@@ -47,6 +47,17 @@
         </ul>
       </li>
       <li class="sidebar__menu-divider">manage</li>
+      <li v-for="(item, index) in dataSyncMenuItems" :key="index">
+        <a href="#" @click.prevent="toggleDropdown(item.name)">
+          <i class='bx bx-book-content icon'></i>{{ item.label }}
+          <i class='bx bxs-chevron-right icon-right'></i>
+        </a>
+        <ul class="sidebar__menu-dropdown" :class="{ show: activeDropdown === item.name }">
+          <li v-for="(subItem, subIndex) in item.subItems" :key="subIndex">
+            <RouterLink :to="subItem.link">{{ subItem.label }}</RouterLink>
+          </li>
+        </ul>
+      </li>
       <li v-for="(item, index) in reportMenuItems" :key="index" :class="{ 'is-open': activeDropdown === item.name }">
         <a href="#" @click.prevent="toggleDropdown(item.name)">
           <i class='bx bx-flag icon'></i>{{ item.label }}
@@ -190,6 +201,17 @@ const noticeMenuItems = [
     icon: ['fas', 'volume-up'],
     subItems: [
     { label: '공지사항 관리', link: '/admin/notice' }
+    ]
+  }
+]
+
+const dataSyncMenuItems = [
+  {
+    name: 'dataSync',
+    label: '데이터 관리',
+    icon: ['fas', 'sync'],
+    subItems: [
+      { label: 'KOPIS 데이터 동기화', link: '/admin/kopis' }
     ]
   }
 ]
