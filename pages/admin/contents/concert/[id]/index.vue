@@ -25,7 +25,12 @@
       <div class="product__content">
         <div class="product__content-summary">
           <div class="product__content-poster">
-            <img :src="`http://localhost:8081/api/v1/uploads/images/concert/${concert.saveImageName}`" />
+            <img 
+              :src="getImageUrl(concert)"
+              :alt="concert.title"
+              @error="handleImageError"
+            />
+            <!-- <img :src="`http://localhost:8081/api/v1/uploads/images/concert/${concert.saveImageName}`" /> -->
           </div>
           <ul class="product__content-info">
             <li class="product__content-info-item">
@@ -117,10 +122,50 @@ watchEffect(async () => {
     key: `concert-${concertId}`,
   });
 
-  if (data.value) {
+  // if (data.value) {
+  //   concert.value = data.value;
+  // }
+  if(data.value) {
+    console.log(useRuntimeConfig().public.apiBase);
+    console.log('data::', data.value);
+    console.log('concert::', concert.value);
     concert.value = data.value;
+  } else {
+    error.value = "데이터를 불러올 수 없습니다.";
   }
 });
+
+// 이미지 URL 동적 생성 함수
+const getImageUrl = (concert) => {
+  if(!concert) return null;
+
+  // KOPIS API 데이터인 경우
+  if(concert.dataSource === 'KOPIS_API') {
+    // imageUrl이 있으면 그것을 사용 (KOPIS API에서 제공하는 포스터 URL)
+    if(concert.imageUrl) {
+      return concert.imageUrl;
+    }
+
+    // imageUrl이 없으면 saveImageName이 HTTP URL인 경우
+    if(concert.saveImageName && concert.saveImageName.startsWith('http')) {
+      return concert.saveImageName;
+    }
+  }
+
+  // 수기 데이터이거나 로컬 이미지인 경우
+  if(concert.saveImageName && !musical.saveImageName.startsWith('http')) {
+    return `http://localhost:8081/api/v1/uploads/images/concert/${concert.saveImageName}`;
+  }
+
+  return null;
+};
+
+// 이미지 로드 에러 처리
+const handleImageError = (event) => {
+  console.warn('이미지 로드 실패:', event.target.src);
+  // 기본 이미지로 대체하거나 숨김 처리
+  event.target.style.display = 'none';
+};
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {

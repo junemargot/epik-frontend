@@ -25,8 +25,15 @@
       <div class="product__content">
         <div class="product__content-summary">
           <div class="product__content-poster">
-            <img v-if="musical.saveImageName"
-              :src="`http://localhost:8081/api/v1/uploads/images/musical/${musical.saveImageName}`" alt="포스터이미지" />
+            <!-- <img v-if="musical.saveImageName"
+              :src="`http://localhost:8081/api/v1/uploads/images/musical/${musical.saveImageName}`" alt="포스터이미지" 
+            /> -->
+            <img
+              v-if="getImageUrl(musical)"
+              :src="getImageUrl(musical)"
+              :alt="musical.title"
+              @error="handleImageError"
+            />
             <div v-else>이미지가 없습니다.</div>
           </div>
           <ul class="product__content-info">
@@ -134,6 +141,32 @@ watchEffect(async () => {
     error.value = "서버와의 통신에 실패했습니다.";
   }
 });
+
+// 이미지 URL 동적 생성
+const getImageUrl = (musical) => {
+  if(!musical) return null;
+
+  if(musical.dataSource === 'KOPIS_API') {
+    if(musical.imageUrl) {
+      return musical.imageUrl;
+    }
+
+    if(musical.saveImageName && musical.saveImageName.startsWith('http')) {
+      return musical.saveImageName;
+    }
+  }
+
+  if(musical.saveImageName && !musical.saveImageName.startsWith('http')) {
+    return `http://localhost:8081/api/v1/uploads/images/musical/${musical.saveImageName}`;
+  }
+
+  return null;
+}
+
+const handleImageError = (event) => {
+  console.warn('이미지 로드 실패:', event.target.src);
+  event.target.style.display = 'none';
+}
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {
