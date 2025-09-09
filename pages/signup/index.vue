@@ -58,25 +58,65 @@
           <label>
             <div class="star_top">이메일</div>
             <div class="gap-mt_1">
-              <input class="email form short_form" v-model="emailModel" id="email" type="text" placeholder="이메일을 입력해주세요" />
-              <button class="btn" type="button" @click="emailHandler">인증</button>
+              <input 
+                class="email form short_form" 
+                v-model="emailModel" 
+                id="email" 
+                type="text" 
+                placeholder="이메일을 입력해주세요" 
+                :disabled="emailVerificationSent"
+                @input="handleEmailChange"
+              />
+              <button 
+                class="btn"
+                type="button" 
+                @click="emailHandler"
+                :disabled="emailVerificationSent"
+                :class="{ 'btn-disabled': emailVerificationSent }"
+              >
+                {{ emailVerificationSent ? '발송완료' : '인증' }}
+              </button>
             </div>
             <div class="message-container">
-              <div v-if="emailValid" class="small_text_blue">인증번호가 발송되었습니다.</div>
-              <div v-if="emailValid===false" class="small_text_red">이메일을 다시 확인해주세요.</div>
+              <div v-if="emailValid" class="small_text_blue">
+                인증번호가 발송되었습니다.
+              </div>
+              <div v-if="emailValid===false" class="small_text_red">
+                이메일을 다시 확인해주세요.
+              </div>
+              <div v-if="emailModified" class="small_text_red">
+                이메일이 수정되었습니다. 인증을 다시 진행해주세요.
+              </div>
             </div>
           </label>
           <label>
             <div class="gap-mt_1">
-              <input class="email_check form short_form" v-model="emailCodeModel" type="text" placeholder="인증번호 6자리 입력" />
-              <button class="btn" type="button" @click="emailCodeHandler">확인</button>
+              <input 
+                class="email_check form short_form" 
+                v-model="emailCodeModel" 
+                type="text" 
+                placeholder="인증번호 입력" 
+                :disabled="!emailVerificationSent || emailModified"
+              />
+              <button 
+                class="btn" 
+                type="button" 
+                @click="emailCodeHandler"
+                :disabled="!emailVerificationSent || emailModified || !emailCodeModel.trim()"
+              >
+                확인
+              </button>
             </div>
           </label>
           <div class="message-container">
             <div v-if="emailCodeCheck === true" class="small_text_blue">인증번호가 일치합니다.</div>
             <div v-if="emailCodeCheck === false" class="small_text_red">인증번호를 다시 확인해주세요.</div>
+            <div v-if="emailModified && emailCodeModel" class="small_text_red">
+              이메일이 변경되어 인증번호가 무효화되었습니다.
+            </div>
           </div>
         </fieldset>
+        <!-- 약관 동의 및 가입 버튼 -->
         <div class="sign-in__terms">
           <div>
             <h2 class="normal_text star_top gap-mt_2">이용약관동의</h2>
@@ -221,104 +261,168 @@ watch([pwModel, pwReModel], () => {
 });
 
 
-//이메일 인증 요청
+// 이메일 인증 요청
 const emailModel = ref('');
 const emailCodeModel = ref('');
 const emailCodeCheck = ref('');
 const serverVerificationCode = ref('');
 const emailValid = ref(''); // 이메일 형식 유효성 확인 변수
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+const emailVerificationSent = ref(false); // 이메일 인증번호 발송 여부
+const emailModified = ref(false); // 이메일 수정 여부 감지
+const originalEmail = ref(''); // 인증번호 발송된 원본 이메일
+const verificationTimeout = ref(null); // 인증번호 만료 타이머
 
-const emailHandler = async () => {
-   // 이메일 형식이 유효한지 확인
-   emailValid.value = emailRegex.test(emailModel.value);
 
-if (emailValid.value) {
-  const emailCheckDto = {
-    email: emailModel.value
-  };
-  console.log(emailCheckDto);
 
-  const response = await fetch('http://localhost:8081/api/v1/signup/checkEmail', {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(emailCheckDto)
-  });
+// 이메일 변경 감지 함수
+const handleEmailChange = () => {
+  // 인증번호가 발송된 상태에서 이메일이 변경되면
+  if(emailVerificationSent.value && emailModel.value !== originalEmail.value) {
+    emailModified.value = true;
+    emailCodeCheck.value = '';
+    emailCodeModel.value = '';
+    serverVerificationCode.value = '';
+    emailVerificationSent.value = false; // 인증번호 발송 상태 해제 (다시 인증 가능하도록)
 
-  const result = await response.json();
-  console.log(result);
-
-  if (result.message === "ok") {
-    serverVerificationCode.value = result.verificationCode;
-    console.log("이메일 전송");
-    console.log("1-" + result.verificationCode);
-    console.log("4-" + serverVerificationCode.value);
-  } else if (result.message === "error") {
-    console.log("중복 이메일");
-  }
-}else {
-    emailValid = false;
-    console.log("이메일 형식 이상")
+  } else if(emailModel.value === originalEmail.value && originalEmail.value) {
+    // 원본 이메일로 되돌린 경우
+    emailModified.value = false;
+    if(serverVerificationCode.value) {
+      emailVerificationSent.value = true;
+    }
   }
 };
 
-//인증 코드 확인
-const emailCodeHandler = async () => {
-  if (emailCodeModel.value===serverVerificationCode.value) {
-    emailCodeCheck.value=true;
-    console.log("2-" + emailCodeModel.value);
-  } else {
-    emailCodeCheck.value=false;
-    console.log("3-" + emailCodeModel.value);
+const emailHandler = async () => {
+  // 이메일 형식 검증
+  emailValid.value = emailRegex.test(emailModel.value);
+
+  if(!emailValid.value) {
+    console.log("이메일 형식 이상");
+    return;
   }
-}
+
+  const emailCheckDto = {
+    email: emailModel.value
+  };
+
+  try {
+    const response = await fetch('http://localhost:8081/api/v1/signup/checkEmail', {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailCheckDto)
+    });
+
+    const result = await response.json();
+    console.log(result);
+
+    if (result.message === "success") {
+      serverVerificationCode.value = result.verificationCode;
+      emailVerificationSent.value = true; // 인증번호 발송 상태 설정
+      emailModified.value = false;
+      originalEmail.value = emailModel.value; // 원본 이메일 저장
+      console.log("이메일 인증번호 전송");
+      console.log("인증번호: ", result.verificationCode);
+    } else if (result.message === "error") {
+      emailValid.value = false;
+      alert("이미 사용 중인 이메일입니다.");
+      console.log("중복 이메일");
+    }
+  } catch(error) {
+    console.error("이메일 인증 요청 실패:", error);
+    emailValid.value = false;
+    alert("이메일 인증 요청에 실패했습니다. 다시 시도해주세요.");
+  }
+};
+
+// 인증 코드 확인
+const emailCodeHandler = async () => {
+  // 이메일이 수정된 상태에서는 인증 불가
+  if(emailModified.value) {
+    alert("이메일이 변경되었습니다. 인증을 다시 진행해주세요.");
+    return;
+  }
+
+  // 인증번호가 발송되지 않은 상태에서는 인증 불가
+  if(!emailVerificationSent.value || !serverVerificationCode.value) {
+    alert("먼저 이메일 인증을 진행해주세요.");
+    return;
+  }
+
+  if (emailCodeModel.value === serverVerificationCode.value) {
+    emailCodeCheck.value = true;
+    console.log("인증번호 일치");
+  } else {
+    emailCodeCheck.value = false;
+    console.log("인증번호 불일치");
+  }
+};
 
 // 체크박스 상태들
 const agreeAll = ref(false); // 전체 동의 체크 상태
 const agreeTerms = ref(false); // 이용약관 동의 체크 상태
 const agreePrivacy = ref(false); // 개인정보 동의 체크 상태
 
-// 전체 동의 시, 나머지 체크박스들 자동으로 동기화
+// 전체 동의 토글
 const toggleAgreeAll = () => {
   agreeTerms.value = agreeAll.value;
   agreePrivacy.value = agreeAll.value;
 };
 
-//회원가입 폼 제출 
+// 폼 제출 시 검증 강화
 const submitForm = async () => {
+  if(!emailCodeCheck.value) {
+    alert("이메일 인증을 완료해주세요.");
+    return;
+  }
+
+  if(emailModified.value) {
+    alert("이메일이 변경되었습니다. 인증을 다시 진행해주세요.");
+    return;
+  }
+
+  if(emailModel.value !== originalEmail.value) {
+    alert("인증된 이메일과 현재 이메일이 일치하지 않습니다.");
+    return;
+  }
+
   const signupRequestDto = {
     username: usernameModel.value,
     nickname: nicknameModel.value,
     password: pwReModel.value,
     email: emailModel.value,
-    // profileImg: memberProfileImg.value,
-    // profileText: memberProfileText.value,
   };
 
-    if(usernameCheck.value&&nicknameModel.value&&pwReModel.value&&emailModel.value&&emailCodeCheck.value&&agreeAll.value){
+  if(usernameCheck.value&&nicknameModel.value&&pwReModel.value&&emailModel.value&&emailCodeCheck.value&&agreeAll.value){
 
-        // 백엔드 API로 회원가입 정보 전송
-        const response = await fetch('http://localhost:8081/api/v1/signup', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(signupRequestDto),
-        });
+    // 백엔드 API로 회원가입 정보 전송
+    const response = await fetch('http://localhost:8081/api/v1/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(signupRequestDto),
+    });
 
-        // 응답 처리
-        if (response.status === 200) {
-          console.log('회원가입 성공', response.data);
-          alert('회원가입이 완료되었습니다!');
-
-          location.href="http://localhost:3000/login"; 
-        } 
-      } else {
-        alert('모든 항목을 입력해주세요');
-      }
+    // 응답 처리
+    if (response.status === 200) {
+      console.log('회원가입 성공', response.data);
+      alert('회원가입이 완료되었습니다!');
+      location.href="http://localhost:3001/login"; 
+    } 
+  } else {
+    alert('모든 항목을 올바르게 입력해주세요');
+  }
 };
+
+onUnmounted(() => {
+  if(verificationTimeout.value) {
+    clearTimeout(verificationTimeout.value);
+  };
+});
 
 
 </script>
@@ -361,6 +465,23 @@ fieldset{
   background-color: var(--accent-1); /* 버튼 색상 회색으로 변경 */
   color: var(--white);  /* 텍스트 색상 흰색으로 변경 */
   cursor: pointer;
+}
+
+.btn-disabled {
+  background-color: var(--color-grey-5) !important;
+  color: var(--color-grey-7) !important;
+  cursor: not-allowd !important;
+}
+
+.btn-disabled:hover {
+  background-color: var(--color-grey-5) !important;
+  color: var(--color-grey-7) !important;
+}
+
+input:disabled {
+  background-color: var(--color-grey-2);
+  color: var(--color-grey-7);
+  cursor: not-allowed;
 }
 
 /* 체크박스 + 텍스트 라인 정렬 및 커서 */
