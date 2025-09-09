@@ -89,26 +89,28 @@
               </div>
             </div>
           </label>
-          <label>
+          <!-- 인증번호 입력칸 - 발송 후에만 표시 -->
+          <label v-if="emailVerificationSent">
             <div class="gap-mt_1">
               <input 
                 class="email_check form short_form" 
                 v-model="emailCodeModel" 
                 type="text" 
                 placeholder="인증번호 입력" 
-                :disabled="!emailVerificationSent || emailModified"
+                :disabled="emailModified"
               />
               <button 
                 class="btn" 
                 type="button" 
                 @click="emailCodeHandler"
-                :disabled="!emailVerificationSent || emailModified || !emailCodeModel.trim()"
+                :disabled="emailModified || !emailCodeModel.trim()"
               >
                 확인
               </button>
             </div>
           </label>
-          <div class="message-container">
+          <!-- 인증번호 확인 메시지 - 발송 후에만 표시 -->
+          <div v-if="emailVerificationSent" class="message-container">
             <div v-if="emailCodeCheck === true" class="small_text_blue">인증번호가 일치합니다.</div>
             <div v-if="emailCodeCheck === false" class="small_text_red">인증번호를 다시 확인해주세요.</div>
             <div v-if="emailModified && emailCodeModel" class="small_text_red">
@@ -411,7 +413,7 @@ const submitForm = async () => {
     if (response.status === 200) {
       console.log('회원가입 성공', response.data);
       alert('회원가입이 완료되었습니다!');
-      location.href="http://localhost:3001/login"; 
+      location.href="http://localhost:3000/login"; 
     } 
   } else {
     alert('모든 항목을 올바르게 입력해주세요');
