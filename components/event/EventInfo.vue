@@ -3,6 +3,7 @@
     <img 
       :src="imageUrl" 
       :alt="imageAlt || '포스터 이미지'" 
+      @error="handleImageError"
     />
     <div class="event__info">
       <div class="event__info-row venue-row" @click="showVenueModal">
@@ -114,6 +115,13 @@ const isModalOpen = ref(false);
 function showVenueModal() {
   isModalOpen.value = true;
 }
+
+// 이미지 로드 에러 처리
+const handleImageError = (event) => {
+  console.warn('이미지 로드 실패:', event.target.src);
+  // 기본 이미지로 대체하거나 숨김 처리
+  event.target.style.display = 'none';
+};
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {

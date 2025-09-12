@@ -6,8 +6,9 @@
         <div v-for="(slide, index) in slides" :key="index" class="photo-slider__item">
           <RouterLink :to="`/popup/${slide.id}`" class="card__link" />
           <img class="photo-slider__image"
-            :src="`http://localhost:8081/api/v1/uploads/images/popup/${slide.imageFileName}`"            
-            :alt="`Image ${index + 1}`">
+            :src="getImageUrl(slide, 'popup')"
+            :alt="`Image ${index + 1}`"
+            @error="handleImageError">
           <div class="photo-slider__overlay">
             <!-- 헤더 영역: 팝업 제목 -->
             <div class="overlay-header">
@@ -53,8 +54,9 @@
       <div class="card__grid">
         <div v-for="(item, index) in popupItems" :key="index" class="card__item">
           <RouterLink :to="`/popup/${item.id}`" class="card__link" />
-          <img :src="`http://localhost:8081/api/v1/uploads/images/popup/${item.imgSavedName}`"
-            :alt="`Popup ${index + 1}`">
+          <img :src="getImageUrl(item, 'popup')"
+            :alt="`Popup ${index + 1}`"
+            @error="handleImageError">
           <div class="card__info">
             <!-- 팝업 상태 라벨 -->
             <div class="card__status-tag">
@@ -82,8 +84,9 @@
       <div class="card__grid">
         <div v-for="(item, index) in concertItems" :key="index" class="card__item">
           <RouterLink :to="`/concert/${item.id}`" class="card__link" />
-          <img :src="`http://localhost:8081/api/v1/uploads/images/concert/${item.imageFileName}`"
-               :alt="`Image ${index + 1}`">
+          <img :src="getImageUrl(item, 'concert')"
+               :alt="`Image ${index + 1}`"
+               @error="handleImageError">
           <div class="card__info">
             <!-- 상태 라벨 -->
             <div class="card__status-tag">
@@ -111,8 +114,9 @@
       <div class="card__grid">
         <div v-for="(item, index) in musicalItems" :key="index" class="card__item">
           <RouterLink :to="`/musical/${item.id}`" class="card__link" />
-          <img :src="`http://localhost:8081/api/v1/uploads/images/musical/${item.imageFileName}`"
-               :alt="`Musical ${index + 1}`">
+          <img :src="getImageUrl(item, 'musical')"
+               :alt="`Musical ${index + 1}`"
+               @error="handleImageError">
           <div class="card__info">
             <!-- 상태 라벨 -->
             <div class="card__status-tag">
@@ -158,8 +162,9 @@
       <div class="card__grid">
         <div v-for="(item, index) in exhibitionItems" :key="index" class="card__item">
           <RouterLink :to="`/exhibition/${item.id}`" class="card__link" />
-          <img :src="`http://localhost:8081/api/v1/uploads/images/exhibition/${item.imageFileName}`"
-               :alt="`Exhibition ${index + 1}`">
+          <img :src="getImageUrl(item, 'exhibition')"
+               :alt="`Exhibition ${index + 1}`"
+               @error="handleImageError">
           <div class="card__info">
             <div class="card__status-tag">
               <span class="card__status">진행중</span>
@@ -274,6 +279,40 @@ const formatDate = (date) => {
   const options = { year: 'numeric', month: 'short', day: 'numeric' }
   return new Date(date).toLocaleDateString(undefined, options)
 }
+
+// 이미지 URL 동적 생성 함수
+const getImageUrl = (item, type) => {
+  if(!item) return null;
+
+  // KOPIS API 데이터인 경우
+  if(item.dataSource === 'KOPIS_API') {
+    // imageUrl이 있으면 그것을 사용 (KOPIS API에서 제공하는 포스터 URL)
+    if(item.imageUrl) {
+      return item.imageUrl;
+    }
+
+    // imageUrl이 없으면 saveImageName이나 다른 필드가 HTTP URL인 경우
+    const imageName = item.saveImageName || item.imageFileName || item.imgSavedName || item.fileSavedName;
+    if(imageName && imageName.startsWith('http')) {
+      return imageName;
+    }
+  }
+
+  // 수기 데이터이거나 로컬 이미지인 경우
+  const imageName = item.imageFileName || item.imgSavedName || item.fileSavedName || item.saveImageName;
+  if(imageName && !imageName.startsWith('http')) {
+    return `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`;
+  }
+
+  return null;
+};
+
+// 이미지 로드 에러 처리
+const handleImageError = (event) => {
+  console.warn('이미지 로드 실패:', event.target.src);
+  // 기본 이미지로 대체하거나 숨김 처리
+  event.target.style.display = 'none';
+};
 
 
 // YouTube URL 관리
