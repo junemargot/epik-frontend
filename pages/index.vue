@@ -163,8 +163,8 @@
         <div v-for="(item, index) in exhibitionItems" :key="index" class="card__item">
           <RouterLink :to="`/exhibition/${item.id}`" class="card__link" />
           <img :src="getImageUrl(item, 'exhibition')"
-               :alt="`Exhibition ${index + 1}`"
-               @error="handleImageError">
+                :alt="`Exhibition ${index + 1}`"
+                @error="handleImageError">
           <div class="card__info">
             <div class="card__status-tag">
               <span class="card__status">진행중</span>
@@ -284,26 +284,46 @@ const formatDate = (date) => {
 const getImageUrl = (item, type) => {
   if(!item) return null;
 
-  // KOPIS API 데이터인 경우
-  if(item.dataSource === 'KOPIS_API') {
-    // imageUrl이 있으면 그것을 사용 (KOPIS API에서 제공하는 포스터 URL)
-    if(item.imageUrl) {
+  console.log('=== getImageUrl 디버깅 ===');
+  console.log('아이템:', item.title);
+  console.log('dataSource:', item.dataSource);
+  
+  // KOPIS API 데이터 판별 (PF_로 시작하는 파일명은 KOPIS 데이터)
+  const imageName = item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName;
+  
+  // KOPIS 데이터인 경우 (파일명이 PF_로 시작하거나 dataSource가 KOPIS_API)
+  if(imageName && (imageName.startsWith('PF_') || item.dataSource === 'KOPIS_API')) {
+    console.log('KOPIS 데이터 감지');
+    
+    // KOPIS 원본 URL들 확인
+    if(item.kopisPoster && item.kopisPoster.startsWith('http')) {
+      console.log('KOPIS 포스터 URL 사용:', item.kopisPoster);
+      return item.kopisPoster;
+    }
+    
+    if(item.imageUrl && item.imageUrl.startsWith('http')) {
+      console.log('이미지 URL 사용:', item.imageUrl);
       return item.imageUrl;
     }
-
-    // imageUrl이 없으면 saveImageName이나 다른 필드가 HTTP URL인 경우
-    const imageName = item.saveImageName || item.imageFileName || item.imgSavedName || item.fileSavedName;
-    if(imageName && imageName.startsWith('http')) {
-      return imageName;
+    
+    if(item.poster && item.poster.startsWith('http')) {
+      console.log('포스터 URL 사용:', item.poster);
+      return item.poster;
     }
+    
+    // KOPIS 데이터인데 외부 URL이 없으면 null 반환 (숨김 처리)
+    console.warn('KOPIS 데이터지만 외부 URL을 찾을 수 없음');
+    return null;
+  }
+  
+  // 수기 입력 데이터 (로컬 파일)
+  if(imageName && !imageName.startsWith('http') && !imageName.startsWith('PF_')) {
+    const finalUrl = `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`;
+    console.log('로컬 이미지 URL:', finalUrl);
+    return finalUrl;
   }
 
-  // 수기 데이터이거나 로컬 이미지인 경우
-  const imageName = item.imageFileName || item.imgSavedName || item.fileSavedName || item.saveImageName;
-  if(imageName && !imageName.startsWith('http')) {
-    return `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`;
-  }
-
+  console.log('이미지 URL을 찾을 수 없음');
   return null;
 };
 
