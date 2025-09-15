@@ -82,10 +82,19 @@
           <div v-html="concert.content"></div>
         </div>
         <div class="product__content-detail-info">
-          <h2>상세 정보</h2>
-          <div class="product__content-detail-info-map">
-            <span class="address" name="address">{{ concert.address }}</span>
+          <div v-if="concert.concertImages && concert.concertImages.length > 0" class="detail-images">
+            <div class="image-gallery">
+              <img 
+                v-for="(imageUrl, index) in concert.concertImages" 
+                :key="index"
+                :src="imageUrl" 
+                :alt="`상세 이미지 ${index + 1}`"
+                class="detail-image"
+                @error="handleImageError"
+              />
+            </div>
           </div>
+
           <!-- 하단 버튼 -->
           <div class="product__content-buttons">
             <button type="button" class="service">서비스 홈페이지로 이동</button>
@@ -194,4 +203,20 @@ onMounted(async () => {
   display: block;
   margin-bottom: 30px;
 }
+
+.detail-images {
+  margin-bottom: 20px;
+}
+
+.image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.detail-image {
+  max-width: 800px;
+  height: auto;
+}
+
 </style>
