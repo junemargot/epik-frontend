@@ -25,16 +25,11 @@
       <div class="product__content">
         <div class="product__content-summary">
           <div class="product__content-poster">
-            <!-- <img v-if="musical.saveImageName"
-              :src="`http://localhost:8081/api/v1/uploads/images/musical/${musical.saveImageName}`" alt="포스터이미지" 
-            /> -->
             <img
-              v-if="getImageUrl(musical)"
               :src="getImageUrl(musical)"
               :alt="musical.title"
               @error="handleImageError"
             />
-            <div v-else>이미지가 없습니다.</div>
           </div>
           <ul class="product__content-info">
             <li class="product__content-info-item">
@@ -82,15 +77,25 @@
         <!-- PRODUCT CONTENT DETAIL -->
         <div class="product__content-detail">
           <div>
-            <h2>공연시간 정보</h2>
+            <h2>공연 정보</h2>
             <div v-html="musical.content"></div>
           </div>
         </div>
         <div class="product__content-detail-info">
-          <h2>상세 정보</h2>
-          <div class="product__content-detail-info-map">
-            <span class="address">{{ musical.address }}</span>
+          <!-- 🎯 상세 이미지 표시 부분 추가! -->
+          <div v-if="musical.musicalImages && musical.musicalImages.length > 0" class="detail-images">
+            <div class="image-gallery">
+              <img 
+                v-for="(imageUrl, index) in musical.musicalImages" 
+                :key="index"
+                :src="imageUrl" 
+                :alt="`상세 이미지 ${index + 1}`"
+                class="detail-image"
+                @error="handleImageError"
+              />
+            </div>
           </div>
+
           <!-- 하단 버튼 -->
           <div class="product__content-buttons">
             <button type="button" class="service">서비스 홈페이지로 이동</button>
@@ -127,14 +132,13 @@ watchEffect(async () => {
       key: `musical-${musicalId}`,
     });
 
-
     if (data.value) {
       console.log(useRuntimeConfig().public.apiBase);
       console.log('data::', data.value);
       console.log('musical::', musical.value);
       musical.value = data.value;
     } else {
-      error.value = "데이터를 불러올 수 없습니다.";
+      error.value = "뮤지컬 데이터를 불러올 수 없습니다.";
     }
   } catch (err) {
     console.error(err);
@@ -161,12 +165,12 @@ const getImageUrl = (musical) => {
   }
 
   return null;
-}
+};
 
 const handleImageError = (event) => {
   console.warn('이미지 로드 실패:', event.target.src);
   event.target.style.display = 'none';
-}
+};
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {
@@ -190,6 +194,21 @@ const formatDate = (dateString) => {
   height: auto !important;
   display: block;
   margin-bottom: 30px;
+}
+
+.detail-images {
+  margin-bottom: 20px;
+}
+
+.image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.detail-image {
+  max-width: 800px;
+  height: auto;
 }
 </style>
 <!-- 

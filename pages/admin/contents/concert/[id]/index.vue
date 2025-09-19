@@ -30,7 +30,6 @@
               :alt="concert.title"
               @error="handleImageError"
             />
-            <!-- <img :src="`http://localhost:8081/api/v1/uploads/images/concert/${concert.saveImageName}`" /> -->
           </div>
           <ul class="product__content-info">
             <li class="product__content-info-item">
@@ -107,7 +106,6 @@
     </section>
     <div v-else>콘서트 데이터 로딩중</div>
   </div>
-
 </template>
 
 <script setup>
@@ -131,16 +129,13 @@ watchEffect(async () => {
     key: `concert-${concertId}`,
   });
 
-  // if (data.value) {
-  //   concert.value = data.value;
-  // }
   if(data.value) {
     console.log(useRuntimeConfig().public.apiBase);
     console.log('data::', data.value);
     console.log('concert::', concert.value);
     concert.value = data.value;
   } else {
-    error.value = "데이터를 불러올 수 없습니다.";
+    error.value = "콘서트 데이터를 불러올 수 없습니다.";
   }
 });
 
