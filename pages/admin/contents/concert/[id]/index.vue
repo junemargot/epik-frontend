@@ -157,7 +157,7 @@ const getImageUrl = (concert) => {
   }
 
   // 수기 데이터이거나 로컬 이미지인 경우
-  if(concert.saveImageName && !musical.saveImageName.startsWith('http')) {
+  if(concert.saveImageName && !concert.saveImageName.startsWith('http')) {
     return `http://localhost:8081/api/v1/uploads/images/concert/${concert.saveImageName}`;
   }
 
