@@ -97,15 +97,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from "vue";
 
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 
 // 반응형 데이터
 const isLoading = ref(false);
-const message = ref('');
-const messageType = ref('success');
+const message = ref("");
+const messageType = ref("success");
 const syncStatus = ref({});
 const syncLogs = ref([]);
 const lastSyncResult = ref(null); // 마지막 동기화 결과 저장
@@ -118,194 +118,209 @@ const syncCooldownTime = 60000;
 
 // API 호출 함수
 const syncAllData = async () => {
-  isLoading.value = true;
-  message.value = '';
+	isLoading.value = true;
+	message.value = "";
 
-  try {
-    const response = await $fetch('/admin/kopis/sync/all', {
-      method: 'POST',
-      baseURL: config.public.apiBase,
-    });
+	try {
+		const response = await $fetch("/admin/kopis/sync/all", {
+			method: "POST",
+			baseURL: config.public.apiBase,
+		});
 
-    if(response.success) {
-      message.value = response.message;
-      messageType.value = 'success';
-      addLog('success', '전체 데이터 동기화 완료');
-      await getSyncStatus();
-    } else {
-      throw new Error(response.message);
-    }
-  } catch(error) {
-    message.value = error.message || '전체 동기화 중 오류가 발생했습니다.';
-    messageType.value = 'error';
-    addLog('error', message.value);
-  } finally {
-    isLoading.value = false;
-  }
-}
+		if (response.success) {
+			message.value = response.message;
+			messageType.value = "success";
+			addLog("success", "전체 데이터 동기화 완료");
+			await getSyncStatus();
+		} else {
+			throw new Error(response.message);
+		}
+	} catch (error) {
+		message.value = error.message || "전체 동기화 중 오류가 발생했습니다.";
+		messageType.value = "error";
+		addLog("error", message.value);
+	} finally {
+		isLoading.value = false;
+	}
+};
 
 const syncConcerts = async () => {
-  // 이미 완료된 상태면 차단
-  if(concertSyncCompleted.value) {
-    showToast('warning', '동기화 대기 중', '최근에 동기화를 완료했습니다. 잠시 후 다시 시도해주세요.');
-    return;
-  }
+	// 이미 완료된 상태면 차단
+	if (concertSyncCompleted.value) {
+		showToast(
+			"warning",
+			"동기화 대기 중",
+			"최근에 동기화를 완료했습니다. 잠시 후 다시 시도해주세요.",
+		);
+		return;
+	}
 
-  isLoading.value = true;
-  message.value = '';
+	isLoading.value = true;
+	message.value = "";
 
-  try {
-    console.log("콘서트 동기화 시작");
-    addLog('info', '콘서트 동기화 요청 시작');
+	try {
+		console.log("콘서트 동기화 시작");
+		addLog("info", "콘서트 동기화 요청 시작");
 
-    const response = await $fetch('/admin/kopis/sync/concerts', {
-      method: 'POST',
-      baseURL: config.public.apiBase,
-      timeout: 30000, // 30초
-    });
-    console.log("응답 받음:", response);
+		const response = await $fetch("/admin/kopis/sync/concerts", {
+			method: "POST",
+			baseURL: config.public.apiBase,
+			timeout: 30000, // 30초
+		});
+		console.log("응답 받음:", response);
 
-    if(response) {
-      console.log('받은 응답 상세:', JSON.stringify(response, null, 2)); // 디버깅
+		if (response) {
+			console.log("받은 응답 상세:", JSON.stringify(response, null, 2)); // 디버깅
 
-      lastSyncResult.value = response; // 결과 저장
-      const syncType = response.syncType || 'CONCERT';
-      const successCount = response.successCount || 0;
-      const skippedCount = response.skippedItemCount || 0;
-      const failureCount = response.failureCount || 0;
-      const totalProcessed = response.totalProcessed || 0;
+			lastSyncResult.value = response; // 결과 저장
+			const syncType = response.syncType || "CONCERT";
+			const successCount = response.successCount || 0;
+			const skippedCount = response.skippedItemCount || 0;
+			const failureCount = response.failureCount || 0;
+			const totalProcessed = response.totalProcessed || 0;
 
-      if(totalProcessed === 0) {
-        message.value = `${syncType} 동기화 완료: 처리할 데이터가 없습니다.`;
-      } else if(skippedCount > 0 && successCount === 0 && failureCount === 0) {
-        message.value = `${syncType} 동기화 완료: ${totalProcessed}개 확인, ${skippedCount}개 건너뜀 (조건 불일치)`;
-      } else  {
-        message.value = `${syncType} 동기화 완료: 성공 ${successCount}개, 실패 ${failureCount}개, 건너뜀 ${skippedCount}개`;
-      }
-      messageType.value = 'success';
-      
-      if(successCount > 0 || failureCount > 0) {
-        addLog('success', `콘서트 데이터 동기화 완료 - 성공 ${successCount}개, 실패 ${failureCount}개`);
-      } else if(skippedCount > 0) {
-        addLog('info', `콘서트 데이터 동기화 완료 - ${skippedCount}개 건너뜀 (조건 불일치)`);
-      } else {
-        addLog('info', `콘서트 데이터 동기화 완료 - 처리할 데이터 없음`);
-      }
+			if (totalProcessed === 0) {
+				message.value = `${syncType} 동기화 완료: 처리할 데이터가 없습니다.`;
+			} else if (skippedCount > 0 && successCount === 0 && failureCount === 0) {
+				message.value = `${syncType} 동기화 완료: ${totalProcessed}개 확인, ${skippedCount}개 건너뜀 (조건 불일치)`;
+			} else {
+				message.value = `${syncType} 동기화 완료: 성공 ${successCount}개, 실패 ${failureCount}개, 건너뜀 ${skippedCount}개`;
+			}
+			messageType.value = "success";
 
-      lastConcertSyncSuccess.value = true;
-      lastSyncTime.value = new Date();
-      concertSyncCompleted.value = true;
-      setTimeout(() => {
-        concertSyncCompleted.value = false;
-      }, syncCooldownTime);
+			if (successCount > 0 || failureCount > 0) {
+				addLog(
+					"success",
+					`콘서트 데이터 동기화 완료 - 성공 ${successCount}개, 실패 ${failureCount}개`,
+				);
+			} else if (skippedCount > 0) {
+				addLog(
+					"info",
+					`콘서트 데이터 동기화 완료 - ${skippedCount}개 건너뜀 (조건 불일치)`,
+				);
+			} else {
+				addLog("info", `콘서트 데이터 동기화 완료 - 처리할 데이터 없음`);
+			}
 
-    } else {
-      console.error('응답 형식:', response);
-      throw new Error('응답 형식이 올바르지 않습니다.');
-    }
-  } catch(error) {
-    if (error.message.includes('timeout')) {
-      message.value = '동기화가 진행 중입니다. 잠시 후 데이터를 확인해주세요.';
-      messageType.value = 'warning';
-    } else {
-      message.value = error.message || '콘서트 동기화 중 오류가 발생했습니다.';
-      messageType.value = 'error';
-    }
-    addLog('error', message.value);
-  } finally {
-    isLoading.value = false;
-  }
-}
+			lastConcertSyncSuccess.value = true;
+			lastSyncTime.value = new Date();
+			concertSyncCompleted.value = true;
+			setTimeout(() => {
+				concertSyncCompleted.value = false;
+			}, syncCooldownTime);
+		} else {
+			console.error("응답 형식:", response);
+			throw new Error("응답 형식이 올바르지 않습니다.");
+		}
+	} catch (error) {
+		if (error.message.includes("timeout")) {
+			message.value = "동기화가 진행 중입니다. 잠시 후 데이터를 확인해주세요.";
+			messageType.value = "warning";
+		} else {
+			message.value = error.message || "콘서트 동기화 중 오류가 발생했습니다.";
+			messageType.value = "error";
+		}
+		addLog("error", message.value);
+	} finally {
+		isLoading.value = false;
+	}
+};
 
 const syncMusicals = async () => {
-  isLoading.value = true;
-  message.value = '';
+	isLoading.value = true;
+	message.value = "";
 
-  try {
-    console.log('뮤지컬 동기화 시작');
-    addLog('info', '뮤지컬 동기화 요청 시작');
+	try {
+		console.log("뮤지컬 동기화 시작");
+		addLog("info", "뮤지컬 동기화 요청 시작");
 
-    const response = await $fetch('/admin/kopis/sync/musicals', {
-      method: 'POST',
-      baseURL: config.public.apiBase,
-      timeout: 30000,
-    });
-    console.log("응답 받음:", response);
+		const response = await $fetch("/admin/kopis/sync/musicals", {
+			method: "POST",
+			baseURL: config.public.apiBase,
+			timeout: 30000,
+		});
+		console.log("응답 받음:", response);
 
-    if(response) {
-      console.log('받은 응답 상세:', JSON.stringify(response, null, 2)); // 디버깅
+		if (response) {
+			console.log("받은 응답 상세:", JSON.stringify(response, null, 2)); // 디버깅
 
-      lastSyncResult.value = response; // 결과 저장
-      const syncType = response.syncType || 'MUSICAL'
-      const successCount = response.successCount || 0;
-      const skippedCount = response.skippedItemCount || 0;
-      const failureCount = response.failureCount || 0;
-      const totalProcessed = response.totalProcessed || 0;
+			lastSyncResult.value = response; // 결과 저장
+			const syncType = response.syncType || "MUSICAL";
+			const successCount = response.successCount || 0;
+			const skippedCount = response.skippedItemCount || 0;
+			const failureCount = response.failureCount || 0;
+			const totalProcessed = response.totalProcessed || 0;
 
-      if(totalProcessed === 0) {
-        message.value = `${syncType} 동기화 완료: 처리할 데이터가 없습니다.`;
-      } else if(skippedCount > 0 && successCount === 0 && failureCount === 0) {
-        message.value = `${syncType} 동기화 완료: ${totalProcessed}개 확인, ${skippedCount}개 건너뜀 (조건 불일치)`;
-      } else  {
-        message.value = `${syncType} 동기화 완료: 성공 ${successCount}개, 실패 ${failureCount}개, 건너뜀 ${skippedCount}개`;
-      }
-      messageType.value = 'success';
-      
-      if(successCount > 0 || failureCount > 0) {
-        addLog('success', `뮤지컬 데이터 동기화 완료 - 성공 ${successCount}개, 실패 ${failureCount}개`);
-      } else if(skippedCount > 0) {
-        addLog('info', `뮤지컬 데이터 동기화 완료 - ${skippedCount}개 건너뜀 (조건 불일치)`);
-      } else {
-        addLog('info', `뮤지컬 데이터 동기화 완료 - 처리할 데이터 없음`);
-      }
+			if (totalProcessed === 0) {
+				message.value = `${syncType} 동기화 완료: 처리할 데이터가 없습니다.`;
+			} else if (skippedCount > 0 && successCount === 0 && failureCount === 0) {
+				message.value = `${syncType} 동기화 완료: ${totalProcessed}개 확인, ${skippedCount}개 건너뜀 (조건 불일치)`;
+			} else {
+				message.value = `${syncType} 동기화 완료: 성공 ${successCount}개, 실패 ${failureCount}개, 건너뜀 ${skippedCount}개`;
+			}
+			messageType.value = "success";
 
-      lastMusicalSyncSuccess.value = true;
-      lastSyncTime.value = new Date();
-      musicalSyncCompleted.value = true;
-      setTimeout(() => {
-        musicalSyncCompleted.value = false;
-      }, syncCooldownTime);
+			if (successCount > 0 || failureCount > 0) {
+				addLog(
+					"success",
+					`뮤지컬 데이터 동기화 완료 - 성공 ${successCount}개, 실패 ${failureCount}개`,
+				);
+			} else if (skippedCount > 0) {
+				addLog(
+					"info",
+					`뮤지컬 데이터 동기화 완료 - ${skippedCount}개 건너뜀 (조건 불일치)`,
+				);
+			} else {
+				addLog("info", `뮤지컬 데이터 동기화 완료 - 처리할 데이터 없음`);
+			}
 
-    } else {
-      console.error('응답 형식:', response);
-      throw new Error('응답 형식이 올바르지 않습니다.');
-    }
-  } catch(error) {
-    if(error.message.incllude('timeout')) {
-      message.value = '동기화가 진행 중입니다. 잠시 후 데이터를 확인해주세요.';
-      messageType.value = 'warning';
-    } else {
-      message.value = error.message || '뮤지컬 동기화 중 오류가 발생했습니다.';
-      messageType.value = 'error';
-    }
-    addLog('error', message.value);
-  } finally {
-    isLoading.value = false;
-  }
-}
+			lastMusicalSyncSuccess.value = true;
+			lastSyncTime.value = new Date();
+			musicalSyncCompleted.value = true;
+			setTimeout(() => {
+				musicalSyncCompleted.value = false;
+			}, syncCooldownTime);
+		} else {
+			console.error("응답 형식:", response);
+			throw new Error("응답 형식이 올바르지 않습니다.");
+		}
+	} catch (error) {
+		if (error.message.incllude("timeout")) {
+			message.value = "동기화가 진행 중입니다. 잠시 후 데이터를 확인해주세요.";
+			messageType.value = "warning";
+		} else {
+			message.value = error.message || "뮤지컬 동기화 중 오류가 발생했습니다.";
+			messageType.value = "error";
+		}
+		addLog("error", message.value);
+	} finally {
+		isLoading.value = false;
+	}
+};
 
 const getSyncStatus = async () => {
-  try {
-    const response = await $fetch('/admin/kopis/sync/status', {
-      baseURL: config.public.apiBase,
-    });
-    if(response.success) {
-      syncStatus.value = response;
-    }
-  } catch(error) {
-    console.error('동기화 상태 조회 중 오류가 발생했습니다.: ', error);
-  }
-}
+	try {
+		const response = await $fetch("/admin/kopis/sync/status", {
+			baseURL: config.public.apiBase,
+		});
+		if (response.success) {
+			syncStatus.value = response;
+		}
+	} catch (error) {
+		console.error("동기화 상태 조회 중 오류가 발생했습니다.: ", error);
+	}
+};
 
 // 토스트 알림 함수
 const showToast = (type, title, message) => {
-  const existingToast = document.querySelector('.toast');
-  if(existingToast) existingToast.remove();
+	const existingToast = document.querySelector(".toast");
+	if (existingToast) existingToast.remove();
 
-  // 새 토스트 생성
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.innerHTML - `
+	// 새 토스트 생성
+	const toast = document.createElement("div");
+	toast.className = `toast toast-${type}`;
+	toast.innerHTML -
+		`
     <div class="toast-header">
       <strong>${title}</strong>
       <button class="toast-close">&times;</button>
@@ -313,112 +328,116 @@ const showToast = (type, title, message) => {
     <div class="toast-body">${message}</div>
   `;
 
-  document.body.appendChild(toast);
+	document.body.appendChild(toast);
 
-  setTimeout(() => toast.remove(), 4000);
+	setTimeout(() => toast.remove(), 4000);
 
-  // 닫기 이벤트
-  toast.querySelector('.toast-close').onclick = () => toast.remove();
+	// 닫기 이벤트
+	toast.querySelector(".toast-close").onclick = () => toast.remove();
 };
 
 // 데이터 확인 함수들
 const viewConcerts = () => {
-  // 콘서트 관리 페이지로 이동
-  navigateTo('/admin/contents/concert');
-}
+	// 콘서트 관리 페이지로 이동
+	navigateTo("/admin/contents/concert");
+};
 
 const viewMusicals = () => {
-  // 뮤지컬 관리 페이지로 이동
-  navigateTo('/admin/contents/musical');
-}
+	// 뮤지컬 관리 페이지로 이동
+	navigateTo("/admin/contents/musical");
+};
 
 // 유틸리티 함수들
 const getStatusText = (status) => {
-  const statusMap = {
-    'RUNNING': '진행중',
-    'COMPLETED': '완료',
-    'ERROR': '오류',
-    'PENDING': '대기중',
-  }
-  return statusMap[status] || '알 수 없음'
-}
+	const statusMap = {
+		RUNNING: "진행중",
+		COMPLETED: "완료",
+		ERROR: "오류",
+		PENDING: "대기중",
+	};
+	return statusMap[status] || "알 수 없음";
+};
 
 const addLog = (type, message) => {
-  syncLogs.value.unshift({
-    id: Date.now(),
-    timestamp: new Date(),
-    type,
-    message,
-  });
+	syncLogs.value.unshift({
+		id: Date.now(),
+		timestamp: new Date(),
+		type,
+		message,
+	});
 
-  // 최대 50개 로그만 유지
-  if(syncLogs.value.length > 50) {
-    syncLogs.value = syncLogs.value.slice(0, 50);
-  }
-}
+	// 최대 50개 로그만 유지
+	if (syncLogs.value.length > 50) {
+		syncLogs.value = syncLogs.value.slice(0, 50);
+	}
+};
 
 const formatTime = (timestamp) => {
-  if(!timestamp) return '시간 정보 없음';
+	if (!timestamp) return "시간 정보 없음";
 
-  try {
-    let date;
+	try {
+		let date;
 
-    if(timestamp instanceof Date) {
-      date = timestamp;
-    } else if(typeof timestamp === 'string') {
-      let dateString = timestamp;
-      const microsecondPattern = /(\.\d{3})\d{3,}/;
-      if(microsecondPattern.test(dateString)) {
-        dateString = dateString.replace(microsecondPattern, '$1');
-      }
+		if (timestamp instanceof Date) {
+			date = timestamp;
+		} else if (typeof timestamp === "string") {
+			let dateString = timestamp;
+			const microsecondPattern = /(\.\d{3})\d{3,}/;
+			if (microsecondPattern.test(dateString)) {
+				dateString = dateString.replace(microsecondPattern, "$1");
+			}
 
-      date = new Date(dateString);
-    } else if(typeof timestamp === 'number') {
-      date = new Date(timestamp);
-    } else {
-      return '유효하지 않은 시간 형식';
-    }
+			date = new Date(dateString);
+		} else if (typeof timestamp === "number") {
+			date = new Date(timestamp);
+		} else {
+			return "유효하지 않은 시간 형식";
+		}
 
-    // 유효성 검사
-    if(isNaN(date.getTime())) {
-      console.warn('Invalid date after processing:', timestamp, '-> processed:', dateString || timestamp);
-      return '유효하지 않은 시간';
-    }
+		// 유효성 검사
+		if (isNaN(date.getTime())) {
+			console.warn(
+				"Invalid date after processing:",
+				timestamp,
+				"-> processed:",
+				dateString || timestamp,
+			);
+			return "유효하지 않은 시간";
+		}
 
-    return new Intl.DateTimeFormat('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).format(date);
-
-  } catch(error) {
-    console.error('formatTime 에러:', error, 'timestamp:', timestamp);
-    return '시간 형식 오류';
-  }
+		return new Intl.DateTimeFormat("ko-KR", {
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+		}).format(date);
+	} catch (error) {
+		console.error("formatTime 에러:", error, "timestamp:", timestamp);
+		return "시간 형식 오류";
+	}
 };
 
 const getButtonText = (type) => {
-  if(isLoading.value) {
-    return type === 'concert' ? '콘서트 동기화 중...' : '뮤지컬 동기화 중...';
-  }
+	if (isLoading.value) {
+		return type === "concert" ? "콘서트 동기화 중..." : "뮤지컬 동기화 중...";
+	}
 
-  if(type === 'concert' && concertSyncCompleted.value) {
-    return '콘서트 동기화 ✓';
-  }
+	if (type === "concert" && concertSyncCompleted.value) {
+		return "콘서트 동기화 ✓";
+	}
 
-  if(type === 'musical' && musicalSyncCompleted.value) {
-    return '뮤지컬 동기화 ✓';
-  }
+	if (type === "musical" && musicalSyncCompleted.value) {
+		return "뮤지컬 동기화 ✓";
+	}
 
-  return type === 'concert' ? '콘서트 동기화' : '뮤지컬 동기화';
+	return type === "concert" ? "콘서트 동기화" : "뮤지컬 동기화";
 };
 
 // 컴포넌트 마운트 시 동기화 상태 조회
 onMounted(async () => {
-  await getSyncStatus();
+	await getSyncStatus();
 });
 </script>
 
