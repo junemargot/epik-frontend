@@ -72,11 +72,6 @@ Reusable logic in `composables/`:
 
 ## Important Configuration
 
-### Environment Variables
-Required in `.env`:
-- `NUXT_PUBLIC_KAKAO_MAP_API_KEY`: Kakao Maps API key
-- `NUXT_PUBLIC_KAKAO_LOGIN_API_KEY`: Kakao Login API key
-
 ### SSR Considerations
 Several admin routes have SSR disabled due to Toast UI Editor compatibility (see `nuxt.config.ts` line 26-35).
 
@@ -87,8 +82,3 @@ Global styles in `public/css/`:
 - `icon.css`: Icon system
 - `p-style.css`: Typography styles
 - `admin/`: Admin-specific styles
-
-## Known Issues
-
-- Typo in `stores/auth.js:12` - `windwo` should be `window`
-- The application uses client-side token storage in localStorage (consider security implications)
