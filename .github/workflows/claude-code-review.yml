@@ -1,0 +1,43 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    # paths:
+    #   - "**/*.vue"
+    #   - "**/*.js"
+    #   - "**/*.ts"
+    #   - "components/**"
+    #   - "pages/**"
+    #   - "plugins/**"
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          direct_prompt: |
+            Review the PR changes in Korean. Focus on:
+            - Vue 3 / Nuxt 3 best practices
+            - Code quality and performance
+            - Potential bugs or issues
+            - UI/UX considerations
+            - Adherence to project standards
+
+            Provide detailed feedback and suggestions for improvement.
+
+          use_sticky_comment: false
