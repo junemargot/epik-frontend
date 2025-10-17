@@ -55,7 +55,10 @@
       v-if="isModalOpen"
       :is-open="isModalOpen"
       :venue="venue"
+      :venue-name="facilityName || venue"
       :address="address"
+      :tel="facilityTel"
+      :url="facilityUrl"
       @close="isModalOpen = false"
     />
   </div>
@@ -63,74 +66,89 @@
 
 
 <script setup>
-import { ref } from 'vue';
-import VenueModal from '../modal/VenueModal.vue';
+import { ref } from "vue";
+import VenueModal from "../modal/VenueModal.vue";
 
 const props = defineProps({
-  imageUrl: {
-    type: String,
-    required: true
-  },
-  imageAlt: {
-    type: String,
-    default: ''
-  },
-  venue: {
-    type: String,
-    required: true
-  },
-  runningTime: {
-    type: String,
-    required: true
-  },
-  startDate: {
-    type: String,
-    required: true
-  },
-  endDate: {
-    type: String,
-    required: true
-  },
-  ageRestriction: {
-    type: String,
-    required: true
-  },
-  ticketPrices: {
-    type: Array,
-    default: () => []
-  },
-  ticketOffices: {
-    type: Array,
-    default: () => []
-  },
-  address: {
-    type: String,
-    default: ''
-  }
+	imageUrl: {
+		type: String,
+		required: true,
+	},
+	imageAlt: {
+		type: String,
+		default: "",
+	},
+	venue: {
+		type: String,
+		required: true,
+	},
+	runningTime: {
+		type: String,
+		required: true,
+	},
+	startDate: {
+		type: String,
+		required: true,
+	},
+	endDate: {
+		type: String,
+		required: true,
+	},
+	ageRestriction: {
+		type: String,
+		required: true,
+	},
+	ticketPrices: {
+		type: Array,
+		default: () => [],
+	},
+	ticketOffices: {
+		type: Array,
+		default: () => [],
+	},
+	address: {
+		type: String,
+		default: "",
+	},
+	facilityName: {
+		type: String,
+		default: "",
+	},
+	facilityTel: {
+		type: String,
+		default: "",
+	},
+	facilityUrl: {
+		type: String,
+		default: "",
+	},
 });
 
 // 공연장 정보 모달
 const isModalOpen = ref(false);
 
 function showVenueModal() {
-  isModalOpen.value = true;
+	isModalOpen.value = true;
 }
 
 // 이미지 로드 에러 처리
 const handleImageError = (event) => {
-  console.warn('이미지 로드 실패:', event.target.src);
-  // 기본 이미지로 대체하거나 숨김 처리
-  event.target.style.display = 'none';
+	console.warn("이미지 로드 실패:", event.target.src);
+	// 기본 이미지로 대체하거나 숨김 처리
+	event.target.style.display = "none";
 };
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).replace(/\. /g, '.').replace(/\.$/, '');
+	if (!dateString) return "";
+	const date = new Date(dateString);
+	return date
+		.toLocaleDateString("ko-KR", {
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		})
+		.replace(/\. /g, ".")
+		.replace(/\.$/, "");
 };
 </script>

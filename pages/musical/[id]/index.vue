@@ -1,5 +1,5 @@
 <template>
-<div class="wrap" v-if="musical">
+  <div class="wrap" v-if="musical">
     <!-- section 1 -->
     <div class="event">
       <EventHeader 
@@ -16,25 +16,24 @@
       <!-- section 2 -->
       <main>
         <EventInfo 
-          :image-url="getImageUrl(musical)"
-          :image-alt="`${musical.title} 포스터`"
+          :image-url="getImageUrl(musical)" 
+          :image-alt="`${musical.title} 포스터`" 
           :venue="musical.venue"
-          :running-time="musical.runningTime"
-          :start-date="musical.startDate"
+          :running-time="musical.runningTime" 
+          :start-date="musical.startDate" 
           :end-date="musical.endDate"
-          :age-restriction="musical.ageRestriction"
+          :age-restriction="musical.ageRestriction" 
           :ticket-prices="musical.ticketPrices"
-          :ticket-offices="musical.ticketOffices"
-          :address="musical.address"
+          :ticket-offices="musical.ticketOffices" 
+          :address="musical.address" 
+          :facility-name="musical.facilityName"
+          :facility-tel="musical.facilityTel" 
+          :facility-url="musical.facilityUrl" 
         />
 
         <!-- section 3 -->
-        <EventIntro 
-          title="뮤지컬"
-          :content="musical.content"
-          :youtube-url="musical.youtubeUrl"
-          :images="musical.musicalImages"
-        />
+        <EventIntro title="뮤지컬" :content="musical.content" :youtube-url="musical.youtubeUrl"
+          :images="musical.musicalImages" />
 
         <!-- section 4 -->
         <!-- <EventLocation 
@@ -87,23 +86,23 @@ function handleBookmark() {
 
 // 이미지 URL 동적 생성 함수
 const getImageUrl = (musical) => {
-  if(!musical) return null;
+  if (!musical) return null;
 
   // KOPIS API 데이터인 경우
-  if(musical.dataSource === 'KOPIS_API') {
+  if (musical.dataSource === 'KOPIS_API') {
     // imageUrl이 있으면 그것을 사용 (KOPIS API에서 제공하는 포스터 URL)
-    if(musical.imageUrl) {
+    if (musical.imageUrl) {
       return musical.imageUrl;
     }
 
     // imageUrl이 없으면 saveImageName이 HTTP URL인 경우
-    if(musical.saveImageName && musical.saveImageName.startsWith('http')) {
+    if (musical.saveImageName && musical.saveImageName.startsWith('http')) {
       return musical.saveImageName;
     }
   }
 
   // 수기 데이터이거나 로컬 이미지인 경우
-  if(musical.saveImageName && !musical.saveImageName.startsWith('http')) {
+  if (musical.saveImageName && !musical.saveImageName.startsWith('http')) {
     return `http://localhost:8081/api/v1/uploads/images/musical/${musical.saveImageName}`;
   }
 
@@ -116,10 +115,7 @@ const handleImageError = (event) => {
   // 기본 이미지로 대체하거나 숨김 처리
   event.target.style.display = 'none';
 };
-
-
 </script>
-
 
 <style lang="css" scoped>
 @import url('/public/css/components/event.css');

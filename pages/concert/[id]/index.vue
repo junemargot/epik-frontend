@@ -26,6 +26,9 @@
           :ticket-prices="concert.ticketPrices"
           :ticket-offices="concert.ticketOffices"
           :address="concert.address"
+          :facility-name="concert.facilityName"
+          :facility-tel="concert.facilityTel"
+          :facility-url="concert.facilityUrl"
         />
 
         <!-- section 3 -->
@@ -47,12 +50,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watchEffect } from 'vue';
-import { useRoute } from 'vue-router';
-import EventHeader from '~/components/event/EventHeader.vue';
-import EventInfo from '~/components/event/EventInfo.vue';
-import EventIntro from '~/components/event/EventIntro.vue';
-import EventLocation from '~/components/event/EventLocation.vue';
+import { ref, onMounted, onUnmounted, watchEffect } from "vue";
+import { useRoute } from "vue-router";
+import EventHeader from "~/components/event/EventHeader.vue";
+import EventInfo from "~/components/event/EventInfo.vue";
+import EventIntro from "~/components/event/EventIntro.vue";
+import EventLocation from "~/components/event/EventLocation.vue";
 
 const route = useRoute();
 const concertId = route.params.id;
@@ -65,61 +68,59 @@ const concert = ref(null);
 
 // 데이터 가져오기
 watchEffect(async () => {
-  const { data } = await useFetch(`/admin/concert/${concertId}`, {
-    baseURL: apiBase,
-    key: `concert-${concertId}`,
-  });
+	const { data } = await useFetch(`/admin/concert/${concertId}`, {
+		baseURL: apiBase,
+		key: `concert-${concertId}`,
+	});
 
-  if (data.value) {
-    concert.value = data.value;
+	if (data.value) {
+		concert.value = data.value;
 
-    console.log('콘서트 데이터 로드됨:', concert.value); 
-    console.log('콘서트 이미지:', concert.value.concertImages);
-  }
+		console.log("콘서트 데이터 로드됨:", concert.value);
+		console.log("콘서트 이미지:", concert.value.concertImages);
+	}
 });
-
 
 // 이벤트 핸들러 추가
 function handleNotification() {
-  console.log('알림 설정');
+	console.log("알림 설정");
 }
 
 function handleBookmark() {
-  console.log('북마크 설정');
+	console.log("북마크 설정");
 }
 
 // 이미지 URL 동적 생성 함수
 const getImageUrl = (concert) => {
-  if(!concert) return null;
+	if (!concert) return null;
 
-  // KOPIS API 데이터인 경우
-  if(concert.dataSource === 'KOPIS_API') {
-    // imageUrl이 있으면 그것을 사용 (KOPIS API에서 제공하는 포스터 URL)
-    if(concert.imageUrl) {
-      return concert.imageUrl;
-    }
+	// KOPIS API 데이터인 경우
+	if (concert.dataSource === "KOPIS_API") {
+		// imageUrl이 있으면 그것을 사용 (KOPIS API에서 제공하는 포스터 URL)
+		if (concert.imageUrl) {
+			return concert.imageUrl;
+		}
 
-    // imageUrl이 없으면 saveImageName이 HTTP URL인 경우
-    if(concert.saveImageName && concert.saveImageName.startsWith('http')) {
-      return concert.saveImageName;
-    }
-  }
+		// imageUrl이 없으면 saveImageName이 HTTP URL인 경우
+		if (concert.saveImageName && concert.saveImageName.startsWith("http")) {
+			return concert.saveImageName;
+		}
+	}
 
-  // 수기 데이터이거나 로컬 이미지인 경우
-  if(concert.saveImageName && !concert.saveImageName.startsWith('http')) {
-    return `http://localhost:8081/api/v1/uploads/images/concert/${concert.saveImageName}`;
-  }
+	// 수기 데이터이거나 로컬 이미지인 경우
+	if (concert.saveImageName && !concert.saveImageName.startsWith("http")) {
+		return `http://localhost:8081/api/v1/uploads/images/concert/${concert.saveImageName}`;
+	}
 
-  return null;
+	return null;
 };
 
 // 이미지 로드 에러 처리
 const handleImageError = (event) => {
-  console.warn('이미지 로드 실패:', event.target.src);
-  // 기본 이미지로 대체하거나 숨김 처리
-  event.target.style.display = 'none';
+	console.warn("이미지 로드 실패:", event.target.src);
+	// 기본 이미지로 대체하거나 숨김 처리
+	event.target.style.display = "none";
 };
-
 </script>
 
 <style scoped>
