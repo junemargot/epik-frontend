@@ -7,7 +7,11 @@
     "dev": "nuxt dev --host",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "link": "biome lint .",
+    "link:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "check": "biome check --write ."
   },
   "dependencies": {
     "@toast-ui/editor": "^3.2.2",
@@ -22,6 +26,7 @@
     "vue3-google-login": "^2.0.33"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.2.6",
     "@types/node": "^22.13.14"
   }
 }
