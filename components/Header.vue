@@ -152,13 +152,27 @@ const goToLoginPageHandler = () => {
 };
 
 //로그아웃 핸들러
-const logoutHandler = () => {
-  userDetails.logout();
-  // userDetails.logout();
-  // localStorage.clear();
-  // location.reload();
-  router.push('/');
-}
+const logoutHandler = async () => {
+  try {
+    // 백엔드 로그아웃 API 호출 (쿠키 삭제)
+    await $fetch('http://localhost:8081/api/v1/auth/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+  
+  } catch(error) {
+    console.error("로그아웃 에러: ", error);
+  } finally {
+    // localStorage 정리
+    userDetails.logout();
+
+    // 페이지 이동
+    // router.push('/');
+
+    // 완전한 새로고침
+    window.location.href = '/';
+  }
+};
 
 // 사이드바 상태
 const isSidebarOpen = ref(false);
