@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   components: true,
   runtimeConfig: {
-    public: { 
+    public: {
       apiBase: 'http://localhost:8081/api/v1',
       backendBaseUrl: 'http://localhost:8081',
       kakaoMapApiKey: process.env.NUXT_PUBLIC_KAKAO_MAP_API_KEY || '',
@@ -42,7 +42,7 @@ export default defineNuxtConfig({
     '/public/css/fonts.css',
     '/public/css/p-style.css',
     '/public/css/icon.css'
-    ],
+  ],
 
   app: {
     head: {

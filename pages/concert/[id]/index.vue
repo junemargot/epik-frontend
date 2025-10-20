@@ -4,8 +4,9 @@
     <div class="event">
       <EventHeader
         :title="concert.title"
+        :is-bookmarked="isBookmarked"
         @notification-click="handleNotification"
-        @bookmark-click="handleBookmark"
+        @toggle-bookmark="handleBookmark"
       />
 
       <!-- 맨 위로 버튼 -->
@@ -50,21 +51,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watchEffect } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted, watchEffect, nextTick } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import EventHeader from "~/components/event/EventHeader.vue";
 import EventInfo from "~/components/event/EventInfo.vue";
 import EventIntro from "~/components/event/EventIntro.vue";
 import EventLocation from "~/components/event/EventLocation.vue";
 
 const route = useRoute();
+const router = useRouter();
 const concertId = route.params.id;
-
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 
+// 북마크 composable 사용
+const { getBookmarkStatus, toggleBookmark } = useBookmark();
+
 // 상태 관리 위한 ref 선언
 const concert = ref(null);
+const isBookmarked = ref(false);
+const isAuthenticated = ref(false);
 
 // 데이터 가져오기
 watchEffect(async () => {
@@ -75,10 +81,22 @@ watchEffect(async () => {
 
 	if (data.value) {
 		concert.value = data.value;
-
 		console.log("콘서트 데이터 로드됨:", concert.value);
-		console.log("콘서트 이미지:", concert.value.concertImages);
 	}
+});
+
+// 북마크 상태 초기화
+onMounted(async() => {
+  try {
+    const status = await getBookmarkStatus(concertId);
+    console.log("북마크 상태 응답: ", status);
+    
+    isBookmarked.value = status.isBookmarked;
+    isAuthenticated.value = status.authenticated;
+
+  } catch(error) {
+    console.error("onMounted 에러: ", error);
+  }
 });
 
 // 이벤트 핸들러 추가
@@ -86,8 +104,30 @@ function handleNotification() {
 	console.log("알림 설정");
 }
 
-function handleBookmark() {
-	console.log("북마크 설정");
+// 북마크 핸들러
+async function handleBookmark() {
+  const result = await toggleBookmark(concertId);
+  if(result.needLogin) {
+    const shouldLogin = confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?');
+    if(shouldLogin) {
+      router.push('/login');
+    }
+    return;
+  }
+
+  if(result.success) {
+    console.log("북마크 상태 업데이트 전: ", isBookmarked.value);
+
+    // 상태 업데이트
+    isBookmarked.value = result.isBookmarked;
+    console.log("북마크 상태 업데이트 후: ", isBookmarked.value);
+
+    // nextTick을 사용하여 DOM 업데이트
+    await nextTick();
+    alert(result.message);
+  } else {
+    alert(result.message || '북마크 처리 중 오류가 발생했습니다.');
+  }
 }
 
 // 이미지 URL 동적 생성 함수

@@ -1,12 +1,14 @@
-export function useAuthFetch(url, options={}){
-  // 이 부분에서 `token.value`는 현재 사용자의 인증 토큰을 가져옵니다.
-const { token } = useUserDetails();
+export function useAuthFetch(url, options = {}) {
+  const config = useRuntimeConfig();
 
-options.headers = {
-    ...options.headers,
-    ...(token.value && {Authorization: `Bearer ${token.value}`})
-}
+  // 쿠키 기반 인증을 위한 설정
+  const fetchOptions = {
+    ...options,
+    credentials: 'include', // 쿠키 포함
+    headers: {
+      ...options.headers,
+    }
+  };
 
-const config = useRuntimeConfig();
-return useFetch(`${config.public.apiBase}${url}`, options);
+  return useFetch(`${config.public.apiBase}${url}`, fetchOptions);
 }

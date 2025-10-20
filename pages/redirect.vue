@@ -27,22 +27,42 @@ const goToLogin = () => {
   navigateTo('/login');
 };
 
+// 쿠키에서 jwt_token 읽기 함수
+const getCookieValue = (name) => {
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [key, value] = cookie.trim().split('=');
+    if (key === name) {
+      return value;
+    }
+  }
+  return null;
+};
+
 onMounted(async () => {
   try {
     console.log("OAuthRedirect 컴포넌트 마운트됨");
+
+    // 1. 쿠키에서 토큰 확인
+    let token = getCookieValue('jwt_token');
+    console.log("쿠키에서 토큰 확인: ", token ? '토큰 있음' : '토큰 없음');
     
-    // URL에서 토큰 파라미터 확인
+    // 2. 쿠키에 없으면 URL에서 토큰 파라미터 확인
+    if (!token) {
+      const urlParams = new URLSearchParams(window.location.search);
+      token = urlParams.get('token');
+      console.log("URL 파라미터에서 토큰 확인: ", token ? '토큰 있음' : '토큰 없음');
+    }
+  
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
     const loginSuccess = urlParams.get('login_success');
-    
-    console.log("URL 파라미터:", { loginSuccess, token: token ? '토큰 있음' : '토큰 없음' });
-     
-    // 로그인 성공 파라미터가 있고 토큰이 있으면 처리
+    console.log("로그인 성공 여부: ", loginSuccess);
+
+    // 로그인 성공이고 토큰이 있으면 처리
     if(loginSuccess === 'true' && token) {
       console.log("토큰 처리 시작");
       
-      // 토큰 저장
+      // 토큰 저장 (백업용)
       localStorage.setItem('access_token', token);
       
       try {
@@ -59,10 +79,14 @@ onMounted(async () => {
                 userInfo.role.map(r => typeof r === 'string' ? r : r.authority) : 
                 [userInfo.role],
           nickname: userInfo.nickname,
+          profileImg: userInfo.profileImg,
           token: token
         });
         
         console.log("사용자 인증 정보 설정 완료");
+
+        // 쿠키 확인 로그
+        console.log("현재 브라우저 쿠키: ", document.cookie);
         
         // 리다이렉트 URL 확인
         const redirectUrl = sessionStorage.getItem('redirectUrl') || '/';
@@ -72,7 +96,7 @@ onMounted(async () => {
         sessionStorage.removeItem('redirectUrl');
         
         // Nuxt의 navigateTo 사용 (권장)
-        await navigateTo(redirectUrl, { external: true});
+        await navigateTo(redirectUrl, { external: false });
         return;
       } catch (decodeError) {
         console.error("토큰 디코딩 실패:", decodeError);
