@@ -192,6 +192,9 @@ import { ref } from 'vue'
 import { useFetch } from '#app';
 import { normalizeImageField } from '~/utils/normalizeData';
 
+// 🔍 이미지 성능 측정 추가
+const { measureImageLoad, printPerformanceReport, downloadReport } = useImagePerformance();
+
 const slides = ref([]);
 const popupItems = ref([]);
 const concertItems = ref([]);
@@ -280,7 +283,7 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString(undefined, options)
 }
 
-// 이미지 URL 동적 생성 함수
+// 이미지 URL 동적 생성 함수 + 성능 측정
 const getImageUrl = (item, type) => {
   if(!item) return null;
 
@@ -296,30 +299,38 @@ const getImageUrl = (item, type) => {
     console.log('KOPIS 데이터 감지');
     
     // KOPIS 원본 URL들 확인
+    let imageUrl = null;
     if(item.kopisPoster && item.kopisPoster.startsWith('http')) {
       console.log('KOPIS 포스터 URL 사용:', item.kopisPoster);
-      return item.kopisPoster;
-    }
-    
-    if(item.imageUrl && item.imageUrl.startsWith('http')) {
+      imageUrl = item.kopisPoster;
+    } else if(item.imageUrl && item.imageUrl.startsWith('http')) {
       console.log('이미지 URL 사용:', item.imageUrl);
-      return item.imageUrl;
+      imageUrl = item.imageUrl;
+    } else if(item.poster && item.poster.startsWith('http')) {
+      console.log('포스터 URL 사용:', item.poster);
+      imageUrl = item.poster;
     }
     
-    if(item.poster && item.poster.startsWith('http')) {
-      console.log('포스터 URL 사용:', item.poster);
-      return item.poster;
+    // 🔍 성능 측정 (KOPIS 외부 이미지)
+    if (imageUrl) {
+      measureImageLoad(imageUrl, `${type}-kopis`);
     }
     
     // KOPIS 데이터인데 외부 URL이 없으면 null 반환 (숨김 처리)
-    console.warn('KOPIS 데이터지만 외부 URL을 찾을 수 없음');
-    return null;
+    if (!imageUrl) {
+      console.warn('KOPIS 데이터지만 외부 URL을 찾을 수 없음');
+    }
+    return imageUrl;
   }
   
   // 수기 입력 데이터 (로컬 파일)
   if(imageName && !imageName.startsWith('http') && !imageName.startsWith('PF_')) {
     const finalUrl = `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`;
     console.log('로컬 이미지 URL:', finalUrl);
+    
+    // 🔍 성능 측정 (로컬 이미지)
+    measureImageLoad(finalUrl, `${type}-local`);
+    
     return finalUrl;
   }
 
@@ -463,6 +474,21 @@ const onMouseUp = () => {
 onMounted(() => {
   updateDimensions()
   window.addEventListener('resize', updateDimensions)
+  
+  // 🔍 5초 후 성능 리포트 출력 (모든 이미지 로드 대기)
+  setTimeout(() => {
+    console.log('\n📊 이미지 로딩 성능 측정 결과:');
+    const report = printPerformanceReport();
+    
+    // 전역 변수로 저장 (콘솔에서 접근 가능)
+    window.imagePerformanceReport = report;
+    console.log('💡 다운로드: window.downloadImageReport()');
+  }, 5000);
+  
+  // 전역 함수로 다운로드 기능 노출
+  window.downloadImageReport = () => {
+    downloadReport(`image-performance-${new Date().toISOString()}.json`);
+  };
 })
 
 onUnmounted(() => {
