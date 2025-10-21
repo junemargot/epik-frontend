@@ -65,7 +65,7 @@ const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 
 // 북마크 composable 사용
-const { getBookmarkStatus, toggleBookmark } = useBookmark();
+const { getBookmarkStatus, toggleBookmark } = useBookmark('concert');
 
 // 상태 관리 위한 ref 선언
 const concert = ref(null);
