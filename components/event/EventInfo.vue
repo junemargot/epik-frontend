@@ -47,6 +47,10 @@
           >
             {{ office.name }}
           </a>
+					<div v-if="!ticketOffices || ticketOffices.length === 0" class="no-ticket-office">
+						<span class="info-text">예매처 정보 없음</span>
+						<p class="guide-text">공연장 및 주최사에 문의해주세요.</p>
+					</div>
         </div>
       </div>
     </div>
@@ -152,3 +156,27 @@ const formatDate = (dateString) => {
 		.replace(/\.$/, "");
 };
 </script>
+
+<style>
+.no-ticket-office {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.no-ticket-office .info-text {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.no-ticket-office .guide-text {
+  color: #999;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+</style>
