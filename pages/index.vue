@@ -50,7 +50,12 @@
 
     <!-- 팝업 -->
     <div class="popup-area">
-      <h2 class="card__title">Pop-up</h2>
+      <div class="section-header">
+        <h2 class="card__title">Pop-up</h2>
+        <RouterLink to="/popup" class="more-btn">
+          더보기 <i class="bx bx-chevron-right"></i>
+        </RouterLink>
+      </div>
       <div class="card__grid">
         <div v-for="(item, index) in popupItems" :key="index" class="card__item">
           <RouterLink :to="`/popup/${item.id}`" class="card__link" />
@@ -84,9 +89,11 @@
       <div class="card__grid">
         <div v-for="(item, index) in concertItems" :key="index" class="card__item">
           <RouterLink :to="`/concert/${item.id}`" class="card__link" />
-          <img :src="getImageUrl(item, 'concert')"
-               :alt="`Image ${index + 1}`"
-               @error="handleImageError">
+          <img 
+            :src="getImageUrl(item, 'concert')"
+            :alt="`Image ${index + 1}`"
+            @error="handleImageError"
+          >
           <div class="card__info">
             <!-- 상태 라벨 -->
             <div class="card__status-tag">
@@ -286,28 +293,20 @@ const formatDate = (date) => {
 // 이미지 URL 동적 생성 함수 + 성능 측정
 const getImageUrl = (item, type) => {
   if(!item) return null;
-
-  console.log('=== getImageUrl 디버깅 ===');
-  console.log('아이템:', item.title);
-  console.log('dataSource:', item.dataSource);
   
   // KOPIS API 데이터 판별 (PF_로 시작하는 파일명은 KOPIS 데이터)
   const imageName = item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName;
   
   // KOPIS 데이터인 경우 (파일명이 PF_로 시작하거나 dataSource가 KOPIS_API)
   if(imageName && (imageName.startsWith('PF_') || item.dataSource === 'KOPIS_API')) {
-    console.log('KOPIS 데이터 감지');
     
     // KOPIS 원본 URL들 확인
     let imageUrl = null;
     if(item.kopisPoster && item.kopisPoster.startsWith('http')) {
-      console.log('KOPIS 포스터 URL 사용:', item.kopisPoster);
       imageUrl = item.kopisPoster;
     } else if(item.imageUrl && item.imageUrl.startsWith('http')) {
-      console.log('이미지 URL 사용:', item.imageUrl);
       imageUrl = item.imageUrl;
     } else if(item.poster && item.poster.startsWith('http')) {
-      console.log('포스터 URL 사용:', item.poster);
       imageUrl = item.poster;
     }
     
@@ -316,17 +315,12 @@ const getImageUrl = (item, type) => {
       measureImageLoad(imageUrl, `${type}-kopis`);
     }
     
-    // KOPIS 데이터인데 외부 URL이 없으면 null 반환 (숨김 처리)
-    if (!imageUrl) {
-      console.warn('KOPIS 데이터지만 외부 URL을 찾을 수 없음');
-    }
     return imageUrl;
   }
   
   // 수기 입력 데이터 (로컬 파일)
   if(imageName && !imageName.startsWith('http') && !imageName.startsWith('PF_')) {
     const finalUrl = `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`;
-    console.log('로컬 이미지 URL:', finalUrl);
     
     // 🔍 성능 측정 (로컬 이미지)
     measureImageLoad(finalUrl, `${type}-local`);
@@ -334,7 +328,6 @@ const getImageUrl = (item, type) => {
     return finalUrl;
   }
 
-  console.log('이미지 URL을 찾을 수 없음');
   return null;
 };
 
