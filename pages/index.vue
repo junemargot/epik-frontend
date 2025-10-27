@@ -85,7 +85,12 @@
 
     <!-- 콘서트 -->
     <div class="concert">
-      <h2 class="card__title">Concert</h2>
+      <div class="section-header">
+        <h2 class="card__title">Concert</h2>
+        <RouterLink to="/concert" class="more-btn">
+          더보기 <i class="bx bx-chevron-right"></i>
+        </RouterLink>
+      </div>
       <div class="card__grid">
         <div v-for="(item, index) in concertItems" :key="index" class="card__item">
           <RouterLink :to="`/concert/${item.id}`" class="card__link" />
@@ -117,13 +122,20 @@
 
     <!-- 뮤지컬 -->
     <div class="musical">
-      <h2 class="card__title">Musical</h2>
+      <div class="section-header">
+        <h2 class="card__title">Musical</h2>
+        <RouterLink to="/musical" class="more-btn">
+          더보기 <i class="bx bx-chevron-right"></i>
+        </RouterLink>
+      </div>
       <div class="card__grid">
         <div v-for="(item, index) in musicalItems" :key="index" class="card__item">
           <RouterLink :to="`/musical/${item.id}`" class="card__link" />
-          <img :src="getImageUrl(item, 'musical')"
-               :alt="`Musical ${index + 1}`"
-               @error="handleImageError">
+          <img 
+            :src="getImageUrl(item, 'musical')"
+            :alt="`Musical ${index + 1}`"
+            @error="handleImageError"
+          >
           <div class="card__info">
             <!-- 상태 라벨 -->
             <div class="card__status-tag">
