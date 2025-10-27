@@ -98,6 +98,11 @@ main {
 	text-decoration-line: underline;
 }
 
+.log-in__search-id:hover,
+.log-in__search-password:hover {
+	color: var(--accent-1);
+}
+
 .search-id__notfound,
 .search-id__found {
 	font-size: var(--font-size-6);
