@@ -28,10 +28,27 @@
   src: url('/fonts/dahlia-bold.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Happiness-Regular';
+  src: url('/fonts/Happiness-Regular') format('woff');
+}
+
+@font-face {
+  font-family: 'Hapiness-Bold';
+  src: url('/fonts/Happiness-Sans-Bold') format('woff');
+}
+
+@font-face {
+  font-family: 'Happiness-Title';
+  src: url('/fonts/Happiness-Title') format('woff');
+}
+
 :root{
   --background-1: #f2f2f2;
   --background-2: #e8e8e8;
   --accent-1: #ea3921;
+  --accent-2: #ff6b6b;
+  --accent-3: #ff4757;
   --black: #222222;
   --white: #ffffff;
 

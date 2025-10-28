@@ -1,6 +1,6 @@
 main {
   box-sizing: border-box;
-  background-color: #F2F2F2;
+  background-color: var(--background-1);
   width: 960px;
   margin: 0 auto;
   padding: 20px 0;
@@ -31,18 +31,18 @@ main {
 .picks__title,
 .region__title {
   font-family: 'Pretendard-Bold', sans-serif;
-  font-size: 28px;
+  font-size: var(--font-size-13);
   margin-bottom: 10px;
   margin: 0;
 }
 
 .picks__more,
 .region__more {
-  font-size: 14px;
+  font-size: var(--font-size-6);
   text-align: right;
   margin-bottom: 10px;
   text-decoration: none;
-  color: #333;
+  color: var(--black);
 }
 
 /* picks 섹션 스타일 */
@@ -63,7 +63,7 @@ main {
   width: 136px;
   height: 166px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: var(--radius-3);
 }
 
 /* region 섹션 스타일 */
@@ -82,7 +82,7 @@ main {
 
 .region__filter-link {
   text-decoration: none;
-  color: #333;
+  color: var(--black);
   padding: 5px 0;
   position: relative;
   cursor: pointer;
@@ -94,7 +94,7 @@ main {
   content: '|';
   position: absolute;
   right: -15px;
-  color: #ccc;
+  color: var(--color-grey-4);
 }
 
 .region__filter-link:not(:last-child) {
@@ -102,11 +102,11 @@ main {
 }
 
 .region__filter-link.active {
-  color: #000;
+  color: var(--black);
 }
 
 .region__filter-link:hover {
-  color: #000;
+  color: var(--black);
   font-weight: bold;
 }
 
@@ -128,19 +128,19 @@ main {
   height: 220px;
   aspect-ratio: 136 / 166;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: var(--radius-3);
 }
 
 /* 공통 텍스트 스타일 */
 .picks__item-title {
-  font-size: 12px;
+  font-size: var(--font-size-5);
   font-family: 'pretendard-bold', sans-serif;
   font-weight: bold;
   margin-top: 8px;
 }
 
 .region__item-title {
-  font-size: 16px;
+  font-size: var(--font-size-7);
   font-family: 'pretendard-bold', sans-serif;
   font-weight: bold;
   margin-top: 8px;
@@ -149,14 +149,14 @@ main {
 .picks__item-venue,
 .picks__item-date {
   font-size: 10px;
-  color: #666;
+  color: var(--color-grey-9);
   margin-top: 4px;
 }
 
 .region__item-venue,
 .region__item-date {
-  font-size: 12px;
-  color: #666;
+  font-size: var(--font-sie-5);
+  color: var(--color-grey-9);
   margin-top: 4px;
 }
 
@@ -168,18 +168,18 @@ main {
   display: block;
   margin: 20px auto;
   padding: 10px 20px;
-  background-color: #f0f0f0;
+  background-color: var(--background-1);
   border: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 .region__more-btn.hidden {
-  display: none; /* 버튼 숨김 */
+  display: none;
 }
 
 .region__more-btn:hover {
-  background-color: #e0e0e0;
+  background-color: var(--color-grey-3);
 }
 
 /* 새로 추가된 스타일 */
@@ -208,9 +208,9 @@ main {
 /* slider css 합침 */
 .container {
   width: 960px;
-  margin: 23px auto;  /*상하 여백은 23px, 좌우는 자동으로 중앙 정렬*/
-  padding: 0 20px;    /* 좌우에 20px의 내부 여백 추가 */
-  box-sizing: border-box;  /* padding이 width에 포함되도록 설정 */
+  margin: 23px auto;
+  padding: 0 20px;
+  box-sizing: border-box; 
 }
 
 /* 화살표 */
@@ -219,7 +219,7 @@ main {
   top: 50%;
   transform: translateY(-35%);
   background: rgba(0, 0, 0, 0.5);
-  color: white;
+  color: var(--white);
   border: none;
   padding: 10px;
   cursor: pointer;
@@ -246,7 +246,7 @@ main {
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 0 30px; /* 화살표 버튼을 위한 공간 확보 */
+  padding: 0 30px;
   box-sizing: border-box;
 }
 
@@ -257,7 +257,7 @@ main {
 .slider-container {
   display: flex;
   overflow: hidden;
-  transition: transform 0.3s ease; /* 부드러운 전환 효과 추가 */
+  transition: transform 0.3s ease;
   
 }
 
@@ -268,20 +268,70 @@ main {
 /* ==slider=============================== */
 .slider-item {
   flex: 0 0 auto;
-  width: 240px; /* 960px / 4 */
+  width: 240px;
   height: 345px;
-  padding: 0 10px; /* 좌우 간격 추가 */
+  padding: 0 10px;
   box-sizing: border-box;
 }
 
 .slider-item:last-child {
-  margin-right: 0; /* 마지막 슬라이드의 오른쪽 마진 제거 */
+  margin-right: 0;
 }
 
 .slider-item img {
-  width: 100%; /* 부모 요소의 너비에 맞춤 */
+  width: 100%;
   height: 338px;
   object-fit: cover;
-  border-radius: 15px;
+  border-radius: var(--radius-5);
 }
 
+.category-filters {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+  max-width: 920px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: var(--white);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.category-btn.active {
+  background: var(--black);
+  color: var(--white);
+  border-color: var(--black);
+}
+
+.category-btn:hover {
+  border-color: var(--black);
+}
+
+.region__filter-btn {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-grey-9);
+  position: relative;
+}
+
+.region__filter-btn.active {
+  color: var(--black);
+  font-weight: bold;
+}
+
+.region__filter-btn:not(:last-child)::after {
+  content: '|';
+  position: absolute;
+  right: 0;
+  color: #ccc;
+}
