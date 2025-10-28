@@ -1,6 +1,6 @@
 /**
  * 범용 북마크 composable
- * @param {string} type - 'concert' | 'musical' | 'exhibition'
+ * @param {string} type - 'concert' | 'musical' | 'exhibition' | 'popup'
  */
 
 export const useBookmark = (type = 'concert') => {
@@ -8,7 +8,7 @@ export const useBookmark = (type = 'concert') => {
   const apiBase = config.public.apiBase;
 
   // 타입 검증
-  const validTypes = ['concert', 'musical', 'exhibition'];
+  const validTypes = ['popup', 'concert', 'musical', 'exhibition'];
   if(!validTypes.includes(type)) {
     console.error(`Invalid bookmark type: ${type}. Must be one of ${validTypes.join(', ')}`);
     type = 'concert'; // 기본값

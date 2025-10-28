@@ -25,7 +25,17 @@
         <!-- POPUP DETAILS -->
         <div class="popup__details">
           <div class="">
-            <h1 class="popup__title">{{ popup?.title }}</h1>
+            <div class="popup__title-wrapper">
+              <h1 class="popup__title">{{ popup?.title }}</h1>
+              <button
+                @click="handleBookmark"
+                class="popup__bookmark-btn"
+                :class="{ 'bookmarked': isBookmarked }"
+                :title="isBookmarked ? '북마크 제거' : '북마크 추가'"
+              >
+                <i :class="isBookmarked ? 'bx bxs-bookmark' : 'bx bx-bookmark'"></i>
+              </button>
+            </div>
             <div class="popup__address">
               <i class='bx bx-map'></i>
               <span>{{ popup?.address }}</span>
@@ -94,14 +104,20 @@ import { useRuntimeConfig } from 'nuxt/app';
 import { useFetch } from '#app';
 
 const route = useRoute();
+const router = useRouter();
 const popupId = route.params.id;
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 const kakaoMapApiKey = config.public.kakaoMapApiKey; // 환경변수에서 API_KEY 로드
+const { getBookmarkStatus, toggleBookmark } = useBookmark('popup');
 
 // 카카오맵 관련
 let kakaoMap;
 let kakaoMarker;
+
+// 북마크 상태 관리
+const isBookmarked = ref(false);
+const isAuthenticated = ref(false);
 
 // 슬라이드 인덱스 & 상태 관리
 const currentIdx = ref(0);
@@ -297,13 +313,30 @@ function openLink(url) {
   window.open(url, '_blank');
 }
 
-// 북마크 상태 관리
-const isBookmark = ref(false);
-function clickBookmark() {
-  isBookmark.value = !isBookmark.value;
+// 북마크 핸들러
+async function handleBookmark() {
+  const result = await toggleBookmark(popupId);
+  if(result.needLogin) {
+    const shouldLogin = confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?');
+    if(shouldLogin) {
+      sessionStorage.setItem('redirectUrl', route.fullPath);
+      router.push('/login');
+    }
+    return;
+  }
+
+  if(result.success) {
+    console.log('북마크 상태 업데이트 전: ', isBookmarked.value);
+    isBookmarked.value = result.isBookmarked;
+    console.log('북마크 상태 업데이트 후: ', isBookmarked.value);
+    await nextTick();
+    // alert(result.message);
+  } else {
+    alert(result.message || '북마크 처리 중 오류가 발생했습니다.');
+  }
 }
 
-// 알림 상태 관리
+// 알림 상태 관리 (나중에 구현)
 const isNotification = ref(false);
 function clickNotification() {
   isNotification.value = !isNotification.value;
@@ -402,11 +435,20 @@ function loadKakaoMapScript() {
 
 onMounted(async () => {
   console.log('컴포넌트 마운트 완료');
+  try {
+    const status = await getBookmarkStatus(popupId);
+    console.log("북마크 상태 응답: ", status);
+
+    isBookmarked.value = status.isBookmarked;
+    isAuthenticated.value = status.authenticated;
+
+  } catch(error) {
+    console.error("북마크 상태 조회 에러: ", error);
+  }
 
   nextTick(() => {
     if (popup.value && popup.value.saveImageNames && popup.value.saveImageNames.length > 0) {
       checkImagesLoaded();
-
     } else {
       console.log('팝업 데이터가 없거나 이미지가 없습니다.');
     }

@@ -110,21 +110,19 @@ async function handleBookmark() {
   if(result.needLogin) {
     const shouldLogin = confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?');
     if(shouldLogin) {
+      // 현재 페이지 경로 저장
+      sessionStorage.setItem('redirectUrl', route.fullPath);
       router.push('/login');
     }
     return;
   }
 
   if(result.success) {
-    console.log("북마크 상태 업데이트 전: ", isBookmarked.value);
-
     // 상태 업데이트
     isBookmarked.value = result.isBookmarked;
-    console.log("북마크 상태 업데이트 후: ", isBookmarked.value);
-
     // nextTick을 사용하여 DOM 업데이트
     await nextTick();
-    alert(result.message);
+    // alert(result.message);
   } else {
     alert(result.message || '북마크 처리 중 오류가 발생했습니다.');
   }
