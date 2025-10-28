@@ -49,7 +49,7 @@
   justify-content: space-between;
   align-items: center;
   /* 상하 좌우 */
-  padding: 10px 30px;
+  padding: 10px 55px;
   /* padding-bottom: 17px; */
   border-bottom: 1px solid var(--black);
 }

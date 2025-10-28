@@ -55,7 +55,7 @@
             <nav>
               <ul>
                 <li class="dropdown-menu__link">
-                  <NuxtLink to="/popup/region">Pop-Up</NuxtLink>
+                  <NuxtLink to="/popup">Pop-Up</NuxtLink>
                   <ul>
                     <li><NuxtLink to="/popup/region" @click="closeSidebarOnNav">지역별</NuxtLink></li>
                     <li><NuxtLink to="/popup/category">카테고리별</NuxtLink></li>
@@ -165,9 +165,6 @@ const logoutHandler = async () => {
   } finally {
     // localStorage 정리
     userDetails.logout();
-
-    // 페이지 이동
-    // router.push('/');
 
     // 완전한 새로고침
     window.location.href = '/';
