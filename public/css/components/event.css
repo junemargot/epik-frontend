@@ -21,6 +21,11 @@ main {
   padding: 30px 30px;
 }
 
+.event main {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 /* 맨 위로 버튼 */
 #go-top {
   position: fixed;
@@ -61,6 +66,8 @@ main {
   padding: 0 10px 20px 10px;
   width: 100%;
   border-bottom: 1px solid var(--black);
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .event__header h1 {
