@@ -27,6 +27,24 @@ const goToLogin = () => {
   navigateTo('/login');
 };
 
+// URL 정규화 함수
+const normalizeUrl = (url) => {
+  if (!url) return '/';
+
+  try {
+    // 전체 URL인 경우 경로만 추출
+    if(url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
+      const urlObj = new URL(url, window.location.origin);
+      return urlObj.pathname + urlObj.search + urlObj.hash;
+    }
+    // 이미 경로 형태인 경우 그대로 반환
+    return url.startsWith('/') ? url : `/${url}`;
+  } catch (e) {
+    console.error('URL 정규화 오류: ', e);
+    return '/';
+  }
+};
+
 // 쿠키에서 jwt_token 읽기 함수
 const getCookieValue = (name) => {
   const cookies = document.cookie.split(';');
@@ -89,15 +107,18 @@ onMounted(async () => {
         console.log("현재 브라우저 쿠키: ", document.cookie);
         
         // 리다이렉트 URL 확인
-        const redirectUrl = sessionStorage.getItem('redirectUrl') || '/';
-        console.log("리다이렉트 예정 URL:", redirectUrl);
+        const rawRedirectUrl = sessionStorage.getItem('redirectUrl') || '/';
+        const redirectUrl = normalizeUrl(rawRedirectUrl);
+        console.log("원본 리다이렉트 URL: ", rawRedirectUrl);
+        console.log("정규화된 리다이렉트 URL:", redirectUrl);
 
         // 세션 스토리지 정리
         sessionStorage.removeItem('redirectUrl');
         
-        // Nuxt의 navigateTo 사용 (권장)
+        // 정규화된 내부 경로로 리다이렉트
         await navigateTo(redirectUrl, { external: false });
         return;
+        
       } catch (decodeError) {
         console.error("토큰 디코딩 실패:", decodeError);
         error.value = "토큰 처리 중 오류가 발생했습니다: " + decodeError.message;
