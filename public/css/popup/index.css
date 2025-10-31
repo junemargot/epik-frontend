@@ -34,8 +34,8 @@ h2 {
 .more-btn {
   display: flex;
   align-items: center;
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-6);
+  color: var(--color-grey-9);
   text-decoration: none;
   font-family: 'Pretendard-Medium', sans-serif;
   transition: color .3s ease;
@@ -44,11 +44,11 @@ h2 {
 }
 
 .more-btn:hover {
-  color: #333;
+  color: var(--black);
 }
 
 .more-btn i {
-  font-size: 18px;
+  font-size: var(--font-size-8);
   transition: transform .3s ease;
 }
 
@@ -102,7 +102,7 @@ h2 {
   width: 100%;
   height: 310px;
   object-fit: cover;
-  border-radius: 15px;
+  border-radius: var(--radius-5);
   border: 1px solid var(--black);
   cursor: pointer;
 }
@@ -159,19 +159,19 @@ h2 {
 
 .photo-slider__tag {
   background-color: transparent;
-  color: #fff;
+  color: var(--white);
   padding: 5px 10px;
-  border-radius: 15px;
+  border-radius: var(--radius-5);
   font-size: 15px;
-  border: 1px solid #fff;
+  border: 1px solid var(--white);
 }
 
 .photo-slider__link {
   position: absolute;
   top: 15px;
   right: 20px;
-  color: #fff;
-  font-size: 20px;
+  color: var(--white);
+  font-size: var(--font-size-9);
   z-index: 2;
 }
 
@@ -245,7 +245,7 @@ h2 {
 }
 
 .bx {
-  font-size: 20px
+  font-size: var(--font-size-9);
 }
 
 .photo-slider__arrow--left {
@@ -259,7 +259,7 @@ h2 {
 /* 팝업 */
 .card__title {
   font-family: 'pretendard-bold';
-  font-size: 28px;
+  font-size: var(--font-size-13);
   padding: 0 !important;
   margin: 0 0 12px 10px;
 }
@@ -327,18 +327,18 @@ h2 {
   font-family: 'pretendard-bold';
   font-size: 13px;
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   border: 1px solid var(--color-point-4);
   width: fit-content;
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #333;
+  color: var(--black);
 }
 
 .card__info-header h3 {
-  font-size: 16px;
+  font-size: var(--font-size-7);
   line-height: 1.4;
   font-family: 'pretendard-bold';
   margin: 0;
@@ -354,7 +354,7 @@ h2 {
 
 .card__location {
   font-family: 'pretendard-medium';
-  font-size: 14px;
+  font-size: var(--font-size-6);
   margin: 0;
   color: var(--color-grey-8);
   white-space: normal;
@@ -369,7 +369,7 @@ h2 {
 
 .card__location,
 .card__date-main {
-  font-size: 14px;
+  font-size: var(--font-size-6);
   font-weight: 600;
 }
 
@@ -417,7 +417,7 @@ h2 {
 .banner__item {
   width: 100%;
   height: 76px;
-  border-radius: 15px;
+  border-radius: var(--radius-5);
   object-fit: cover;
 }
 
@@ -459,7 +459,7 @@ h2 {
 .video__item iframe {
   width: 100%;
   aspect-ratio: 16/9;
-  border-radius: 15px;
+  border-radius: var(--radius-5);
 }
 
 .video__nav {
@@ -467,9 +467,9 @@ h2 {
   top: 50%;
   transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.5);
-  color: white;
+  color: var(--white);
   border: none;
-  font-size: 24px;
+  font-size: var(--font-size-11);
   padding: 10px;
   cursor: pointer;
   z-index: 10;
@@ -492,7 +492,7 @@ h2 {
 
 .tag-button {
   padding: 8px 16px;
-  font-size: 14px;
+  font-size: var(--font-size-6);
   font-weight: 600;
   border: 1px solid var(--color-grey-5);
   border-radius: 8px;
@@ -527,7 +527,7 @@ h2 {
 
 .picks__title {
   font-family: 'Pretendard-Bold', sans-serif;
-  font-size: 28px;
+  font-size: var(--font-size-13);
   margin: 0;
   padding: 0 !important;
 }
@@ -557,7 +557,7 @@ h2 {
   width: 100%;
   aspect-ratio: 3/4;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: var(--radius-3);
   margin-bottom: 8px;
   transition: transform 0.3s ease;
 }
@@ -573,7 +573,7 @@ h2 {
 }
 
 .picks__item-title {
-  font-size: 14px;
+  font-size: var(--font-size-6);
   font-family: 'Pretendard-Bold', sans-serif;
   font-weight: bold;
   line-height: 1.3;
@@ -586,31 +586,30 @@ h2 {
 .picks__item-venue,
 .picks__item-date {
   font-size: 12px;
-  color: #666;
+  color: var(--color-grey-9);
   font-family: 'Pretendard-Medium', sans-serif;
 }
 
 /* ============================================ */
 /* 지역별 보기 섹션 */
 /* ============================================ */
-.region {
+.region, .category {
   width: 100%;
   max-width: 100%;
-  margin: 60px auto 0;
-  padding: 0 20px 40px;
+  margin: 40px auto 0;
+  padding: 0 20px 20px;
 }
 
-.region__title {
+.region__title, .category__title {
   font-family: 'Pretendard-Bold', sans-serif;
-  font-size: 28px;
-  margin-bottom: 20px;
+  font-size: var(--font-size-13);
+  margin-bottom: 10px;
   padding: 0 !important;
 }
 
 .region__filters {
   display: flex;
-  gap: 8px;
-  margin-bottom: 30px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
 }
 
@@ -619,27 +618,31 @@ h2 {
   border: none;
   padding: 8px 16px;
   cursor: pointer;
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-6);
+  color: var(--color-grey-9);
   font-family: 'Pretendard-Medium', sans-serif;
   position: relative;
   transition: all 0.3s ease;
 }
 
 .region__filter-btn.active {
-  color: #000;
+  color: var(--black);
   font-weight: bold;
 }
 
 .region__filter-btn:hover {
-  color: #000;
+  color: var(--black);
+}
+
+.region__filter-btn:first-child {
+  padding-left: 0;
 }
 
 .region__filter-btn:not(:last-child)::after {
   content: '|';
   position: absolute;
   right: 0;
-  color: #ccc;
+  color: var(--color-grey-5);
 }
 
 .region__container {
@@ -652,7 +655,7 @@ h2 {
 .region__item {
   width: 100%;
   border: 1px solid #e5e5e5;
-  border-radius: 10px;
+  border-radius: var(--radius-3);
   overflow: hidden;
   transition: all 0.3s ease;
 }
@@ -674,7 +677,7 @@ h2 {
   width: 116px;
   height: 155px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   margin-right: 12px;
   flex-shrink: 0;
 }
@@ -702,7 +705,7 @@ h2 {
 .region__item-venue,
 .region__item-date {
   font-size: 13px;
-  color: #666;
+  color: var(--color-grey-9);
   font-family: 'Pretendard-Medium', sans-serif;
   line-height: 1.4;
 }
@@ -718,7 +721,7 @@ h2 {
   padding: 12px 40px;
   background-color: #f5f5f5;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   cursor: pointer;
   font-size: 14px;
   font-family: 'Pretendard-Medium', sans-serif;
@@ -726,8 +729,8 @@ h2 {
 }
 
 .region__more-btn:hover {
-  background-color: #e8e8e8;
-  border-color: #999;
+  background-color: var(--background-2);
+  border-color: var(--color-grey-7);
 }
 
 /* ============================================ */
