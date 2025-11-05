@@ -1,161 +1,236 @@
+<!-- /Users/margotinjune/Documents/EPIK_Frontend/pages/concert/index.vue -->
 <template>
-  <main>
-    <!-- 슬라이더 섹션 -->
+  <div class="main-container">
+    <!-- 상단 슬라이더 -->
     <div class="photo-slider">
-      <div class="slider-container" ref="slider">
-        <div class="slider-item" v-for="(image, index) in sliderImages" :key="index">
-          <a href="http://localhost:3001/concert/43" class="picks__item-link"></a>
-          <img :src="image.src" :alt="image.alt">
+      <div class="slider-container" ref="sliderRef" :style="sliderStyle">
+        <div class="slider-item" v-for="(slide, index) in slides" :key="index">
+          <RouterLink :to="`/concert/${slide.id}`" class="slider-link">
+            <img :src="getImageUrl(slide, 'concert')" 
+                 :alt="`Concert ${index + 1}`"
+                 @error="handleImageError">
+          </RouterLink>
         </div>
       </div>
-      <button class="arrow-left" @click="moveSlider(-1)" :disabled="isPrevDisabled">&#8592;</button>
-      <button class="arrow-right" @click="moveSlider(1)" :disabled="isNextDisabled">&#8594;</button>
+      <button class="arrow-left" @click="moveSlider(-1)" :disabled="isPrevDisabled">
+        <i class='bx bx-chevron-left'></i>
+      </button>
+      <button class="arrow-right" @click="moveSlider(1)" :disabled="isNextDisabled">
+        <i class='bx bx-chevron-right'></i>
+      </button>
     </div>
 
-    <!-- EPIK'S PICK 섹션 -->
+    <!-- 카테고리 필터 -->
+    <div class="category-filters">
+      <button 
+        v-for="category in categories" 
+        :key="category"
+        class="category-btn"
+        :class="{ active: selectedCategory === category }"
+        @click="selectedCategory = category">
+        {{ category }}
+      </button>
+    </div>
+
+    <!-- EPIK'S PICK -->
     <section class="picks">
       <div class="picks__header">
         <h2 class="picks__title">EPIK'S PICK</h2>
       </div>
       <div class="picks__container">
-        <div v-for="pick in picks" :key="pick.id" class="picks__item">
-          <a href="http://localhost:3001/concert/43" class="picks__item-link">
-            <img :src="pick.image" :alt="pick.title + ' 포스터'" class="picks__image">
+        <div v-for="(pick, index) in picksItems" :key="index" class="picks__item">
+          <RouterLink :to="`/concert/${pick.id}`" class="picks__item-link">
+            <img :src="getImageUrl(pick, 'concert')" 
+                 :alt="`${pick.title} 포스터`" 
+                 class="picks__image"
+                 @error="handleImageError">
             <span class="picks__item-title">{{ pick.title }}</span>
             <span class="picks__item-venue">{{ pick.venue }}</span>
-            <span class="picks__item-date">{{ pick.date }}</span>
-          </a>
+            <span class="picks__item-date">
+              {{ formatDate(pick.startDate) }} ~ {{ formatDate(pick.endDate) }}
+            </span>
+          </RouterLink>
         </div>
       </div>
     </section>
 
-    <!-- 지역별 보기 섹션 -->
+    <!-- 지역별 보기 -->
     <section class="region">
       <h2 class="region__title">지역별 보기</h2>
 
       <div class="region__filters">
-        <a href="#" v-for="filter in filters" :key="filter" class="region__filter-link">{{ filter }}</a>
+        <button 
+          v-for="region in regions" 
+          :key="region"
+          class="region__filter-btn"
+          :class="{ active: selectedRegion === region }"
+          @click="selectedRegion = region">
+          {{ region }}
+        </button>
       </div>
 
       <div class="region__container">
-        <!-- 아이템 리스트 -->
-        <div v-for="item in items" :key="item.id" :class="{ hidden: item.hidden }" class="region__item">
-          <a href="http://localhost:3001/concert/71" class="picks__item-link">
-            <img :src="item.image" :alt="item.title + ' 포스터'" class="region__image">
+        <div v-for="(item, index) in displayedItems" :key="index" class="region__item">
+          <RouterLink :to="`/concert/${item.id}`" class="region__item-link">
+            <img :src="getImageUrl(item, 'concert')" 
+                 :alt="`${item.title} 포스터`" 
+                 class="region__image"
+                 @error="handleImageError">
             <span class="region__item-title">{{ item.title }}</span>
             <span class="region__item-venue">{{ item.venue }}</span>
-            <span class="region__item-date">{{ item.date }}</span>
-          </a>
+            <span class="region__item-date">
+              {{ formatDate(item.startDate) }} ~ {{ formatDate(item.endDate) }}
+            </span>
+          </RouterLink>
         </div>
       </div>
 
       <!-- 더보기 버튼 -->
-      <button v-if="hasHiddenItems" @click="showMoreItems" class="region__more-btn">더보기</button>
+      <button v-if="hasMore" @click="loadMore" class="region__more-btn">더보기</button>
     </section>
-  </main>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue'
+import { useFetch } from '#app'
+import { normalizeImageField } from '~/utils/normalizeData'
 
-// 슬라이더 이미지 데이터
-const sliderImages = ref([
-  { src: '/images/콜드플레이1.gif', alt: 'Image 1' },
-  { src: '/images/크러쉬.gif', alt: 'Image 2' },
-  { src: '/images/에이핑크.gif', alt: 'Image 3' },
-  { src: '/images/두아리파.gif', alt: 'Image 4' },
-  { src: '/images/규현.gif', alt: 'Image 5' },
-  { src: '/images/켈라니.gif', alt: 'Image 6' },
-  { src: '/images/성시경.gif', alt: 'Image 7' },
-  { src: '/images/케시.gif', alt: 'Image 8' }
-]);
+// 데이터
+const slides = ref([])
+const picksItems = ref([])
+const allItems = ref([])
+const displayLimit = ref(15)
 
-// 슬라이더 관련 상태 및 함수
-const slider = ref(null);
-const currentIndex = ref(0);
-const slidesToShow = 3; // 한 번에 보여줄 슬라이드 수
-let slideWidth = ref(0);
+// 필터
+const selectedCategory = ref('전체')
+const selectedRegion = ref('전체')
 
-function updateDimensions() {
-  const slideElement = slider.value.querySelector('.slider-item');
+const categories = ref(['전체', '🔥 요즘 HOT', '발라드', '락/메탈', '팝/랩', '재즈/소울', '인디'])
+const regions = ref(['전체', '서울', '경기/인천', '충청/강원', '대구/경북', '부산/경남', '광주/전라', '제주'])
+
+// API 호출 - 슬라이더
+const { data: slidesData } = await useFetch('/api/v1/concert/random', {
+  baseURL: 'http://localhost:8081',
+  credentials: 'include'
+})
+
+if (slidesData.value) {
+  const rawData = Array.isArray(slidesData.value) ? slidesData.value : [slidesData.value]
+  slides.value = normalizeImageField(rawData.slice(0, 8), 'concert')
+}
+
+// API 호출 - PICK
+const { data: picksData } = await useFetch('/api/v1/concert/random', {
+  baseURL: 'http://localhost:8081',
+  credentials: 'include'
+})
+
+if (picksData.value) {
+  const rawData = Array.isArray(picksData.value) ? picksData.value : [picksData.value]
+  picksItems.value = normalizeImageField(rawData.slice(0, 6), 'concert')
+}
+
+// API 호출 - 전체
+const { data: allData } = await useFetch('/api/v1/concert', {
+  baseURL: 'http://localhost:8081',
+  credentials: 'include'
+})
+
+if (allData.value) {
+  const rawData = Array.isArray(allData.value) ? allData.value : [allData.value]
+  allItems.value = normalizeImageField(rawData, 'concert')
+}
+
+// 필터링
+const filteredItems = computed(() => {
+  let items = allItems.value
+
+  if (selectedCategory.value !== '전체') {
+    items = items.filter(item => item.genre === selectedCategory.value)
+  }
+
+  if (selectedRegion.value !== '전체') {
+    items = items.filter(item => item.venue && item.venue.includes(selectedRegion.value))
+  }
+
+  return items
+})
+
+const displayedItems = computed(() => {
+  return filteredItems.value.slice(0, displayLimit.value)
+})
+
+const hasMore = computed(() => {
+  return filteredItems.value.length > displayLimit.value
+})
+
+const loadMore = () => {
+  displayLimit.value += 15
+}
+
+// 날짜 포맷
+const formatDate = (date) => {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('ko-KR', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  })
+}
+
+// 이미지 URL
+const getImageUrl = (item, type) => {
+  if (!item) return null
+  const imageName = item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName
+
+  if (imageName && (imageName.startsWith('PF_') || item.dataSource === 'KOPIS_API')) {
+    return item.kopisPoster || item.imageUrl || item.poster || null
+  }
+
+  if (imageName && !imageName.startsWith('http') && !imageName.startsWith('PF_')) {
+    return `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`
+  }
+
+  return null
+}
+
+const handleImageError = (event) => {
+  event.target.style.display = 'none'
+}
+
+// 슬라이더
+const sliderRef = ref(null)
+const currentIndex = ref(0)
+const slidesToShow = 4
+const slideWidth = ref(0)
+
+const sliderStyle = computed(() => ({
+  transform: `translateX(${-currentIndex.value * slideWidth.value}px)`,
+  transition: 'transform 0.3s ease'
+}))
+
+const isPrevDisabled = computed(() => currentIndex.value === 0)
+const isNextDisabled = computed(() => currentIndex.value >= slides.value.length - slidesToShow)
+
+const updateDimensions = () => {
+  if (!sliderRef.value) return
+  const slideElement = sliderRef.value.querySelector('.slider-item')
   if (slideElement) {
-    slideWidth.value = slideElement.offsetWidth + parseFloat(getComputedStyle(slideElement).marginRight);
-    slider.value.style.width = `${slideWidth.value * sliderImages.value.length}px`;
+    slideWidth.value = slideElement.offsetWidth + parseFloat(getComputedStyle(slideElement).marginRight)
   }
 }
 
-function moveSlider(direction) {
-  currentIndex.value = Math.max(0, Math.min(sliderImages.value.length - slidesToShow, currentIndex.value + direction));
-  const translateX = -currentIndex.value * slideWidth.value;
-  slider.value.style.transform = `translateX(${translateX}px)`;
+const moveSlider = (direction) => {
+  currentIndex.value = Math.max(0, Math.min(slides.value.length - slidesToShow, currentIndex.value + direction))
 }
-
-const isPrevDisabled = computed(() => currentIndex.value === 0);
-const isNextDisabled = computed(() => currentIndex.value === sliderImages.value.length - slidesToShow);
 
 onMounted(() => {
-  updateDimensions();
-});
-
-// EPIK'S PICK 데이터
-const picks = ref([
-  { id: 1, image: '/images/다비치.gif', title: '2025 DAVICHI CONCERT 〈A Stitch in Time〉', venue: 'KSPO DOME(올림픽공원)', date: '25.01.18 - 01.19' },
-  { id: 2, image: '/images/에이핑크.gif', title: '2024 Apink 7th Concert 〈PINK CHRISTMAS〉', venue: 'KBS아레나', date: '24.12.21 - 12.22' },
-  { id: 3, image: '/images/크러쉬.gif', title: '2024 CRUSH CONCERT ［CRUSH HOUR : O］', venue: '올림픽공원', date: '24.12.20 - 12.22' },
-  { id: 4, image: '/images/찰리푸스.gif', title: '찰리푸스 내한공연', venue: '고척스카이돔', date: '24.12.07 - 12.08' },
-  { id: 5, image: '/images/ado.gif', title: 'Ado WORLD TOUR 2025 “Hibana”', venue: '일산 킨텍스 제2전시장 9홀', date: '25.05.15' },
-  { id: 6, image: '/images/하이라이트.gif', title: '터치드(TOUCHED) 단독 콘서트 ‘HIGHLIGHT Ⅲ’', venue: '올림픽공원 올림픽홀', date: '25.01.25 - 01.26' }
-]);
-
-// 필터 데이터
-const filters = ref(['전체', '서울', '경기/인천', '충청/강원', '대구/경북', '부산/경남', '광주/전라', '제주']);
-
-// 지역별 보기 아이템 데이터
-const items = ref([
-  { id: 1, image: '/images/두아리파.gif', title: '두아 리파 내한공연', venue: '고척스카이돔', date: '24.12.04 - 12.05', hidden: false },
-  { id: 2, image: '/images/영탁.gif', title: '2024 영탁 단독 콘서트 “TAK SHOW3” - 인천', venue: '송도컨벤시아', date: '25.01.18 - 01.19', hidden: false },
-  { id: 3, image: '/images/자우림.gif', title: '자우림 단독 콘서트 ［ MIDNIGHT EXPRESS 2024-2025 ］', venue: '장충체육관', date: '24.12.27 - 12.29', hidden: false },
-  { id: 4, image: '/images/이창섭.gif', title: '이창섭 단독 콘서트 〈The Wayfarer〉 - 수원', venue: '수원 실내체육관', date: '24.12.28 - 12.29', hidden: false },
-  { id: 5, image: '/images/찰리푸스.gif', title: '찰리푸스 내한공연', venue: '고척스카이돔', date: '24.12.07 - 12.08', hidden: false },
-  { id: 6, image: '/images/에이핑크.gif', title: '2024 Apink 7th Concert 〈PINK CHRISTMAS〉', venue: '올림픽공원', date: '24.12.20 - 12.22', hidden: true },
-  { id: 7, image: '/images/원리퍼블릭.gif', title: 'OneRepublic The Artificial Paradise Tour in Korea', venue: '인스파이어 아레나', date: '25.01.18', hidden: true },
-  { id: 8, image: '/images/다비치.gif', title: '2025 DAVICHI CONCERT 〈A Stitch in Time〉', venue: 'KSPO DOME(올림픽공원)', date: '25.01.18 - 01.19', hidden: true },
-  { id: 9, image: '/images/크러쉬.gif', title: '2024 CRUSH CONCERT ［CRUSH HOUR : O］', venue: '올림픽공원', date: '24.12.20 - 12.22', hidden: true },
-  { id: 10, image: '/images/ado.gif', title: 'Ado WORLD TOUR 2025 “Hibana”', venue: '일산 킨텍스 제2전시장 9홀', date: '25.05.15', hidden: true },
-  { id: 11, image: '/images/하이라이트.gif', title: '터치드(TOUCHED) 단독 콘서트 ‘HIGHLIGHT Ⅲ’', venue: '올림픽공원 올림픽홀', date: '25.01.25 - 01.26', hidden: true },
-  { id: 12, image: '/images/권진아.gif', title: '2024 권진아 연말 콘서트 〈This Winter〉', venue: '올림픽공원 핸드볼경기장', date: '24.12.13 - 12.15', hidden: true },
-  { id: 13, image: '/images/하동균.gif', title: '2024 하동균 단독 콘서트 〈Piece〉', venue: '블루스퀘어 마스터카드홀', date: '24.12.21 - 12.22', hidden: true },
-  { id: 14, image: '/images/카운트.gif', title: 'COUNTDOWN FANTASY 2024-2025', venue: '킨텍스 5홀', date: '24.12.30 - 12.31', hidden: true },
-  { id: 15, image: '/images/규현.gif', title: 'KYUHYUN 10th Anniversary Asia Tour ［COLORS］ in SEOUL', venue: '올림픽공원 올림픽홀', date: '24.12.20 - 12.22', hidden: true },
-  { id: 16, image: '/images/이영현.gif', title: '2024 이영현 콘서트 “나의 노래가 필요한 너에게”', venue: '인터파크 유니플렉스 2관', date: '24.06.07 - 12.29', hidden: true },
-  { id: 17, image: '/images/케시.gif', title: 'keshi: REQUIEM TOUR IN SEOUL', venue: '올림픽공원 올림픽홀', date: '25.03.01', hidden: true },
-  { id: 18, image: '/images/휘성.gif', title: '2024 휘성 콘서트 Winterfall', venue: 'KBS아레나', date: '24.12.23 - 12.24', hidden: true },
-  { id: 19, image: '/images/제드.gif', title: '제드 내한공연', venue: '인스파이어 아레나', date: '25.03.01', hidden: true },
-  { id: 20, image: '/images/켈라니.gif', title: '켈라니 내한공연', venue: '올림픽공원 올림픽홀', date: '25.03.06', hidden: true },
-  { id: 21, image: '/images/성시경.gif', title: '2024 성시경 연말 콘서트 〈성시경〉', venue: 'KSPO DOME', date: '24.12.27 - 12.31', hidden: true }
-
-  // ... 추가 아이템
-]);
-
-const itemsPerPage = 15;
-
-// 숨겨진 아이템이 있는지 확인하는 계산 속성
-const hasHiddenItems = computed(() => items.value.some(item => item.hidden));
-
-// 더 많은 아이템을 표시하는 함수
-function showMoreItems() {
-  let itemsShown = 0;
-
-  for (let item of items.value) {
-    if (itemsShown >= itemsPerPage) break;
-    if (item.hidden) {
-      item.hidden = false;
-      itemsShown++;
-    }
-  }
-}
+  updateDimensions()
+  window.addEventListener('resize', updateDimensions)
+})
 </script>
 
 <style scoped>
-@import url('/public/css/concert/');
+@import url('/public/css/concert/index.css');
 </style>

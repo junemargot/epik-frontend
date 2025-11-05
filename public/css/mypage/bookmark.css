@@ -1,24 +1,27 @@
 .bookmark {
   width: 100%;
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
+  min-height: calc(100vh - 220px);
+  padding-bottom: 50px;
   box-sizing: border-box;
-  background-color: #F2F2F2;
+  background-color: var(--background-1);
 }
 
 .bookmark__category {
   margin-bottom: 20px;
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  border: 1px solid var(--color-grey-6);
+  border-radius: var(--radius-1);
 }
 
 .bookmark__header {
-  width: 682px;
+  width: 100%;
+  max-width: 960px;
   padding: 30px 20px 0;
   box-sizing: border-box;
   margin: 0 auto;
-
+  position: relative;  /* 추가: 편집 버튼의 기준점 */
 }
 
 .bookmark__title-container {
@@ -33,32 +36,32 @@
 }
 
 .bookmark__divider {
-  width: 682px;
-  margin-right: 10px;
+  width: 100%;
+  margin: 10px 0;
+  border: none;
+  border-top: 1px solid var(--black);
 }
 
 .bookmark__nav {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  padding: 0;
-  margin: 0;
+  margin: 15px 0;
   list-style-type: none;
 }
 
 .bookmark__nav-item {
   font-family: 'pretendard-semibold';
-  font-size: 22px;
+  font-size: var(--font-size-10);
   margin-right: 35px;
-  color: #C0C0C0;
+  color: var(--color-grey-6);
   margin-left: 10px;
   transition: color 0.3s ease;
 }
 
 .bookmark__nav-item a {
   text-decoration: none;
-  color: #C0C0C0;
-  /* 기본 색상은 회색 */
+  color: var(--color-grey-6);
   transition: color 0.3s ease;
 }
 
@@ -70,12 +73,12 @@
 .bookmark__nav-item.active,
 .bookmark__nav-item.active a {
   font-weight: bold;
-  color: #222222;
+  color: var(--black);
 }
 
-/* 전체 북마크 묶음, 전역편집 */
 .bookmark__container {
-  width: 682px;
+  width: 100%;
+  max-width: 960px;
   margin: 20px auto;
   padding: 0 20px;
   box-sizing: border-box;
@@ -99,8 +102,9 @@
 
 /* 북마크 메인 */
 .bookmark__popup {
-  width: 682px;
-  padding: 20px 20px 0;
+  width: 100%;
+  max-width: 960px;
+  padding: 20px;
   box-sizing: border-box;
   margin: 0 auto;
 }
@@ -108,15 +112,21 @@
 .bookmark__concert,
 .bookmark__musical,
 .bookmark__exhibition {
-  width: 682px;
+  width: 100%;
+  max-width: 960px;
   margin: 20px auto;
   padding: 0 20px;
   box-sizing: border-box;
 }
 
+.bookmark__section {
+  width: 100%;
+}
+
 .bookmark__section h2 {
   font-family: 'pretendard-bold';
-  font-size: 28px;
+  font-size: var(--font-size-12);
+  margin: 0 0 12px 6px;
 }
 
 .bookmark__header-container {
@@ -124,50 +134,52 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-bottom: 5px;
-  height: 20px;
-  padding: 10px;
 }
 
 .bookmark__location-date {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .bookmark__text-container {
-  flex-grow: 1;
-  margin-bottom: 10px;
+  width: 100%;
 }
 
 .bookmark__location,
 .bookmark__date {
-  margin: 0;
-  line-height: 1;
+  margin: 3px 0;
+  line-height: 1.4;
+  width: 100%;
+}
+
+.bookmark__checkbox-container {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
 }
 
 .bookmark__checkbox {
   position: absolute;
-  right: 5px;
-  top: 80%;
+  right: 0px;
+  top: -8px;
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
-  border: solid 1px #bbbbbb;
+  border: solid 1px var(--color-grey-6);
   border-radius: 50%;
   appearance: none;
   outline: none;
   cursor: pointer;
-  background-color: white;
-
-  pointer-events: none;
-  /* 체크박스 자체의 클릭 이벤트를 비활성화 */
+  background-color: var(--white);
+  pointer-events: auto;
 }
 
 /* 편집 모드일 때만 체크박스 표시 */
 .bookmark__checkbox:checked {
-  background-color: #EA3921;
-  border-color: #bbbbbb;
+  background-color: var(--accent-1);
+  border-color: var(--color-grey-6);
 }
 
 .bookmark__checkbox:checked::after {
@@ -177,30 +189,35 @@
   align-items: center;
   width: 100%;
   height: 100%;
-  color: white;
-  font-size: 12px;
+  color: var(--white);
+  font-size: var(--font-size-5);
 }
 
-/* 편집 */
 .bookmark__edit-container {
   position: absolute;
-  top: 20px;
+  top: 2px;
   right: 20px;
   text-align: right;
-  padding: 10px;
+  z-index: 10;
+  background-color: var(--background-1);
+  padding: 0 10px;
 }
 
 .bookmark__content {
   position: relative;
-  width: 680px;
+  width: 100%;
+  max-width: 960px;
   margin: 0 auto;
+  padding: 20px 20px 0;
+  box-sizing: border-box;
 }
 
 .bookmark__edit,
 .bookmark__edit-options {
   cursor: pointer;
-  font-size: 16px;
-  color: #222222;
+  font-size: var(--font-size-7);
+  color: var(--color-grey-7);
+  font-family: 'pretendard-medium';
 }
 
 .bookmark__edit:hover,
@@ -208,45 +225,55 @@
   text-decoration: underline;
 }
 
+.bookmark__select-all,
+.bookmark__remove {
+  cursor: pointer;
+}
+
 .bookmark__item {
   position: relative;
-  width: 324px;
-  height: 141px;
+  width: 100%;
+  height: 160px;
   display: flex;
   align-items: flex-start;
   padding: 10px;
-  margin-top: 10px;
   box-sizing: border-box;
+  border: 1px solid var(--color-grey-5);
+  border-radius: var(--radius-2)
 }
 
 .bookmark__item:hover {
-  border: solid 1px;
+  border: 1px solid var(--color-grey-5);
   border-radius: 10px;
-  border-color: #bbbbbb;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.025);
   transform: translateY(-1px);
-  z-index: 1;
+  cursor: pointer;
+  background-color: var(--background-1);
 }
 
 .bookmark__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 16px;
   width: 100%;
   margin: 0 auto;
 }
 
 .bookmark__image-container {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: 100px;
+  height: 140px;
   flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  background-color: var(--background-1);
 }
 
 .bookmark__image-container img {
-  width: 125px;
-  height: 120px;
-  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
 
 .bookmark__image-container .bookmark__status {
@@ -268,14 +295,22 @@
   margin-top: 5px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   flex-grow: 1;
+  min-width: 0;
+  height: 100%;
 }
 
 .bookmark__info h3 {
   font-family: 'pretendard-bold';
   font-size: 16px;
-  margin: 0 0 30px 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
 }
 
 .bookmark__info .bookmark__location,
@@ -283,15 +318,54 @@
   font-family: 'pretendard-medium';
   font-size: 14px;
   margin: 3px 0;
+  line-height: 1.4;
 }
 
 .bookmark__info .bookmark__date {
-  color: #858585;
+  color: var(--color-grey-7);
 }
 
-/* All 섹션을 위한 스타일 */
 .All__bookmark .bookmark__concert,
 .All__bookmark .bookmark__musical,
 .All__bookmark .bookmark__exhibition {
   display: block;
+}
+
+.bookmark__loading,
+.bookmark__empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: #666;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-family: 'pretendard-medium';
+}
+
+@media (max-width: 768px) {
+  .bookmark__grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bookmark__header,
+  .bookmark__popup,
+  .bookmark__content {
+    max-width: 100%;
+    padding: 20px 15px;
+  }
+  
+  .bookmark__item {
+    min-height: 150px;
+  }
+  
+  .bookmark__image-container {
+    width: 100px;
+    height: 140px;
+  }
+  
+  .bookmark__edit-container {
+    right: 20px;
+  }
 }

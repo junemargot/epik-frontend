@@ -1,8 +1,8 @@
-<!-- /Users/margotinjune/Documents/EPIK_Frontend/pages/popup/index.vue -->
+<!-- /pages/popup/index.vue -->
 <template>
   <div class="main-container">
     <!-- 상단 슬라이더 -->
-    <div class="photo-slider">
+    <!-- <div class="photo-slider">
       <div class="photo-slider__container" ref="sliderRef" :style="sliderStyle">
         <div v-for="(slide, index) in slides" :key="index" class="photo-slider__item">
           <RouterLink :to="`/popup/${slide.id}`" class="card__link" />
@@ -34,10 +34,10 @@
       <div class="photo-slider__scrollbar" @mousedown="onScrollbarClick">
         <div class="photo-slider__scrollbar-thumb" ref="scrollbarThumbRef" :style="scrollbarThumbStyle"></div>
       </div>
-    </div>
+    </div> -->
 
     <!-- 카테고리 버튼 -->
-    <div class="tag-buttons">
+    <!-- <div class="tag-buttons">
       <button 
         v-for="category in categories" 
         :key="category.id"
@@ -46,7 +46,7 @@
         @click="filterByCategory(category.value)">
         {{ category.icon }} {{ category.label }}
       </button>
-    </div>
+    </div> -->
 
     <!-- EPIK'S PICK -->
     <section class="picks">
@@ -56,10 +56,12 @@
       <div class="picks__container">
         <div v-for="(item, index) in picksItems" :key="index" class="picks__item">
           <RouterLink :to="`/popup/${item.id}`" class="picks__item-link">
-            <img :src="getImageUrl(item, 'popup')"
+            <img 
+              :src="getImageUrl(item, 'popup')"
               :alt="`Popup ${index + 1}`"
               @error="handleImageError"
-              class="picks__image">
+              class="picks__image"
+            >
             <div class="picks__info">
               <span class="picks__item-title">{{ item.title }}</span>
               <span class="picks__item-venue">{{ item.address }}</span>
@@ -75,18 +77,16 @@
     <!-- 지역별 보기 -->
     <section class="region">
       <h2 class="region__title">지역별 보기</h2>
-
       <div class="region__filters">
-        <button 
-          v-for="region in regions" 
-          :key="region"
+        <button v-for="region in regions"
+          :key="region.id"
           class="region__filter-btn"
-          :class="{ active: selectedRegion === region }"
-          @click="filterByRegion(region)">
-          {{ region }}
+          :class="{ active: selectedRegion === region.label }"
+          @click="filterByRegion(region)"
+        >
+        {{ region.label }}
         </button>
       </div>
-
       <div class="region__container">
         <div v-for="(item, index) in displayedItems" :key="index" class="region__item">
           <RouterLink :to="`/popup/${item.id}`" class="region__item-link">
@@ -95,106 +95,171 @@
               @error="handleImageError"
               class="region__image">
             <div class="region__info">
-              <div class="card__status-tag">
-                <span class="card__status">{{ getStatusLabel(item) }}</span>
+              <div class="region__info-header">
+                <div class="card__status-tag">
+                  <span class="card__status">{{ getStatusLabel(item) }}</span>
+                </div>
+                <span class="region__item-title">{{ item.title }}</span>
               </div>
-              <span class="region__item-title">{{ item.title }}</span>
-              <span class="region__item-venue">{{ item.address }}</span>
-              <span class="region__item-date">
-                {{ formatDate(item.startDate) }} ~ {{ formatDate(item.endDate) }}
-              </span>
+              <div class="region__info-footer">
+                <span class="region__item-venue">{{ item.address }}</span>
+                <span class="region__item-date">
+                  {{ formatDate(item.startDate) }} ~ {{ formatDate(item.endDate) }}
+                </span>
+              </div>
+            </div>
+          </RouterLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- 카테고리별 보기 -->
+    <section class="category">
+      <h2 class="category__title">카테고리별 보기</h2>
+      <div class="category__filters">
+        <button v-for="category in categories"
+          :key="category.id"
+          class="category__filter-btn"
+          :class="{ active: selectedCategory === category.label }"
+          @click="filterByCategory(category)"
+        >
+        {{ category.label }}
+        </button>
+      </div>
+      <!-- <RouterLink to="/popup/category" class="more-btn">
+        더보기 <i class='bx bx-chevron-right'></i>
+      </RouterLink> -->
+      <!-- 카테고리별 팝업 아이템 표시 -->
+      <div class="category__container">
+        <div v-for="(item, index) in categoryItems" :key="index" class="category__item">
+          <RouterLink :to="`/popup/${item.id}`" class="category__item-link">
+            <img :src="getImageUrl(item, 'popup')"
+              :alt="`Popup ${index + 1}`"
+              @error="handleImageError"
+              class="category__image"
+            >
+            <div class="category__info">
+              <div class="category__info-header">
+                <div class="card__status-tag">
+                  <span class="card__status">
+                    {{ getStatusLabel(item) }}
+                  </span>
+                </div>
+                <span class="category__item-title">{{ item.title }}</span>
+              </div>
+              <div class="category__info-footer">
+                <span class="category__item-venue">{{ item.address }}</span>
+                <span class="category__item-date">
+                  {{ formatDate(item.startDate) }} ~ {{ formatDate(item.endDate) }}
+                </span>
+              </div>
             </div>
           </RouterLink>
         </div>
       </div>
 
+      </section>
+
       <!-- 더보기 버튼 -->
-      <button v-if="hasMore" @click="loadMore" class="region__more-btn">더보기</button>
-    </section>
+      <!-- <button v-if="hasMore" @click="loadMore" class="region__more-btn">더보기</button> -->
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useFetch } from '#app'
-import { normalizeImageField } from '~/utils/normalizeData'
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useFetch } from '#app';
+import { normalizeImageField } from '~/utils/normalizeData';
 
-// 슬라이더 데이터
-const slides = ref([])
-const picksItems = ref([])
-const allItems = ref([])
-const displayLimit = ref(15)
+const slides = ref([]);
+const picksItems = ref([]);
+// const allItems = ref([]);
+const regionItems = ref([]);
+const categoryItems = ref([]);
+// const displayLimit = ref(9);
 
 // 필터 상태
-const selectedCategory = ref('전체')
-const selectedRegion = ref('전체')
+const selectedCategory = ref('전체');
+const selectedRegion = ref('전체');
+
+// 지역 목록
+const regions = ref([
+  { label: '전체', id: null },
+  { label: '더현대서울', id: 1 },
+  { label: '성수', id: 2 },
+  { label: '마포﹒서대문﹒홍대', id: 3 },
+  { label: '강남﹒송파', id: 4 },
+  { label: '그 외지역', id: 5 }
+]);
 
 // 카테고리 목록
 const categories = ref([
-  { id: 1, label: '전체', value: '전체', icon: '🎯' },
-  { id: 2, label: '애니메이션', value: '애니메이션', icon: '🍭' },
-  { id: 3, label: '체험형 인터랙티브', value: '체험형', icon: '🌈' },
-  { id: 4, label: '기록덕후 추천', value: '기록', icon: '🖋️' },
-  { id: 5, label: '포토존 핫플', value: '포토존', icon: '📸' },
-  { id: 6, label: '굿즈 천국', value: '굿즈', icon: '🛍️' }
-])
+  { label: '전체', id: null },
+  { label: '영화﹒애니메이션', id: 1 },
+  { label: '패션', id: 2},
+  { label: '뷰티﹒코스메틱', id: 3},
+  { label: '문구﹒굿즈', id: 4},
+  { label: '푸드', id: 5},
+]);
 
-// 지역 목록
-const regions = ref(['전체', '서울', '경기/인천', '충청/강원', '대구/경북', '부산/경남', '광주/전라', '제주'])
-
-// 슬라이더 데이터 조회
+// ====== 데이터 조회 ======
+// 슬라이드 데이터 조회
 const { data: slidesData } = await useFetch('/api/v1/popup/random', {
   baseURL: 'http://localhost:8081',
   credentials: 'include'
-})
+});
 
 if (slidesData.value) {
   const rawData = Array.isArray(slidesData.value) ? slidesData.value : [slidesData.value]
   slides.value = normalizeImageField(rawData.slice(0, 10), 'popup')
-}
+};
 
 // EPIK'S PICK 데이터 조회
 const { data: picksData } = await useFetch('/api/v1/popup/random', {
   baseURL: 'http://localhost:8081',
   credentials: 'include'
-})
+});
 
 if (picksData.value) {
-  const rawData = Array.isArray(picksData.value) ? picksData.value : [picksData.value]
-  picksItems.value = normalizeImageField(rawData.slice(0, 6), 'popup')
-}
+  const rawData = Array.isArray(picksData.value) ? picksData.value : [picksData.value];
+  picksItems.value = normalizeImageField(rawData.slice(0, 6), 'popup');
+};
 
-// 전체 데이터 조회
-const { data: allData } = await useFetch('/api/v1/popup', {
+// 전체 데이터 조회 및 초기화
+// const { data: allData, error: allDataError } = await useFetch('/api/v1/popup/region', {
+//   baseURL: 'http://localhost:8081',
+//   credentials: 'include',
+//   params: { page: 1 }
+// });
+
+// if (allData.value) {
+//   const rawData = Array.isArray(allData.value) ? allData.value : [allData.value];  
+//   allItems.value = normalizeImageField(rawData, 'popup');
+//   regionItems.value = normalizeImageField(rawData.slice(0, 15), 'popup');
+//   categoryItems.value = normalizeImageField(rawData.slice(0, 15), 'popup');
+// };
+
+// 초기 지역별/카테고리별 데이터 조회
+const { data: initialData, error: initialDataError } = await useFetch('/api/v1/popup/region', {
   baseURL: 'http://localhost:8081',
-  credentials: 'include'
-})
+  credentials: 'include',
+  params: { page: 1}
+});
 
-if (allData.value) {
-  const rawData = Array.isArray(allData.value) ? allData.value : [allData.value]
-  allItems.value = normalizeImageField(rawData, 'popup')
-}
+console.log("=== 초기 데이터 조회 ===");
+console.log("API 응답: ", initialData.value);
 
-// 필터링된 아이템들
-const filteredItems = computed(() => {
-  let items = allItems.value
+if(initialData.value) {
+  const rawData = Array.isArray(initialData.value) ? initialData.value : [initialData.value];
+  console.log('rawData 길이:', rawData.length);
+  
+  regionItems.value = normalizeImageField(rawData.slice(0, 15), 'popup');
+  categoryItems.value = normalizeImageField(rawData.slice(0, 15), 'popup');
+  console.log('regionItems 길이: ', regionItems.value.length);
+  console.log('categoryItems 길이: ', categoryItems.value.length);
+};
 
-  // 카테고리 필터
-  if (selectedCategory.value !== '전체') {
-    items = items.filter(item => item.category === selectedCategory.value)
-  }
-
-  // 지역 필터
-  if (selectedRegion.value !== '전체') {
-    items = items.filter(item => item.address && item.address.includes(selectedRegion.value))
-  }
-
-  return items
-})
-
-// 표시할 아이템들
 const displayedItems = computed(() => {
-  return filteredItems.value.slice(0, displayLimit.value)
+  return regionItems.value;
 })
 
 // 더보기 버튼 표시 여부
@@ -203,16 +268,66 @@ const hasMore = computed(() => {
 })
 
 // 카테고리 필터 함수
-const filterByCategory = (category) => {
-  selectedCategory.value = category
-  displayLimit.value = 15
+const filterByCategory = async (category) => {
+  console.log('=== filterByCategory 호출 ===');
+  console.log('선택한 카테고리: ', category);
+
+  selectedCategory.value = category.label;
+  if(category.id === null) {
+    const { data, error } = await useFetch('/api/v1/popup/region', {
+      baseURL: 'http://localhost:8081',
+      credentials: 'include',
+      params: { page: 1 }
+    });
+
+    if(data.value) {
+      const rawData = Array.isArray(data.value) ? data.value : [data.value];
+      categoryItems.value = normalizeImageField(rawData.slice(0, 6), 'popup');
+      console.log('categoryItems 업데이트: ', categoryItems.value.length);
+    }
+  } else {
+    const { data, error } = await useFetch('/api/v1/popup/category', {
+      baseURL: 'http://localhost:8081',
+      credentials: 'include',
+      params: { categoryId: category.id }
+    });
+
+    if(data.value) {
+      const rawData = Array.isArray(data.value) ? data.value : [data.value];
+      categoryItems.value = normalizeImageField(rawData.slice(0, 6), 'popup');
+      console.log('categoryItems 업데이트: ', categoryItems.value.length);
+    }
+  }
 }
 
 // 지역 필터 함수
-const filterByRegion = (region) => {
-  selectedRegion.value = region
-  displayLimit.value = 15
-}
+const filterByRegion = async (region) => {
+  console.log('=== filterByRegion 호출 ===');
+  console.log('선택한 지역: ', region);
+
+  selectedRegion.value = region.label;
+
+  // 전체가 아니면 regionId로 조회
+  const params = region.id ? { regionId: region.id, page: 1} : { page: 1};
+  console.log('API 파라미터: ', params);
+
+  const { data, error } = await useFetch('/api/v1/popup/region', {
+    baseURL: 'http://localhost:8081',
+    credentials: 'include',
+    params: params
+  });
+
+  console.log('API 응답: ', data.value);
+  console.log('에러: ', error);
+
+  if(data.value) {
+    const rawData = Array.isArray(data.value) ? data.value : [data.value];
+    console.log('필터된 데이터 개수: ', rawData.length);
+
+    regionItems.value = normalizeImageField(rawData, 'popup');
+    console.log('regionItems 업데이트: ', regionItems.value.length);
+  }
+};
 
 // 더보기 함수
 const loadMore = () => {
@@ -221,99 +336,105 @@ const loadMore = () => {
 
 // 상태 라벨 가져오기
 const getStatusLabel = (item) => {
-  const now = new Date()
-  const startDate = new Date(item.startDate)
-  const endDate = new Date(item.endDate)
+  const now = new Date();
+  const startDate = new Date(item.startDate);
+  const endDate = new Date(item.endDate);
 
   if (now < startDate) {
-    return '오픈예정'
+    return '오픈예정';
   } else if (now > endDate) {
-    return '종료'
+    return '종료';
   } else {
-    return '진행중'
+    return '진행중';
   }
-}
+};
 
 // 날짜 포맷팅
 const formatDate = (date) => {
-  if (!date) return ''
-  const options = { year: 'numeric', month: 'short', day: 'numeric' }
-  return new Date(date).toLocaleDateString('ko-KR', options)
-}
+  if (!date) return '';
+  const options = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric'
+  };
+  
+  return new Date(date).toLocaleDateString('ko-KR', options);
+};
 
 // 이미지 URL 생성
 const getImageUrl = (item, type) => {
-  if (!item) return null
-
-  const imageName = item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName
+  if (!item) return null;
+  const imageName = item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName;
 
   if (imageName && (imageName.startsWith('PF_') || item.dataSource === 'KOPIS_API')) {
     return item.kopisPoster || item.imageUrl || item.poster || null
-  }
+  };
 
   if (imageName && !imageName.startsWith('http') && !imageName.startsWith('PF_')) {
     return `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`
-  }
+  };
 
-  return null
-}
+  return null;
+};
 
 // 이미지 에러 처리
 const handleImageError = (event) => {
-  console.warn('이미지 로드 실패:', event.target.src)
-  event.target.style.display = 'none'
-}
+  console.warn('이미지 로드 실패:', event.target.src);
+  event.target.style.display = 'none';
+};
 
 // 슬라이더 관련 코드
-const sliderRef = ref(null)
-const scrollbarThumbRef = ref(null)
-const sliderPosition = ref(0)
-const containerWidth = ref(0)
-const sliderWidth = ref(0)
-const maxScroll = ref(0)
-const slideWidth = ref(0)
+const sliderRef = ref(null);
+const scrollbarThumbRef = ref(null);
+const sliderPosition = ref(0);
+const containerWidth = ref(0);
+const sliderWidth = ref(0);
+const maxScroll = ref(0);
+const slideWidth = ref(0);
 
 const sliderStyle = computed(() => ({
   transform: `translateX(${-sliderPosition.value}px)`,
   width: `${sliderWidth.value}px`
-}))
+}));
 
 const scrollbarThumbStyle = computed(() => ({
   width: `${Math.max((containerWidth.value / sliderWidth.value) * 100, 40)}px`,
   left: `${(sliderPosition.value / maxScroll.value) * 100}%`
-}))
+}));
 
 const updateDimensions = () => {
-  if (!sliderRef.value) return
-  const slideElements = sliderRef.value.querySelectorAll('.photo-slider__item')
+  if (!sliderRef.value) return;
+  const slideElements = sliderRef.value.querySelectorAll('.photo-slider__item');
 
-  if (slideElements.length === 0) return
-
-  containerWidth.value = sliderRef.value.parentElement.offsetWidth
-  slideWidth.value = slideElements[0].offsetWidth + parseFloat(getComputedStyle(slideElements[0]).marginRight)
-  sliderWidth.value = slideWidth.value * slideElements.length - parseFloat(getComputedStyle(slideElements[slideElements.length - 1]).marginRight)
-  maxScroll.value = Math.max(0, sliderWidth.value - containerWidth.value)
-}
+  if (slideElements.length === 0) return;
+  containerWidth.value = sliderRef.value.parentElement.offsetWidth;
+  slideWidth.value = slideElements[0].offsetWidth + parseFloat(getComputedStyle(slideElements[0]).marginRight);
+  sliderWidth.value = slideWidth.value * slideElements.length - parseFloat(getComputedStyle(slideElements[slideElements.length - 1]).marginRight);
+  maxScroll.value = Math.max(0, sliderWidth.value - containerWidth.value);
+};
 
 const moveSlider = (direction) => {
-  sliderPosition.value = Math.max(0, Math.min(maxScroll.value, sliderPosition.value + direction * slideWidth.value))
-}
+  sliderPosition.value = Math.max(0, Math.min(maxScroll.value, sliderPosition.value + direction * slideWidth.value));
+};
 
 const onScrollbarClick = (e) => {
-  const scrollbarRect = e.currentTarget.getBoundingClientRect()
-  const clickX = e.clientX - scrollbarRect.left
-  const percentage = clickX / scrollbarRect.width
-  sliderPosition.value = Math.min(maxScroll.value, Math.max(0, percentage * maxScroll.value))
-}
+  const scrollbarRect = e.currentTarget.getBoundingClientRect();
+  const clickX = e.clientX - scrollbarRect.left;
+  const percentage = clickX / scrollbarRect.width;
+  sliderPosition.value = Math.min(maxScroll.value, Math.max(0, percentage * maxScroll.value));
+};
 
 onMounted(() => {
-  updateDimensions()
-  window.addEventListener('resize', updateDimensions)
-})
+  updateDimensions();
+  window.addEventListener('resize', updateDimensions);
+});
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateDimensions)
-})
+  window.removeEventListener('resize', updateDimensions);
+});
+
+
+
 </script>
 
 <style scoped>

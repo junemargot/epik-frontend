@@ -37,9 +37,9 @@
                 </a>
               </li>
               <li class="bookmark">
-                <a href="../mypage/1/bookmark">
+                <NuxtLink :to="`/mypage/${userDetails.id.value}/bookmark`">
                   <i class='mypage__bookmark-icon bx bx-bookmark'></i>북마크
-                </a>
+                </NuxtLink>
               </li>
               <li class="myfeed">
                 <a href="#">

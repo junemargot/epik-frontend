@@ -1,5 +1,5 @@
+<!-- popup/[id]/-->
 <template>
-  <!-- popup -->
   <main class="popup__wrap">
     <section class="popup__infomation">
       <div class="popup__information-inner">
