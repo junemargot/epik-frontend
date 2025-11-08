@@ -75,6 +75,13 @@
           </RouterLink>
         </div>
       </div>
+
+      <!-- 더보기 버튼 - 장르별 -->
+      <div v-if="hasMoreCategory" class="more-btn-container">
+        <button @click="loadMoreCategory" class="more-btn">
+          더보기
+        </button>
+      </div>
     </section>
 
     <!-- 지역별 보기 -->
@@ -95,10 +102,12 @@
       <div class="region__container">
         <div v-for="(item, index) in regionItems" :key="index" class="region__item">
           <RouterLink :to="`/concert/${item.id}`" class="region__item-link">
-            <img :src="getImageUrl(item, 'concert')" 
-                 :alt="`${item.title} 포스터`" 
-                 class="region__image"
-                 @error="handleImageError">
+            <img 
+              :src="getImageUrl(item, 'concert')" 
+              :alt="`${item.title} 포스터`" 
+              class="region__image"
+              @error="handleImageError"
+            >
             <div class="region__info">
               <div class="region__info-header">
                 <div class="card__status-tag">
@@ -116,9 +125,12 @@
           </RouterLink>
         </div>
       </div>
-      
-      <!-- 더보기 버튼 -->
-      <!-- <button v-if="hasMore" @click="loadMore" class="region__more-btn">더보기</button> -->
+      <!-- 더보기 버튼 - 지역별 -->
+      <div v-if="hasMoreRegion" class="more-btn-container">
+        <button @click="loadMoreRegion" class="more-btn">
+          더보기
+        </button>
+      </div>
     </section>
   </div>
 </template>
