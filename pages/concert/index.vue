@@ -10,6 +10,7 @@
               :src="getImageUrl(slide, 'concert')" 
               :alt="`Concert ${index + 1}`"
               @error="handleImageError"
+              loading="lazy"
               class="slider-image"
             >
             <div class="slider-overlay">
@@ -49,11 +50,12 @@
       </div>
       
       <div class="category__container">
-        <div v-for="(item, index) in categoryItems" :key="index" class="category__item">
+        <div v-for="(item, index) in categoryItems" :key="item.id" class="category__item">
           <RouterLink :to="`/concert/${item.id}`" class="category__item-link">
             <img :src="getImageUrl(item, 'concert')"
               :alt="`Concert ${index + 1}`"
               @error="handleImageError"
+              loading="lazy"
               class="category__image"
             >
             <div class="category__info">
@@ -100,13 +102,14 @@
       </div>
 
       <div class="region__container">
-        <div v-for="(item, index) in regionItems" :key="index" class="region__item">
+        <div v-for="(item, index) in regionItems" :key="item.id" class="region__item">
           <RouterLink :to="`/concert/${item.id}`" class="region__item-link">
             <img 
               :src="getImageUrl(item, 'concert')" 
               :alt="`${item.title} 포스터`" 
               class="region__image"
               @error="handleImageError"
+              loading="lazy"
             >
             <div class="region__info">
               <div class="region__info-header">
@@ -136,7 +139,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useFetch } from '#app';
 import { normalizeImageField } from '~/utils/normalizeData';
 
@@ -146,9 +149,28 @@ const allItems = ref([]);
 const categoryItems = ref([]);
 const regionItems = ref([]);
 
+// 전체 데이터 저장 (더보기용)
+const allCategoryData = ref([]);
+const allRegionData = ref([]);
+
+// 페이지네이션
+const categoryPage = ref(0);
+const regionPage = ref(0);
+const itemsPerPage = 12;
+
+// 더보기 버튼 표시 여부
+const hasMoreCategory = computed(() => {
+  return categoryItems.value.length < allCategoryData.value.length;
+});
+
+const hasMoreRegion = computed(() => {
+  return regionItems.value.length < allRegionData.value.length;
+});
+
+
 // 필터
 const selectedCategory = ref('전체');
-const selectedRegion = ref('전체');
+const selectedRegion = ref('서울');
 
 const categories = ref([
   { label: '전체', id: null },
@@ -160,7 +182,6 @@ const categories = ref([
 ]);
 
 const regions = ref([
-  { label: '전체', id: null },
   { label: '서울', id: 1 },
   { label: '경기/인천', id: 2 },
   { label: '충청/강원', id: 3 },
@@ -178,8 +199,8 @@ const { data: slidesData } = await useFetch('/api/v1/concert/random', {
 
 if (slidesData.value) {
   const rawData = Array.isArray(slidesData.value) ? slidesData.value : [slidesData.value];
-  slides.value = normalizeImageField(rawData.slice(0, 16), 'concert');
-  console.log('=== 슬라이더 최종 데이터 개수:', slides.value.length);
+  slides.value = normalizeImageField(rawData, 'concert');
+  console.log('슬라이더 데이터:', slides.value.length);
 };
 
 
@@ -188,14 +209,42 @@ const { data: allData } = await useFetch('/api/v1/concert', {
   baseURL: 'http://localhost:8081',
   credentials: 'include',
   params: { page: 1 }
-})
+});
 
 if (allData.value) {
   const rawData = Array.isArray(allData.value) ? allData.value : [allData.value];
   allItems.value = normalizeImageField(rawData, 'concert');
-  categoryItems.value = normalizeImageField(rawData.slice(0, 15), 'concert');
-  regionItems.value = normalizeImageField(rawData.slice(0, 15), 'concert');
+
+  // 장르별 초기 데이터 (전체 - 랜덤)
+  const { data: randomData } = await useFetch('/api/v1/concert/random', {
+    baseURL: 'http://localhost:8081',
+    credentials: 'include'
+  });
+
+  if(randomData.value) {
+    const rawRandom = Array.isArray(randomData.value) ? randomData.value : [randomData.value];
+    allCategoryData.value = normalizeImageField(rawRandom, 'concert');
+    categoryItems.value = allCategoryData.value.slice(0, itemsPerPage);
+    categoryPage.value = 1;
+    console.log('초기 장르별 데이터:', allCategoryData.value.length, '/ 표시:', categoryItems.value.length);
+  }
+
+  // 지역별 초기 데이터 (서울)
+  const { data: seoulData } = await useFetch('/api/v1/concert', {
+    baseURL: 'http://localhost:8081',
+    credentials: 'include',
+    params: { region: 1, page: 1 }
+  });
+
+  if (seoulData.value) {
+    const rawData = Array.isArray(seoulData.value) ? seoulData.value : [seoulData.value];
+    allRegionData.value = normalizeImageField(rawData, 'concert');
+    regionItems.value = allRegionData.value.slice(0, itemsPerPage);
+    regionPage.value = 1;
+    console.log('초기 지역별 데이터:', allRegionData.value.length, '/ 표시:', regionItems.value.length);
+  }
 };
+
 
 // 카테고리 필터 함수
 const filterByCategory = async (category) => {
@@ -205,16 +254,18 @@ const filterByCategory = async (category) => {
   selectedCategory.value = category.label;
 
   if(category.id === null) {
-    const { data, error } = await useFetch('/api/v1/concert', {
+    // 전체선택 시
+    const { data, error } = await useFetch('/api/v1/concert/random', {
       baseURL: 'http://localhost:8081',
       credentials: 'include',
-      params: { page: 1 }
     });
 
     if(data.value) {
       const rawData = Array.isArray(data.value) ? data.value : [data.value];
-      categoryItems.value = normalizeImageField(rawData.slice(0, 15), 'concert');
-      console.log('전체 카테고리 데이터:', categoryItems.value.length);
+      allCategoryData.value = normalizeImageField(rawData, 'concert');
+      categoryItems.value = allCategoryData.value.slice(0, itemsPerPage);
+      categoryPage.value = 1;
+      console.log('전체 카테고리 데이터:', allCategoryData.value.length);
     }
   } else {
     const genreMapping = {
@@ -236,8 +287,10 @@ const filterByCategory = async (category) => {
 
     if(data.value) {
       const rawData = Array.isArray(data.value) ? data.value : [data.value];
-      categoryItems.value = normalizeImageField(rawData.slice(0, 15), 'concert');
-      console.log('장르별 데이터:', categoryItems.value.length);
+      allCategoryData.value = normalizeImageField(rawData, 'concert');
+      categoryItems.value = allCategoryData.value.slice(0, itemsPerPage);
+      categoryPage.value = 1;
+      console.log('장르별 데이터:', allCategoryData.value.length, '/ 표시:', categoryItems.value.length);
     };
   }
 };
@@ -249,7 +302,7 @@ const filterByRegion = async (region) => {
 
   selectedRegion.value = region.label;
 
-  const params = region.id ? { region: region.id, page: 1} : { page: 1};
+  const params = { region: region.id, page: 1};
   console.log('지역 API 파라미터: ', params);
 
   const { data, error } = await useFetch('/api/v1/concert', {
@@ -265,8 +318,10 @@ const filterByRegion = async (region) => {
     const rawData = Array.isArray(data.value) ? data.value : [data.value];
     console.log('필터된 데이터 개수: ', rawData.length);
 
-    regionItems.value = normalizeImageField(rawData.slice(0, 15), 'concert');
-    console.log('regionItems 업데이트: ', regionItems.value.length);
+    allRegionData.value = normalizeImageField(rawData, 'concert');
+    regionItems.value = allRegionData.value.slice(0, itemsPerPage);
+    regionPage.value = 1;
+    console.log('지역별 데이터:', allRegionData.value.length, '/ 표시:', regionItems.value.length);
   }
 };
 
@@ -392,6 +447,30 @@ const moveSlider = (direction) => {
     currentIndex: currentIndex.value,
     showing: `${currentIndex.value + 1} ~ ${Math.min(currentIndex.value + slidesToShow, slides.value.length)}`
   });
+};
+
+// 장르별 더보기
+const loadMoreCategory = () => {
+  const start = categoryPage.value * itemsPerPage;
+  const end = start + itemsPerPage;
+  const moreItems = allCategoryData.value.slice(start, end);
+  
+  categoryItems.value = [...categoryItems.value, ...moreItems];
+  categoryPage.value++;
+  
+  console.log('장르별 더보기:', categoryItems.value.length, '/', allCategoryData.value.length);
+};
+
+// 지역별 더보기
+const loadMoreRegion = () => {
+  const start = regionPage.value * itemsPerPage;
+  const end = start + itemsPerPage;
+  const moreItems = allRegionData.value.slice(start, end);
+  
+  regionItems.value = [...regionItems.value, ...moreItems];
+  regionPage.value++;
+  
+  console.log('지역별 더보기:', regionItems.value.length, '/', allRegionData.value.length);
 };
 
 onMounted(() => {

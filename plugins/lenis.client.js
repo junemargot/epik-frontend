@@ -1,3 +1,4 @@
+/*
 import Lenis from "lenis";
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -108,3 +109,4 @@ export default defineNuxtPlugin((nuxtApp) => {
 		});
 	}
 });
+*/
