@@ -62,7 +62,7 @@
               <div class="category__info-header">
                 <div class="card__status-tag">
                   <span class="card__status">
-                    {{ getStatusLabel(item) }}
+                    {{ getRegionLabel(item) }}
                   </span>
                 </div>
                 <span class="category__item-title">{{ item.title }}</span>
@@ -114,7 +114,7 @@
             <div class="region__info">
               <div class="region__info-header">
                 <div class="card__status-tag">
-                  <span class="card__status">{{ getStatusLabel(item) }}</span>
+                  <span class="card__status">{{ getGenreLabel(item) }}</span>
                 </div>
                 <span class="region__item-title">{{ item.title }}</span>
               </div>
@@ -208,7 +208,7 @@ if (slidesData.value) {
 const { data: allData } = await useFetch('/api/v1/concert', {
   baseURL: 'http://localhost:8081',
   credentials: 'include',
-  params: { page: 1 }
+  // params: { page: 1 }
 });
 
 if (allData.value) {
@@ -233,18 +233,17 @@ if (allData.value) {
   const { data: seoulData } = await useFetch('/api/v1/concert', {
     baseURL: 'http://localhost:8081',
     credentials: 'include',
-    params: { region: 1, page: 1 }
+    params: { region: 1 }
   });
 
   if (seoulData.value) {
-    const rawData = Array.isArray(seoulData.value) ? seoulData.value : [seoulData.value];
-    allRegionData.value = normalizeImageField(rawData, 'concert');
+    const rawSeoul = Array.isArray(seoulData.value) ? seoulData.value : [seoulData.value];
+    allRegionData.value = normalizeImageField(rawSeoul, 'concert');
     regionItems.value = allRegionData.value.slice(0, itemsPerPage);
     regionPage.value = 1;
     console.log('초기 지역별 데이터:', allRegionData.value.length, '/ 표시:', regionItems.value.length);
   }
 };
-
 
 // 카테고리 필터 함수
 const filterByCategory = async (category) => {
@@ -258,6 +257,10 @@ const filterByCategory = async (category) => {
     const { data, error } = await useFetch('/api/v1/concert/random', {
       baseURL: 'http://localhost:8081',
       credentials: 'include',
+      // params: {
+      //   page: 0,
+      //   size: 50
+      // }
     });
 
     if(data.value) {
@@ -302,7 +305,7 @@ const filterByRegion = async (region) => {
 
   selectedRegion.value = region.label;
 
-  const params = { region: region.id, page: 1};
+  const params = { region: region.id };
   console.log('지역 API 파라미터: ', params);
 
   const { data, error } = await useFetch('/api/v1/concert', {
@@ -339,6 +342,40 @@ const getStatusLabel = (item) => {
     return '진행중';
   }
 };
+
+// 지역 라벨
+const getRegionLabel = (item) => {
+  if(!item.regionName) return '';
+  const region = item.regionName;
+
+  return region
+    .replace('특별시', '')
+    .replace('광역시', '')
+    .replace('북도', '')
+    .replace('남도', '')
+    .replace('도', '')
+    .trim();
+  };
+
+// 장르 라벨
+const getGenreLabel = (item) => {
+  if(!item.genreName) return '기타';
+  const genre = item.genreName;
+
+  if(genre.includes('무용')) {
+    return '무용';
+  } else if (genre.includes('클래식') || genre.includes('서양음악')) {
+    return '클래식';
+  } else if ( genre.includes('대중음악')) {
+    return '대중음악';
+  } else if (genre.includes('대중무용')) {
+    return '대중무용';
+  } else if (genre.includes('복합')) {
+    return '복합공연'
+  }
+
+  return genre;
+}
 
 // 날짜 포맷
 const formatDate = (date) => {
@@ -450,27 +487,56 @@ const moveSlider = (direction) => {
 };
 
 // 장르별 더보기
-const loadMoreCategory = () => {
+const loadMoreCategory = async () => {
   const start = categoryPage.value * itemsPerPage;
   const end = start + itemsPerPage;
   const moreItems = allCategoryData.value.slice(start, end);
-  
-  categoryItems.value = [...categoryItems.value, ...moreItems];
-  categoryPage.value++;
-  
-  console.log('장르별 더보기:', categoryItems.value.length, '/', allCategoryData.value.length);
+
+  if(moreItems.length > 0) {
+    categoryItems.value = [...categoryItems.value, ...moreItems];
+    categoryPage.value++;
+    console.log('장르별 더보기:', categoryItems.value.length, '/', allCategoryData.value.length);
+  }
 };
 
 // 지역별 더보기
-const loadMoreRegion = () => {
+const loadMoreRegion = async () => {
   const start = regionPage.value * itemsPerPage;
   const end = start + itemsPerPage;
   const moreItems = allRegionData.value.slice(start, end);
   
-  regionItems.value = [...regionItems.value, ...moreItems];
-  regionPage.value++;
-  
-  console.log('지역별 더보기:', regionItems.value.length, '/', allRegionData.value.length);
+  if(moreItems.length > 0) {
+    regionItems.value = [...regionItems.value, ...moreItems];
+    regionPage.value++;
+    console.log('지역별 더보기:', regionItems.value.length, '/', allRegionData.value.length);
+  } else {
+    // 캐시 소진, 추가 페이지 요청
+    const currentRegionId = regions.value.find(r => r.label === selectedRegion.value)?.id;
+    const nextPage = Math.floor(allRegionData.value.length / 15) + 1;
+    console.log('추가 API 요청: ', { regionId: currentRegionId, page: nextPage });
+
+    const { data, error } = await useFetch('/api/v1/concert', {
+      baseURL: 'http://localhost:8081',
+      credentials: 'include',
+      params: {
+        region: currentRegionId,
+        page: nextPage
+      }
+    });
+
+    if(data.value && Array.isArray(data.value) && data.value.length > 0) {
+      const rawData = normalizeImageField(data.value, 'concert');
+      allRegionData.value = [...allRegionData.value, ...rawData];
+      
+      const newItems = rawData.slice(0, itemsPerPage);
+      regionItems.value = [...regionItems.value, ...newItems];
+      regionPage.value++;
+      
+      console.log('지역별 더보기 (API):', regionItems.value.length, '/ 전체:', allRegionData.value.length);
+    } else {
+      console.log('지역별 더보기: 더 이상 데이터 없음');
+    }
+  }
 };
 
 onMounted(() => {
