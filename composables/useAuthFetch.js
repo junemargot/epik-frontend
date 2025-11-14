@@ -4,9 +4,16 @@ export function useAuthFetch(url, options = {}) {
   // 쿠키 기반 인증을 위한 설정
   const fetchOptions = {
     ...options,
-    credentials: 'include', // 쿠키 포함
+    credentials: 'include',
+    server: false,
     headers: {
       ...options.headers,
+    },
+    onResponse({ request, response, options }) {
+      console.log(`[useAuthFetch] 응답: ${request}`, response._data);
+    },
+    onResponseError({ request, response, options }) {
+      console.error(`[useAuthFetch] 에러: ${request}`, response);
     }
   };
 

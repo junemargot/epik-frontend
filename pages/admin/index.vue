@@ -2,22 +2,110 @@
 <template>
   <div class="admin_wrap">
     <section id="content">
-      <!-- MAIN -->
       <main>
         <div class="content__info-data">
-          <div class="card" v-for="(item, index) in progressItems" :key="index"> <!-- one card -->
+          <div class="card">
             <div class="card__head">
               <div>
-                <h2>{{ item.value }}<span>{{ item.unit }}</span></h2>
-                <p>{{ item.description }}</p>
-                <p>{{ item.date }}</p>
+                <h2>{{ dashboardStats.totalContents || 0 }}<span>건</span></h2>
+                <p>전체 콘텐츠</p>
+                <p>{{ getToday() }}</p>
               </div>
-              <i class='bx bx-trending-up icon'></i>
+              <i class="bx bx-trending-up icon"></i>
             </div>
-            <span class="card__progress" :data-value="item.progress"></span>
-            <span class="label">{{ item.progress }}</span>
-          </div> <!-- one card end -->
+            <div class="card__breakdown">
+              <span>팝업: {{ dashboardStats.totalPopups || 0 }}</span>
+              <span>콘서트: {{ dashboardStats.totalConcerts || 0 }}</span>
+              <span>뮤지컬: {{ dashboardStats.totalMusicals || 0 }}</span>
+              <span>전시회: {{ dashboardStats.totalExhibitions || 0 }}</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <h2>{{ dashboardStats.ongoingContents || 0 }}<span>건</span></h2>
+                <p>진행 중인 행사</p>
+                <p>{{ getToday() }}</p>
+              </div>
+              <i class="bx bx-trending-up icon"></i>
+            </div>
+            <span class="card__progress" :data-value="calculateProgress(dashboardStats.ongoingContents, dashboardStats.totalContents)"></span>
+            <span class="label">{{ calculateProgress(dashboardStats.ongoingContents, dashboardStats.totalContents) }}</span>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <h2>{{ dashboardStats.todayContents || 0 }}<span>건</span></h2>
+                <p>오늘 등록된 콘텐츠</p>
+                <p>{{ getToday() }}</p>
+              </div>
+              <i class="bx bx-trending-up icon"></i>
+            </div>
+            <span class="card__progress" :data-value="'40%'"></span>
+            <span class="label">40%</span>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <div>
+                <h2>
+                  <span>
+                    <p v-if="dashboardStats.lastKopisSyncTime">{{ formatSyncTime(dashboardStats.lastKopisSyncTime) }}</p>
+                    <p v-else>동기화 기록 없음</p>
+                  </span>
+                </h2>
+                <p>최근 동기화 시간</p>
+                <p>{{ formatDateOnly(dashboardStats.lastKopisSyncTime) }}</p>
+              </div>
+              <i class="bx bx-refresh icon"></i>
+            </div>
+            <span class="card__progress" :data-value="'50%'"></span>
+            <span class="label">50%</span>
+          </div>   
         </div>
+        
+        <div class="charts-section">
+          <!-- 지역별 분포 -->
+          <div class="chart-card">
+            <div class="chart-header" @click="isRegionChartOpen = !isRegionChartOpen">
+              <h3>지역별 콘텐츠 분포</h3>
+              <i class="bx bx-chevron-down icon" :class="{ 'rotate': isRegionChartOpen }"></i>
+            </div>
+            <div class="chart-content" v-if="isRegionChartOpen">
+              <div v-if="dashboardStats.regionStats && dashboardStats.regionStats.length > 0">
+                <div v-for="region in dashboardStats.regionStats" :key="region.regionName" class="chart-bar">
+                  <div class="bar-label">{{ region.regionName }}</div>
+                  <div class="bar-wrapper">
+                    <div class="bar-fill" :style="{ width: calculatePercentage(region.count, maxRegionCount) + '%' }"></div>
+                    <span class="bar-value">{{ region.count }}</span>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="no-data">데이터가 없습니다</div>
+            </div>
+          </div>
+
+          <!-- 장르별 분포 -->
+          <div class="chart-card">
+            <div class="chart-header" @click="isGenreChartOpen = !isGenreChartOpen">
+              <h3>장르별 콘텐츠 분포</h3>
+              <i class="bx bx-chevron-down icon" :class="{ 'rotate': isGenreChartOpen }"></i>
+            </div>
+            <div class="chart-content" v-if="isGenreChartOpen">
+              <div v-if="dashboardStats.genreStats && dashboardStats.genreStats.length > 0">
+                <div v-for="genre in dashboardStats.genreStats" :key="genre.genreName" class="chart-bar">
+                  <div class="bar-label">{{ genre.genreName }}</div>
+                  <div class="bar-wrapper">
+                    <div class="bar-fill" :style="{ width: calculatePercentage(genre.count, maxGenreCount) + '%' }"></div>
+                    <span class="bar-value">{{ genre.count }}</span>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="no-data">데이터가 없습니다</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 게시글 섹션 -->
         <div class="data">
           <div class="content-data" v-for="(section, index) in contentSections" :key="index">
             <div class="head">
@@ -61,11 +149,8 @@
           </div>
         </div>
       </main>
-      <!-- END MAIN -->
     </section>
   </div>
-  <!-- END WRAP -->
-
 </template>
 
 <script setup>
@@ -74,36 +159,144 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase || 'http://localhost:8081/api/v1';
 
-const adminNotices = ref([]); // 관리자 메인페이지에 표시할 공지사항
-
-// 데이터 로드 함수
-const loadAdminNotices = async () => {
-  try {
-    const params = new URLSearchParams({
-      p: 1,
-      size: 5,
-      sort: 'writeDate,desc'
-    })
-    const response = await fetch(`${apiBase}/admin/notice?${params}`);
-    // const response = await fetch(`${apiBase}/admin/notice?p=1&size=5`);
-    if(!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    adminNotices.value = (data.noticeList || []).slice(0, 5);
-    
-  } catch (error) {
-    console.error('Failed to load notices:', error);
+// setup 단계 호출
+const { data: dashboardData, error: dashboardError, pending: dashboardPending } = await useAuthFetch('/admin/dashboard/stats');
+const { data: noticeData, error: noticeError } = await useAuthFetch('/admin/notice', {
+  params: {
+    p: 1,
+    size: 5,
+    sort: 'writeData,desc'
   }
+});
+
+const dashboardStats = computed(() => dashboardData.value  || {
+  totalContents: 0,
+  ongoingContents: 0,
+  todayContents: 0,
+  totalConcerts: 0,
+  totalMusicals: 0,
+  totalExhibitions: 0,
+  totalPopups: 0,
+  regionStats: [],
+  genreStats: [],
+  lastKopisSyncTime: null
+});
+
+const adminNotices = computed(() => noticeData.value?.noticeList || []);
+const contentSections = computed(() => [
+  {
+    title: '공지사항',
+    link: '/admin/notice',
+    items: adminNotices.value.map(notice => ({
+      id: notice.id,
+      title: notice.title,
+      writer: notice.writer,
+      writeDate: notice.writeDate
+    }))
+  },
+  {
+    title: '1:1 문의내역',
+    link: '/admin/inquiries/personal',
+    items: [
+      { id: 5, title: '회원가입 문의', writer: 'apple1234', writeDate: '2024-11-23' },
+      { id: 4, title: '비밀번호 변경 방법', writer: '이영희', writeDate: '2024-11-23' },
+      { id: 3, title: '탈퇴 신청 문의', writer: '김철수', writeDate: '2024-11-20' },
+      { id: 2, title: '이메일 인증 실패', writer: '박민수', writeDate: '2024-11-20' },
+      { id: 1, title: '포인트 적립 관련 문의', writer: '최유리', writeDate: '2024-11-19' },
+    ]
+  },
+  {
+    title: '비즈니스 문의내역',
+    link: '/admin/inquiries/business',
+    items: [
+      { id: 5, title: '협찬 제안 문의', writer: '김경민', writeDate: '2024-11-25' },
+      { id: 4, title: '공동 이벤트 제안', writer: '담당자', writeDate: '2024-11-23' },
+      { id: 3, title: '탈퇴 신청 문의', writer: '김철재', writeDate: '2024-11-20' },
+      { id: 2, title: '이메일 인증 실패', writer: '박민수', writeDate: '2024-11-20' },
+      { id: 1, title: '포인트 적립 관련 문의', writer: '최유리', writeDate: '2024-11-19' },
+    ]
+  },
+  {
+    title: '피드 신고내역',
+    link: '/admin/reports/feed',
+    items: [
+      { id: 5, title: '게시물 수정 요청드립니다.', writer: '바니', writeDate: '2024-11-25' },
+      { id: 4, title: '공동 이벤트 제안', writer: '래빗', writeDate: '2024-11-23' },
+      { id: 3, title: '탈퇴 신청 문의', writer: '애플', writeDate: '2024-11-20' },
+      { id: 2, title: '이메일 인증 실패', writer: '박민수', writeDate: '2024-11-20' },
+      { id: 1, title: '포인트 적립 관련 문의', writer: '최유리', writeDate: '2024-11-19' },
+    ]
+  },
+]);
+
+const isMenuOpen = ref([false]);
+const isRegionChartOpen = ref(true);
+const isGenreChartOpen = ref(true);
+
+// 차트용 최대값 계산
+const maxRegionCount = computed(() => {
+  if(!dashboardStats.value.regionStats || dashboardStats.value.regionStats.length === 0) return 1;
+  return Math.max(...dashboardStats.value.regionStats.map(r => r.count));
+});
+
+const maxGenreCount = computed(() => {
+  if (!dashboardStats.value.genreStats || dashboardStats.value.genreStats.length === 0) return 1;
+  return Math.max(...dashboardStats.value.genreStats.map(g => g.count));
+});
+
+// 퍼센티지 계산
+const calculatePercentage = (value, max) => {
+  if (max === 0) return 0;
+  return Math.round((value / max) * 100);
 };
 
+const calculateProgress = (ongoing, total) => {
+  if (total === 0) return  '0%';
+  return Math.round((ongoing / total) * 100) + '%';
+}
 
-// 진행률 데이터
+// 오늘 날짜
 const getToday = () => {
   const today = new Date();
   return today.toISOString().split('T')[0].replace(/-/g, '.'); // "2025.04.30"
 }
+
+// 동기화 시간 포맷
+const formatSyncTime = (dateTimeString) => {
+  if(!dateTimeString) return '동기화 기록 없음';
+  const date = new Date(dateTimeString);
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000); // 초 단위
+
+  if(diff < 60) return '방금 전';
+  if(diff < 3600) return `${Math.floor(diff / 60)}분 전`;
+  if(diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
+
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).replace(/\s/g, '').replace(/\.$/, '');
+};
+
+const formatDateOnly = (dateTimeString) => {
+  if(!dateTimeString) return '';
+  const date = new Date(dateTimeString);
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).replace(/\s/g, '').replace(/\.$/, '');
+}
+
+// 날짜 포맷
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+  const formattedDate = new Date(dateString).toLocaleDateString('ko-KR', options);
+  return formattedDate.replace(/\s/g, '').replace(/\.$/, '');
+};
 
 const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -125,9 +318,6 @@ onMounted(() => {
   console.log('최종 렌더될 progressItem: ', progressItems.value);
 });
 
-// 공지사항 및 컨텐츠 데이터
-const contentSections = ref([]);
-
 // 컨텐츠 더 보기 DROPDOWN
 const props = defineProps({
   contentSections: {
@@ -136,8 +326,7 @@ const props = defineProps({
   }
 }); // contentSections 각 컨텐츠 데이터
 
-const isMenuOpen = ref(Array(props.contentSections.length).fill(false));
-
+// 메뉴 토글
 const toggleMenu = (index) => {
   isMenuOpen.value[index] = !isMenuOpen.value[index];
 };
@@ -155,67 +344,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('click', closeMenu);
 });
-
-
-// 메인 컨텐츠 데이터 불러오기
-onMounted(async () => {
-  await loadAdminNotices();
-
-  contentSections.value = [
-    {
-      title: '공지사항',
-      link: '/admin/notice',
-      items: adminNotices.value.map(notice => ({
-        id: notice.id,
-        title: notice.title,
-        writer: notice.writer,
-        writeDate: notice.writeDate
-      }))
-    },
-    {
-      title: '1:1 문의내역',
-      link: '/admin/inquiries/personal',
-      items: [
-        { id: 5, title: '회원가입 문의', writer: 'apple1234', writeDate: '2024-11-23' },
-        { id: 4, title: '비밀번호 변경 방법', writer: '이영희', writeDate: '2024-11-23' },
-        { id: 3, title: '탈퇴 신청 문의', writer: '김철수', writeDate: '2024-11-20' },
-        { id: 2, title: '이메일 인증 실패', writer: '박민수', writeDate: '2024-11-20' },
-        { id: 1, title: '포인트 적립 관련 문의', writer: '최유리', writeDate: '2024-11-19' },
-      ]
-    },
-    {
-      title: '비즈니스 문의내역',
-      link: '/admin/inquiries/business',
-      items: [
-        { id: 5, title: '협찬 제안 문의', writer: '김경민', writeDate: '2024-11-25' },
-        { id: 4, title: '공동 이벤트 제안', writer: '담당자', writeDate: '2024-11-23' },
-        { id: 3, title: '탈퇴 신청 문의', writer: '김철재', writeDate: '2024-11-20' },
-        { id: 2, title: '이메일 인증 실패', writer: '박민수', writeDate: '2024-11-20' },
-        { id: 1, title: '포인트 적립 관련 문의', writer: '최유리', writeDate: '2024-11-19' },
-      ]
-    },
-    {
-      title: '피드 신고내역',
-      link: '/admin/reports/feed',
-      items: [
-        { id: 5, title: '게시물 수정 요청드립니다.', writer: '바니', writeDate: '2024-11-25' },
-        { id: 4, title: '공동 이벤트 제안', writer: '래빗', writeDate: '2024-11-23' },
-        { id: 3, title: '탈퇴 신청 문의', writer: '애플', writeDate: '2024-11-20' },
-        { id: 2, title: '이메일 인증 실패', writer: '박민수', writeDate: '2024-11-20' },
-        { id: 1, title: '포인트 적립 관련 문의', writer: '최유리', writeDate: '2024-11-19' },
-      ]
-    },
-  ]
-})
-
-// 날짜 포맷팅 함수
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-  const formattedDate = new Date(dateString).toLocaleDateString('ko-KR', options);
-
-  // 공백 제거 및 점 삭제 ("2024. 11. 03." -> "2024.11.03")
-  return formattedDate.replace(/\s/g, '').replace(/\.$/, '')
-};
 
 </script>
 
