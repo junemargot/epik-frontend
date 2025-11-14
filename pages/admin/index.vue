@@ -11,26 +11,58 @@
                 <p>전체 콘텐츠</p>
                 <p>{{ getToday() }}</p>
               </div>
-              <i class="bx bx-trending-up icon"></i>
+              <i class='bx bx-book-content icon'></i>
             </div>
             <div class="card__breakdown">
-              <span>팝업: {{ dashboardStats.totalPopups || 0 }}</span>
-              <span>콘서트: {{ dashboardStats.totalConcerts || 0 }}</span>
-              <span>뮤지컬: {{ dashboardStats.totalMusicals || 0 }}</span>
-              <span>전시회: {{ dashboardStats.totalExhibitions || 0 }}</span>
+              <div class="breakdown-item">
+                <span class="label">팝업</span>
+                <span class="value">{{ dashboardStats.totalPopups || 0 }}건</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">콘서트</span>
+                <span class="value">{{ dashboardStats.totalConcerts || 0 }}건</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">뮤지컬</span>
+                <span class="value">{{ dashboardStats.totalMusicals || 0 }}건</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">전시회</span>
+                <span class="value">{{ dashboardStats.totalExhibitions || 0 }}건</span>
+              </div>
             </div>
           </div>
-          <div class="card">
+          <div class="card card--ongoing">
             <div class="card__head">
               <div>
                 <h2>{{ dashboardStats.ongoingContents || 0 }}<span>건</span></h2>
                 <p>진행 중인 행사</p>
                 <p>{{ getToday() }}</p>
               </div>
-              <i class="bx bx-trending-up icon"></i>
+              <i class='bx bx-doughnut-chart icon'></i>
+              <!-- <i class="bx bx-trending-up icon"></i> -->
             </div>
-            <span class="card__progress" :data-value="calculateProgress(dashboardStats.ongoingContents, dashboardStats.totalContents)"></span>
-            <span class="label">{{ calculateProgress(dashboardStats.ongoingContents, dashboardStats.totalContents) }}</span>
+            <!-- <span class="card__progress" :data-value="calculateProgress(dashboardStats.ongoingContents, dashboardStats.totalContents)"></span>
+            <span class="label">{{ calculateProgress(dashboardStats.ongoingContents, dashboardStats.totalContents) }}</span> -->
+            <!-- 기존 progress bar 제거 타입별 분포 -->
+            <div class="card__breakdown">
+              <div class="breakdown-item">
+                <span class="label">팝업</span>
+                <span class="value">{{ dashboardStats.ongoingContentsByType.popups || 0 }}건</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">콘서트</span>
+                <span class="value">{{ dashboardStats.ongoingContentsByType.concerts || 0 }}건</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">뮤지컬</span>
+                <span class="value">{{ dashboardStats.ongoingContentsByType.musicals || 0 }}건</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">전시회</span>
+                <span class="value">{{ dashboardStats.ongoingContentsByType.exhibitions || 0 }}건</span>
+              </div>
+            </div>
           </div>
           <div class="card">
             <div class="card__head">
@@ -39,7 +71,8 @@
                 <p>오늘 등록된 콘텐츠</p>
                 <p>{{ getToday() }}</p>
               </div>
-              <i class="bx bx-trending-up icon"></i>
+              <i class='bx bx-message-square-add icon'></i>
+              <!-- <i class="bx bx-trending-up icon"></i> -->
             </div>
             <span class="card__progress" :data-value="'40%'"></span>
             <span class="label">40%</span>
@@ -76,7 +109,7 @@
                   <div class="bar-label">{{ region.regionName }}</div>
                   <div class="bar-wrapper">
                     <div class="bar-fill" :style="{ width: calculatePercentage(region.count, maxRegionCount) + '%' }"></div>
-                    <span class="bar-value">{{ region.count }}</span>
+                    <span class="bar-value" :class="{ 'white-text': calculatePercentage(region.count, maxRegionCount) >= 100 }">{{ region.count }}</span>
                   </div>
                 </div>
               </div>
@@ -96,7 +129,7 @@
                   <div class="bar-label">{{ genre.genreName }}</div>
                   <div class="bar-wrapper">
                     <div class="bar-fill" :style="{ width: calculatePercentage(genre.count, maxGenreCount) + '%' }"></div>
-                    <span class="bar-value">{{ genre.count }}</span>
+                    <span class="bar-value" :class="{ 'white-text': calculatePercentage(genre.count, maxGenreCount) >= 100}">{{ genre.count }}</span>
                   </div>
                 </div>
               </div>
@@ -169,17 +202,29 @@ const { data: noticeData, error: noticeError } = await useAuthFetch('/admin/noti
   }
 });
 
-const dashboardStats = computed(() => dashboardData.value  || {
-  totalContents: 0,
-  ongoingContents: 0,
-  todayContents: 0,
-  totalConcerts: 0,
-  totalMusicals: 0,
-  totalExhibitions: 0,
-  totalPopups: 0,
-  regionStats: [],
-  genreStats: [],
-  lastKopisSyncTime: null
+const dashboardStats = computed(() => {
+  const data = dashboardData.value || {};
+  console.log('dashboardData.value: ', data);
+  console.log('ongoingContentsByType: ', data.ongoingContentsByType);
+
+  return {
+    totalContents: data.totalContents || 0,
+    ongoingContents: data.ongoingContents || 0,
+    todayContents: data.todayContents || 0,
+    totalConcerts: data.totalConcerts || 0,
+    totalMusicals: data.totalMusicals || 0,
+    totalExhibitions: data.totalExhibitions || 0,
+    totalPopups: data.totalPopups || 0,
+    regionStats: data.regionStats || [],
+    genreStats: data.genreStats || [],
+    lastKopisSyncTime: data.lastKopisSyncTime || null,
+    ongoingContentsByType: data.ongoingContentsByType || {
+      popups: 0,
+      concerts: 0,
+      musicals: 0,
+      exhibitions: 0
+    }
+  };
 });
 
 const adminNotices = computed(() => noticeData.value?.noticeList || []);
