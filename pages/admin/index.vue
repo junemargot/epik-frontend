@@ -74,8 +74,36 @@
               <i class='bx bx-message-square-add icon'></i>
               <!-- <i class="bx bx-trending-up icon"></i> -->
             </div>
-            <span class="card__progress" :data-value="'40%'"></span>
-            <span class="label">40%</span>
+            <div class="today-chart-container" v-if="dashboardStats.todayContents > 0">
+              <!-- 왼쪽: 범례 -->
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #FF6384;"></span>
+                  <span class="legend-text">팝업 {{ dashboardStats.todayContentsByType.popups || 0 }}건</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #36A2EB;"></span>
+                  <span class="legend-text">콘서트 {{ dashboardStats.todayContentsByType.concerts || 0 }}건</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #FFCE56;"></span>
+                  <span class="legend-text">뮤지컬 {{ dashboardStats.todayContentsByType.musicals || 0 }}건</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #4BC0C0;"></span>
+                  <span class="legend-text">전시회 {{ dashboardStats.todayContentsByType.exhibitions || 0 }}건</span>
+                </div>
+              </div>
+              
+              <!-- 오른쪽: 차트 -->
+              <div class="chart-wrapper">
+                <canvas ref="todayChart"></canvas>
+              </div>
+            </div>
+            <div v-else class="no-data-message">
+              <i class="bx bx-info-circle"></i>
+              <p>오늘 등록된 콘텐츠가 없습니다</p>
+            </div>
           </div>
           <div class="card">
             <div class="card__head">
@@ -103,14 +131,17 @@
               <h3>지역별 콘텐츠 분포</h3>
               <i class="bx bx-chevron-down icon" :class="{ 'rotate': isRegionChartOpen }"></i>
             </div>
-            <div class="chart-content" v-if="isRegionChartOpen">
+            <div class="chart-content" v-show="isRegionChartOpen">
               <div v-if="dashboardStats.regionStats && dashboardStats.regionStats.length > 0">
-                <div v-for="region in dashboardStats.regionStats" :key="region.regionName" class="chart-bar">
+                <!-- <div v-for="region in dashboardStats.regionStats" :key="region.regionName" class="chart-bar">
                   <div class="bar-label">{{ region.regionName }}</div>
                   <div class="bar-wrapper">
                     <div class="bar-fill" :style="{ width: calculatePercentage(region.count, maxRegionCount) + '%' }"></div>
                     <span class="bar-value" :class="{ 'white-text': calculatePercentage(region.count, maxRegionCount) >= 100 }">{{ region.count }}</span>
                   </div>
+                </div> -->
+                <div class="chart-canvas-wrapper">
+                  <canvas ref="regionChart"></canvas>
                 </div>
               </div>
               <div v-else class="no-data">데이터가 없습니다</div>
@@ -123,14 +154,17 @@
               <h3>장르별 콘텐츠 분포</h3>
               <i class="bx bx-chevron-down icon" :class="{ 'rotate': isGenreChartOpen }"></i>
             </div>
-            <div class="chart-content" v-if="isGenreChartOpen">
+            <div class="chart-content" v-show="isGenreChartOpen">
               <div v-if="dashboardStats.genreStats && dashboardStats.genreStats.length > 0">
-                <div v-for="genre in dashboardStats.genreStats" :key="genre.genreName" class="chart-bar">
+                <!-- <div v-for="genre in dashboardStats.genreStats" :key="genre.genreName" class="chart-bar">
                   <div class="bar-label">{{ genre.genreName }}</div>
                   <div class="bar-wrapper">
                     <div class="bar-fill" :style="{ width: calculatePercentage(genre.count, maxGenreCount) + '%' }"></div>
                     <span class="bar-value" :class="{ 'white-text': calculatePercentage(genre.count, maxGenreCount) >= 100}">{{ genre.count }}</span>
                   </div>
+                </div> -->
+                <div class="chart-canvas-wrapper">
+                  <canvas ref="genreChart"></canvas>
                 </div>
               </div>
               <div v-else class="no-data">데이터가 없습니다</div>
@@ -187,7 +221,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import Chart from 'chart.js/auto';
 
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase || 'http://localhost:8081/api/v1';
@@ -219,6 +254,12 @@ const dashboardStats = computed(() => {
     genreStats: data.genreStats || [],
     lastKopisSyncTime: data.lastKopisSyncTime || null,
     ongoingContentsByType: data.ongoingContentsByType || {
+      popups: 0,
+      concerts: 0,
+      musicals: 0,
+      exhibitions: 0
+    },
+    todayContentsByType: data.todayContentsByType || {
       popups: 0,
       concerts: 0,
       musicals: 0,
@@ -381,6 +422,166 @@ const closeMenu = (event) => {
     isMenuOpen.value.fill(false);
   }
 };
+
+// 지역별, 장르별, 등록 콘텐츠 차트
+const regionChart = ref(null);
+let regionChartInstance = null;
+
+const genreChart = ref(null);
+let genreChartInstance = null;
+
+const todayChart = ref(null);
+let todayChartInstance = null;
+
+const createRegionChart = async () => {
+  await nextTick();
+  const data = dashboardStats.value.regionStats;
+  if(regionChart.value && data && data.length > 0) {
+    if(regionChartInstance) {
+      regionChartInstance.destroy();
+    }
+
+    regionChartInstance = new Chart(regionChart.value, {
+      type: 'bar',
+      data: {
+        labels: data.map(r => r.regionName),
+        datasets: [{
+          data: data.map(r => r.count),
+          backgroundColor: 'rgba(12, 95, 205, 0.8)',
+          borderRadius: 10
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            beginAtZero: true,
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+};
+
+const createGenreChart = async () => {
+  await nextTick();
+  const data = dashboardStats.value.genreStats;
+  if(genreChart.value && data && data.length > 0) {
+    if(genreChartInstance) {
+      genreChartInstance.destroy();
+    }
+
+    genreChartInstance = new Chart(genreChart.value, {
+      type: 'bar',
+      data: {
+        labels: data.map(g => g.genreName),
+        datasets: [{
+          data: data.map(g => g.count),
+          backgroundColor: 'rgba(12, 95, 205, 0.8)',
+          borderRadius: 10
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: { display: false }
+          },
+          y: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+};
+
+const createTodayChart = async () => {
+  await nextTick();
+  const data = dashboardStats.value.todayContentsByType;
+  if(todayChart.value && data) {
+    const chartData = [
+      data.popups || 0,
+      data.concerts || 0,
+      data.musicals || 0,
+      data.exhibitions || 0
+    ];
+
+    const hasData = chartData.some(value => value > 0);
+    if(!hasData) {
+      console.log('오늘 등록된 콘텐츠가 없어 차트를 생성하지 않습니다.');
+      return;
+    }
+
+    if(todayChartInstance) {
+      todayChartInstance.destroy();
+    }
+
+    todayChartInstance = new Chart(todayChart.value, {
+      type: 'doughnut',
+      data: {
+        labels: ['팝업', '콘서트', '뮤지컬', '전시회'],
+        datasets: [{
+          data: chartData,
+          backgroundColor: [
+            '#FF6384',
+            '#36A2EB', 
+            '#FFCE56',
+            '#4BC0C0'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  }
+};
+
+watch(() => dashboardStats.value.regionStats, (newData) => {
+  if(newData && newData.length > 0) {
+    createRegionChart();
+  }
+});
+
+watch(() => dashboardStats.value.genreStats, (newData) => {
+  if(newData && newData.length > 0) {
+    createGenreChart();
+  }
+});
+
+watch(() => dashboardStats.value.todayContentsByType, (newData) => {
+  if(newData) {
+    createTodayChart();
+  }
+});
+
+onMounted(async () => {
+  await nextTick();
+  createRegionChart();
+  createGenreChart();
+  createTodayChart();
+});
 
 onMounted(() => {
   window.addEventListener('click', closeMenu);

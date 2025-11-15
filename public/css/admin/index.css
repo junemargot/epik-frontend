@@ -216,7 +216,7 @@ main .content-data .notice table > tbody > tr > td {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 20px;
 }
 
 .card__breakdown span {
@@ -265,7 +265,6 @@ main .content-data .notice table > tbody > tr > td {
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  margin-bottom: 20px;
   padding-bottom: 12px;
   border-bottom: 2px solid var(--color-grey-3);
 }
@@ -346,4 +345,93 @@ main .content-data .notice table > tbody > tr > td {
   padding: 40px;
   color: var(--color-grey-6);
   font-size: 14px;
+}
+
+/* 차트 관련 */
+.chart-wrapper {
+  width: 100px;
+  height: 100px;
+  margin-top: 16px;
+  margin-left: 0; 
+}
+
+.chart-wrapper canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* 추가 */
+.today-chart-container {
+  display: flex;
+  align-items: center !important;
+  justify-content: space-between;
+  /* gap: 10px; */
+  margin-top: 16px;
+}
+
+.chart-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 8px;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-text {
+  font-size: 13px;
+  color: var(--color-grey-8);
+}
+
+.chart-wrapper {
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+  margin: auto 0;
+  margin-right: 26px;
+} 
+
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  margin-top: 16px;
+  color: var(--color-grey-6);
+  text-align: center;
+}
+
+.no-data-message i {
+  font-size: 30px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.no-data-message p {
+  font-size: 13px;
+  margin: 0;
+}
+
+/* 지역별 차트 추가 */
+/* .chart-canvas-wrapper {
+  height: 300px;
+  padding: 20px 0;
+} */
+
+.chart-canvas-wrapper {
+  height: 250px;
+  padding: 15px 0 10px 0;
 }

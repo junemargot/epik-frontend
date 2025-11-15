@@ -17,6 +17,7 @@
     "@toast-ui/editor": "^3.2.2",
     "axios": "^1.8.4",
     "boxicons": "^2.1.4",
+    "chart.js": "^4.5.1",
     "jwt-decode": "^4.0.0",
     "lenis": "^1.2.3",
     "nuxt": "^3.13.2",
