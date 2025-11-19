@@ -35,19 +35,31 @@
               <div class="chart-legend">
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #FF6384;"></span>
-                  <span class="legend-text">팝업 {{ dashboardStats.totalPopups || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">팝업</span>
+                    <span class="legend-count">{{ dashboardStats.totalPopups || 0 }}건</span>
+                  </div>
                 </div>
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #36A2EB;"></span>
-                  <span class="legend-text">콘서트 {{ dashboardStats.totalConcerts || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">콘서트</span>
+                    <span class="legend-count">{{ dashboardStats.totalConcerts || 0 }}건</span>
+                  </div>
                 </div>
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #FFCE56;"></span>
-                  <span class="legend-text">뮤지컬 {{ dashboardStats.totalMusicals || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">뮤지컬</span>
+                    <span class="legend-count">{{ dashboardStats.totalMusicals || 0 }}건</span>
+                  </div>
                 </div>
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #4BC0C0;"></span>
-                  <span class="legend-text">전시회 {{ dashboardStats.totalExhibitions || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">전시회</span>
+                    <span class="legend-count">{{ dashboardStats.totalExhibitions || 0 }}건</span>
+                  </div>
                 </div>
               </div>
               <div class="chart-wrapper">
@@ -92,19 +104,31 @@
               <div class="chart-legend">
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #FF6384;"></span>
-                  <span class="legend-text">팝업 {{ dashboardStats.ongoingContentsByType.popups || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">팝업</span>
+                    <span class="legend-count">{{ dashboardStats.ongoingContentsByType.popups || 0 }}건</span>
+                  </div>
                 </div>
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #36A2EB;"></span>
-                  <span class="legend-text">콘서트 {{ dashboardStats.ongoingContentsByType.concerts || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">콘서트</span>
+                    <span class="legend-count">{{ dashboardStats.ongoingContentsByType.concerts || 0 }}건</span>
+                  </div>
                 </div>
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #FFCE56;"></span>
-                  <span class="legend-text">뮤지컬 {{ dashboardStats.ongoingContentsByType.musicals || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">뮤지컬</span>
+                    <span class="legend-count">{{ dashboardStats.ongoingContentsByType.musicals || 0 }}건</span>
+                  </div>
                 </div>
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #4BC0C0;"></span>
-                  <span class="legend-text">전시회 {{ dashboardStats.ongoingContentsByType.exhibitions || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">전시회</span>
+                    <span class="legend-count">{{ dashboardStats.ongoingContentsByType.exhibitions || 0 }}건</span>
+                  </div>
                 </div>
               </div>
               <div class="chart-wrapper">
@@ -124,30 +148,38 @@
                 <p>{{ getToday() }}</p>
               </div>
               <i class='bx bx-message-square-add icon'></i>
-              <!-- <i class="bx bx-trending-up icon"></i> -->
             </div>
             <div class="today-chart-container" v-if="dashboardStats.todayContents > 0">
-              <!-- 왼쪽: 범례 -->
               <div class="chart-legend">
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #FF6384;"></span>
-                  <span class="legend-text">팝업 {{ dashboardStats.todayContentsByType.popups || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">팝업</span>
+                    <span class="legend-count">{{ dashboardStats.todayContentsByType.popups || 0 }}건</span>
+                  </div>
                 </div>
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #36A2EB;"></span>
-                  <span class="legend-text">콘서트 {{ dashboardStats.todayContentsByType.concerts || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">콘서트</span>
+                    <span class="legend-count">{{ dashboardStats.todayContentsByType.concerts || 0 }}건</span>
+                  </div>
                 </div>
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #FFCE56;"></span>
-                  <span class="legend-text">뮤지컬 {{ dashboardStats.todayContentsByType.musicals || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">뮤지컬</span>
+                    <span class="legend-count">{{ dashboardStats.todayContentsByType.musicals || 0 }}건</span>
+                  </div>
                 </div>
                 <div class="legend-item">
                   <span class="legend-dot" style="background: #4BC0C0;"></span>
-                  <span class="legend-text">전시회 {{ dashboardStats.todayContentsByType.exhibitions || 0 }}건</span>
+                  <div class="legend-text">
+                    <span class="legend-label">전시회</span>
+                    <span class="legend-count">{{ dashboardStats.todayContentsByType.exhibitions || 0 }}건</span>
+                  </div>
                 </div>
               </div>
-              
-              <!-- 오른쪽: 차트 -->
               <div class="chart-wrapper">
                 <canvas ref="todayChart"></canvas>
               </div>
@@ -161,18 +193,34 @@
             <div class="card__head">
               <div>
                 <h2>
-                  <span>
-                    <p v-if="dashboardStats.lastKopisSyncTime">{{ formatSyncTime(dashboardStats.lastKopisSyncTime) }}</p>
-                    <p v-else>동기화 기록 없음</p>
+                  <span v-if="dashboardStats.lastKopisSyncTime">
+                    {{ formatSyncTime(dashboardStats.lastKopisSyncTime) }}
+                    <!-- <p v-if="dashboardStats.lastKopisSyncTime">{{ formatSyncTime(dashboardStats.lastKopisSyncTime) }}</p> -->
                   </span>
+                  <span v-else>동기화 기록 없음</span>
                 </h2>
                 <p>최근 동기화 시간</p>
                 <p>{{ formatDateOnly(dashboardStats.lastKopisSyncTime) }}</p>
               </div>
               <i class="bx bx-refresh icon"></i>
             </div>
-            <span class="card__progress" :data-value="'50%'"></span>
-            <span class="label">50%</span>
+            <div class="sync-info">
+              <!-- <div class="sync-status">
+                <span class="status-badge active">
+                  <i class="bx bx-check-circle"></i> 정상 가동
+                </span>
+              </div> -->
+              <div class="sync-schedule">
+                <div class="schedule-item">
+                  <span class="label">자동 동기화</span>
+                  <span class="value">매일 새벽 2시</span>
+                </div>
+                <div class="schedule-item">
+                  <span class="label">다음 동기화</span>
+                  <span class="value">{{ getNextSyncTime() }}</span>
+                </div>
+              </div>
+            </div>
           </div>   
         </div>
         
@@ -183,20 +231,15 @@
               <h3>지역별 콘텐츠 분포</h3>
               <i class="bx bx-chevron-down icon" :class="{ 'rotate': isRegionChartOpen }"></i>
             </div>
-            <div class="chart-content" v-show="isRegionChartOpen">
-              <div v-if="dashboardStats.regionStats && dashboardStats.regionStats.length > 0">
-                <!-- <div v-for="region in dashboardStats.regionStats" :key="region.regionName" class="chart-bar">
-                  <div class="bar-label">{{ region.regionName }}</div>
-                  <div class="bar-wrapper">
-                    <div class="bar-fill" :style="{ width: calculatePercentage(region.count, maxRegionCount) + '%' }"></div>
-                    <span class="bar-value" :class="{ 'white-text': calculatePercentage(region.count, maxRegionCount) >= 100 }">{{ region.count }}</span>
+            <div class="chart-content-wrapper">
+              <div class="chart-content" :class="{ 'collapsed': !isRegionChartOpen }">
+                <div v-if="dashboardStats.regionStats && dashboardStats.regionStats.length > 0">
+                  <div class="chart-canvas-wrapper">
+                    <canvas ref="regionChart"></canvas>
                   </div>
-                </div> -->
-                <div class="chart-canvas-wrapper">
-                  <canvas ref="regionChart"></canvas>
                 </div>
+                <div v-else class="no-data">데이터가 없습니다</div>
               </div>
-              <div v-else class="no-data">데이터가 없습니다</div>
             </div>
           </div>
 
@@ -206,20 +249,15 @@
               <h3>장르별 콘텐츠 분포</h3>
               <i class="bx bx-chevron-down icon" :class="{ 'rotate': isGenreChartOpen }"></i>
             </div>
-            <div class="chart-content" v-show="isGenreChartOpen">
-              <div v-if="dashboardStats.genreStats && dashboardStats.genreStats.length > 0">
-                <!-- <div v-for="genre in dashboardStats.genreStats" :key="genre.genreName" class="chart-bar">
-                  <div class="bar-label">{{ genre.genreName }}</div>
-                  <div class="bar-wrapper">
-                    <div class="bar-fill" :style="{ width: calculatePercentage(genre.count, maxGenreCount) + '%' }"></div>
-                    <span class="bar-value" :class="{ 'white-text': calculatePercentage(genre.count, maxGenreCount) >= 100}">{{ genre.count }}</span>
+            <div class="chart-content-wrapper">
+              <div class="chart-content" :class="{ 'collapsed': !isGenreChartOpen }" v-show="isGenreChartOpen">
+                <div v-if="dashboardStats.genreStats && dashboardStats.genreStats.length > 0">
+                  <div class="chart-canvas-wrapper">
+                    <canvas ref="genreChart"></canvas>
                   </div>
-                </div> -->
-                <div class="chart-canvas-wrapper">
-                  <canvas ref="genreChart"></canvas>
                 </div>
+                <div v-else class="no-data">데이터가 없습니다</div>
               </div>
-              <div v-else class="no-data">데이터가 없습니다</div>
             </div>
           </div>
         </div>
@@ -435,6 +473,27 @@ const formatDate = (dateString) => {
   const formattedDate = new Date(dateString).toLocaleDateString('ko-KR', options);
   return formattedDate.replace(/\s/g, '').replace(/\.$/, '');
 };
+
+// 다음 동기화 시간 계산
+const getNextSyncTime = () => {
+  const now = new Date();
+  const nextSync = new Date();
+  nextSync.setHours(2, 0, 0, 0);
+
+  // 이미 오늘 새벽 2시가 지났으면 내일 새벽 2시
+  if(now.getHours() >= 2) {
+    nextSync.setDate(nextSync.getDate() + 1);
+  }
+
+  const diff = nextSync - now;
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+
+  if(hours === 0) {
+    const minutes = Math.floor(diff / (1000 * 60));
+    return `${minutes}분 후`;
+  }
+  return `${hours}시간 후`;
+}
 
 const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;

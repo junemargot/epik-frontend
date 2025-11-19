@@ -13,7 +13,7 @@ main .content__info-data {
 
 .card {
   padding: 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-3);
   background: var(--white);
   box-shadow: var(--shadow-1);
 }
@@ -25,25 +25,26 @@ main .card .card__head {
 }
 
 main .card .card__head h2 {
-  font-size: 24px;
-  font-weight: 600;
+  font-family: 'Happiness-Regular', sans-serif;
+  font-size: var(--font-size-11);
+  font-weight: 700;
 }
 
 main .card .card__head p {
-  font-size: 16px;
+  font-size: 0.9rem;
 }
 
 main .card .card__head span p:first-child {
-  font-size: 24px;
+  font-size: var(--font-size-11);
   font-weight: 600;
 }
 
 main .card .card__head p:last-child {
-  font-size: 12px;
+  font-size: var(--font-size-5);
 }
 
 main .card .card__head .icon {
-  font-size: 34px;
+  font-size: var(--font-size-16);
   color: var(--color-point-5);
 }
 
@@ -56,7 +57,7 @@ main .card .card__progress {
   margin-top: 24px;
   height: 10px;
   width: 100%;
-  border-radius: 10px;
+  border-radius: var(--radius-3);
   background: var(--color-grey-4);
   overflow-y: hidden;
   position: relative;
@@ -88,7 +89,7 @@ main .data .content-data {
   flex-basis: 600px;
   padding: 20px;
   background: var(--white);
-  border-radius: 10px;
+  border-radius: var(--radius-3);
   box-shadow: var(--shadow-2);
   height: 100%;
 }
@@ -97,6 +98,8 @@ main .content-data .head {
   display: flex;
   align-items: center;
   margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-grey-3);
 }
 
 main .content-data .head h3 {
@@ -104,13 +107,14 @@ main .content-data .head h3 {
   margin: 0;
   text-align: left;
   font-weight: 600 !important;
-  font-size: 18px;
+  font-size: var(--font-size-8);
 }
 
 main .data .content-data .head h3 > a {
   display: block;
   text-align: left;
-  font-family: 'Pretendard-Bold', sans-serif;
+  font-weight: 700 !important;
+  font-family: 'Hapiness-Bold', sans-serif;
 }
 
 main .content-data .notice table tbody td {
@@ -138,7 +142,7 @@ main .content-data .head .menu-link {
   right: 0;
   width: 140px;
   background: var(--white);
-  border-radius: 10px;
+  border-radius: var(--radius-3);
   box-shadow: var(--shadow-2);
   padding: 10px 0;
   z-index: 100;
@@ -156,13 +160,12 @@ main .content-data .head .menu-link.show {
 main .content-data .head .menu-link a {
   display: block;
   padding: 10px 16px;
-  font-size: 14px;
+  font-size: var(--font-size-6);
   color: var(--black);
   transition: all .3s ease;
 }
 
 main .content-data .head .menu-link a:hover {
-  /* background: var(--background); */
   color: var(--color-grey-7);
   margin-left: 5px;
   transition: margin-left .3s ease, color .2s ease;
@@ -183,7 +186,6 @@ main .content-data .notice table > tbody > tr {
 }
 
 main .content-data .notice table > thead > tr > th {
-  /* font-weight: 600; */
   border-bottom: 1px solid var(--color-grey-3);
   padding-bottom: 10px;
 }
@@ -212,39 +214,6 @@ main .content-data .notice table > tbody > tr > td {
   width: 20%;
 }
 
-.card__breakdown {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  margin-top: 20px;
-}
-
-.card__breakdown span {
-  font-size: 13px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  color: var(--color-grey-8);
-}
-
-.breakdown-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--color-grey-1);
-  border-radius: 10px;
-}
-
-.breakdown-item .label {
-  color: var(--color-grey-7);
-  flex-shrink: 0;
-}
-
-.breakdown-item .value {
-  color: var(--black);
-  font-weight: 700;
-  text-align: right;
-}
-
 /* 차트 섹션 */
 .charts-section {
   display: grid;
@@ -255,7 +224,7 @@ main .content-data .notice table > tbody > tr > td {
 
 .chart-card {
   background: var(--white);
-  border-radius: 10px;
+  border-radius: var(--radius-3);
   padding: 24px;
   box-shadow: var(--shadow-1);
 }
@@ -270,7 +239,7 @@ main .content-data .notice table > tbody > tr > td {
 }
 
 .chart-header .icon {
-  font-size: 18px;
+  font-size: var(--font-size-8);
   transition: transform .3s ease;
 }
 
@@ -279,11 +248,18 @@ main .content-data .notice table > tbody > tr > td {
 }
 
 .chart-header h3 {
-  font-size: 18px;
-  font-weight: 600 !important;
+  font-size: var(--font-size-8);
+  font-weight: 700 !important;
   color: var(--black);
   margin: 0;
-  font-family: 'Pretendard-Bold', sans-serif;  
+  font-family: 'Hapiness-Bold', sans-serif;  
+}
+
+.chart-content-wrapper {
+  max-height: 500px;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+  opacity: 1;
 }
 
 .chart-content {
@@ -292,59 +268,22 @@ main .content-data .notice table > tbody > tr > td {
   gap: 12px;
   max-height: 400px;
   overflow-y: auto;
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
 }
 
-.chart-bar {
-  display: grid;
-  grid-template-columns: 100px 1fr;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.bar-label {
-  width: 100px;
-  min-width: 80px;
-  font-size: 13px;
-  color: var(--color-grey-8);
-  font-weight: 500;
-}
-
-.bar-wrapper {
-  flex: 1;
-  height: 24px;
-  background: var(--color-grey-2);
-  border-radius: 12px;
-  position: relative;
+.chart-content.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
   overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-point-5), var(--color-point-4));
-  border-radius: 12px;
-  transition: width 0.6s ease;
-}
-
-.bar-value {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--black);
-}
-
-.bar-value.white-text {
-  color: var(--white);
 }
 
 .no-data {
   text-align: center;
   padding: 40px;
   color: var(--color-grey-6);
-  font-size: 14px;
+  font-size: var(--font-size-6);
 }
 
 /* 차트 관련 */
@@ -360,14 +299,13 @@ main .content-data .notice table > tbody > tr > td {
   max-height: 100%;
 }
 
-/* 추가 */
 .total-chart-container,
 .ongoing-chart-container,
 .today-chart-container {
   display: flex;
   align-items: center !important;
   justify-content: space-between;
-  /* gap: 10px; */
+  gap: 22px;
   margin-top: 16px;
 }
 
@@ -375,7 +313,7 @@ main .content-data .notice table > tbody > tr > td {
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: 8px;
+  margin-left: 6px;
   gap: 8px;
 }
 
@@ -393,8 +331,23 @@ main .content-data .notice table > tbody > tr > td {
 }
 
 .legend-text {
-  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 105px;
+  max-width: 150px;
   color: var(--color-grey-8);
+}
+
+.legend-label {
+  font-size: 0.85rem;
+  color: var(--color-grey-9);
+}
+
+.legend-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--black);
 }
 
 .chart-wrapper {
@@ -417,7 +370,7 @@ main .content-data .notice table > tbody > tr > td {
 }
 
 .no-data-message i {
-  font-size: 30px;
+  font-size: var(--font-size-14);
   margin-bottom: 8px;
   opacity: 0.5;
 }
@@ -436,4 +389,56 @@ main .content-data .notice table > tbody > tr > td {
 .chart-canvas-wrapper {
   height: 250px;
   padding: 15px 0 10px 0;
+}
+
+.sync-info {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sync-status {
+  display: flex;
+  justify-content: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+}
+
+.sync-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.schedule-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+}
+
+.schedule-item .label {
+  color: var(--color-grey-9);
+  font-size: 0.85rem;
+}
+
+.schedule-item .value {
+  color: var(--black);
+  font-weight: 500;
+  font-size: 0.85rem;
 }
