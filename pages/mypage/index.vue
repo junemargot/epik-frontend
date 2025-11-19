@@ -32,9 +32,9 @@
           <nav>
             <ul class="mypage__fuction-icons">
               <li class="bell">
-                <a href="./notification.vue">
+                <NuxtLink to="/mypage/notification">
                   <i class='mypage__bell-icon bx bx-bell'></i>알림
-                </a>
+                </NuxtLink>
               </li>
               <li class="bookmark">
                 <NuxtLink :to="`/mypage/${userDetails.id.value}/bookmark`">
@@ -42,9 +42,9 @@
                 </NuxtLink>
               </li>
               <li class="myfeed">
-                <a href="#">
+                <NuxtLink to="/feed/my">
                   <i class='mypage__myfeed-icon bx bx-message-alt-minus'></i>마이피드
-                </a>
+                </NuxtLink>
               </li>
             </ul>
           </nav>
@@ -54,44 +54,44 @@
         <nav>
           <ul class="mypage__menulist">
             <li>
-              <a href="../mypage/info/modify" class="mypage__memberInfoUpdate">
+              <NuxtLink to="/mypage/info/modify" class="mypage__memberInfoUpdate">
                 <div class="mypage__icon-wrap">
                   <i class='mypage__user-icon bx bx-user-circle'></i>회원정보수정
                 </div>
                 <div>
                   <i class='mypage__angleright-icon bx bx-chevron-right'></i>
                 </div>
-              </a>
+              </NuxtLink>
             </li>
             <li>
-              <a href="../mypage/password/check" class="mypage__passwordChange">
+              <NuxtLink to="/mypage/password/check" class="mypage__passwordChange">
                 <div class="mypage__icon-wrap">
                   <i class='mypage__lock-icon bx bx-lock-alt'></i>비밀번호 변경
                 </div>
                 <div>
                   <i class='mypage__angleright-icon bx bx-chevron-right'></i>
                 </div>
-              </a>
+              </NuxtLink>
             </li>
             <li>
-              <a href="../mypage/inquiry" class="mypage__inquiry">
+              <NuxtLink to="/mypage/inquiry" class="mypage__inquiry">
                 <div class="mypage__icon-wrap">
                   <i class='mypage__headset-icon bx bx-support'></i>문의내역
                 </div>
                 <div>
                   <i class='mypage__angleright-icon bx bx-chevron-right'></i>
                 </div>
-              </a>
+              </NuxtLink>
             </li>
             <li>
-              <a href="../mypage/block" class="mypage__blockMember">
+              <NuxtLink to="/mypage/block" class="mypage__blockMember">
                 <div class="mypage__icon-wrap">
                   <i class='mypage__userlock-icon bx bxs-user-x'></i>차단 계정 관리
                 </div>
                 <div>
                   <i class='mypage__angleright-icon bx bx-chevron-right'></i>
                 </div>
-              </a>
+              </NuxtLink>
             </li>
           </ul>
         </nav>
