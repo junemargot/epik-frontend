@@ -10,6 +10,12 @@
   margin-bottom: 50px;
 }
 
+.my-feed__profile {
+  display: flex;
+  align-items: center;
+  margin: 10px 0 10px 4px;
+}
+
 /* 프로필 영역 위치 조정 */
 .my-feed__user-profile {
   display: flex;
@@ -18,9 +24,10 @@
 
 /* 프로필 사진 사이즈 조정*/
 .my-feed__user-image {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
 /* 프로필 이름, 설명 위치 조정 및 상세 스타일 */
@@ -105,9 +112,12 @@
 /* 피드 사진들 */
 .my-feed__container {
   display: grid;
-  /* 가로열 크기 지정 */
   grid-template-columns: repeat(3, 33.3%);
   grid-gap: 1px;
+}
+
+.my-feed__item {
+  cursor: pointer;
 }
 
 .my-feed__item img {
@@ -157,6 +167,10 @@
   cursor: pointer;
 }
 
+.feed__menu-column {
+  font-size: 22px;
+}
+
 .feed__menu-column a {
   text-decoration: none;
   color: #C1C1C1;
@@ -164,17 +178,34 @@
 }
 
 .feed__menu-column a.is-active {
-  color: var(--black); /* 선택된 경우 검정색 */
+  color: var(--black);
   font-weight: bold;
 }
 
 .feed__menu-column a.is-inactive {
-  color: #C1C1C1; /* 비활성화된 경우 회색 */
+  color: #C1C1C1;
   font-weight: normal;
 }
 
 .feed__menu-column span {
   color: #C1C1C1;
+}
+
+.feed__menu-column span:hover {
+  color: #222222;
+}
+
+.feed__menu-column:first-child span {
+  text-transform: uppercase;
+}
+
+.feed__menu-column span {
+  margin-right: 31px;
+}
+
+.feed__menu-column:nth-child(2) {
+  border-bottom: 1px solid #BDBDBD;
+  padding-bottom: 20px;
 }
 
 /* feed__menu-column 내의 span에 대한 스타일 */
