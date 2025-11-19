@@ -13,7 +13,7 @@
               </div>
               <i class='bx bx-book-content icon'></i>
             </div>
-            <div class="card__breakdown">
+            <!-- <div class="card__breakdown">
               <div class="breakdown-item">
                 <span class="label">팝업</span>
                 <span class="value">{{ dashboardStats.totalPopups || 0 }}건</span>
@@ -30,6 +30,33 @@
                 <span class="label">전시회</span>
                 <span class="value">{{ dashboardStats.totalExhibitions || 0 }}건</span>
               </div>
+            </div> -->
+            <div class="total-chart-container" v-if="dashboardStats.totalContents > 0">
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #FF6384;"></span>
+                  <span class="legend-text">팝업 {{ dashboardStats.totalPopups || 0 }}건</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #36A2EB;"></span>
+                  <span class="legend-text">콘서트 {{ dashboardStats.totalConcerts || 0 }}건</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #FFCE56;"></span>
+                  <span class="legend-text">뮤지컬 {{ dashboardStats.totalMusicals || 0 }}건</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #4BC0C0;"></span>
+                  <span class="legend-text">전시회 {{ dashboardStats.totalExhibitions || 0 }}건</span>
+                </div>
+              </div>
+              <div class="chart-wrapper">
+                <canvas ref="totalChart"></canvas>
+              </div>
+            </div>
+            <div v-else class="no-data-message">
+              <i class="bx bx-info-circle"></i>
+              <p>등록된 콘텐츠가 없습니다</p>
             </div>
           </div>
           <div class="card card--ongoing">
@@ -42,10 +69,8 @@
               <i class='bx bx-doughnut-chart icon'></i>
               <!-- <i class="bx bx-trending-up icon"></i> -->
             </div>
-            <!-- <span class="card__progress" :data-value="calculateProgress(dashboardStats.ongoingContents, dashboardStats.totalContents)"></span>
-            <span class="label">{{ calculateProgress(dashboardStats.ongoingContents, dashboardStats.totalContents) }}</span> -->
             <!-- 기존 progress bar 제거 타입별 분포 -->
-            <div class="card__breakdown">
+            <!-- <div class="card__breakdown">
               <div class="breakdown-item">
                 <span class="label">팝업</span>
                 <span class="value">{{ dashboardStats.ongoingContentsByType.popups || 0 }}건</span>
@@ -62,6 +87,33 @@
                 <span class="label">전시회</span>
                 <span class="value">{{ dashboardStats.ongoingContentsByType.exhibitions || 0 }}건</span>
               </div>
+            </div> -->
+            <div class="ongoing-chart-container" v-if="dashboardStats.ongoingContents > 0">
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #FF6384;"></span>
+                  <span class="legend-text">팝업 {{ dashboardStats.ongoingContentsByType.popups || 0 }}건</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #36A2EB;"></span>
+                  <span class="legend-text">콘서트 {{ dashboardStats.ongoingContentsByType.concerts || 0 }}건</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #FFCE56;"></span>
+                  <span class="legend-text">뮤지컬 {{ dashboardStats.ongoingContentsByType.musicals || 0 }}건</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot" style="background: #4BC0C0;"></span>
+                  <span class="legend-text">전시회 {{ dashboardStats.ongoingContentsByType.exhibitions || 0 }}건</span>
+                </div>
+              </div>
+              <div class="chart-wrapper">
+                <canvas ref="ongoingChart"></canvas>
+              </div>
+            </div>
+            <div v-else class="no-data-message">
+              <i class="bx bx-info-circle"></i>
+              <p>진행 중인 행사가 없습니다</p>
             </div>
           </div>
           <div class="card">
@@ -423,7 +475,13 @@ const closeMenu = (event) => {
   }
 };
 
-// 지역별, 장르별, 등록 콘텐츠 차트
+// 전체, 진행중, 지역별, 장르별, 등록 콘텐츠 차트
+const totalChart = ref(null);
+let totalChartInstance = null;
+
+const ongoingChart = ref(null);
+let ongoingChartInstance = null;
+
 const regionChart = ref(null);
 let regionChartInstance = null;
 
@@ -432,6 +490,106 @@ let genreChartInstance = null;
 
 const todayChart = ref(null);
 let todayChartInstance = null;
+
+// 전체 콘텐츠 차트 생성 함수
+const createTotalChart = async () => {
+  await nextTick();
+  const data = dashboardStats.value;
+  if(totalChart.value && data) {
+    const chartData = [
+      data.totalPopups|| 0,
+      data.totalConcerts || 0,
+      data.totalMusicals || 0,
+      data.totalExhibitions || 0
+    ];
+
+    const hasData = chartData.some(value => value > 0);
+    if(!hasData) {
+      console.log("전체 콘텐츠가 없어 차트를 생성하지 않습니다.");
+      return;
+    }
+
+    if(totalChartInstance) {
+      totalChartInstance.destroy();
+    }
+
+    totalChartInstance = new Chart(totalChart.value, {
+      type: 'doughnut',
+      data: {
+        labels: ['팝업', '콘서트', '뮤지컬', '전시회'],
+        datasets: [{
+          data: chartData,
+          backgroundColor: [
+            '#FF6384',
+            '#36A2EB', 
+            '#FFCE56',
+            '#4BC0C0'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  }
+};
+
+// 진행 중인 행사 차트 생성 함수
+const createOngoingChart = async () => {
+  await nextTick();
+  const data = dashboardStats.value.ongoingContentsByType;
+  if(ongoingChart.value && data) {
+    const chartData = [
+      data.popups || 0,
+      data.concerts || 0,
+      data.musicals || 0,
+      data.exhibitions || 0
+    ];
+
+    const hasData = chartData.some(value => value > 0);
+    if(!hasData) {
+      console.log('진행 중인 콘텐츠가 없어 차트를 생성하지 않습니다.');
+      return;
+    }
+
+    if(ongoingChartInstance) {
+      ongoingChartInstance.destroy();
+    }
+
+    ongoingChartInstance = new Chart(ongoingChart.value, {
+      type: 'doughnut',
+      data: {
+        labels: ['팝업', '콘서트', '뮤지컬', '전시회'],
+        datasets: [{
+          data: chartData,
+          backgroundColor: [
+            '#FF6384',
+            '#36A2EB', 
+            '#FFCE56',
+            '#4BC0C0'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  }
+};
 
 const createRegionChart = async () => {
   await nextTick();
@@ -558,6 +716,18 @@ const createTodayChart = async () => {
   }
 };
 
+watch(() => dashboardStats.value.totalContents, (newValue) => {
+  if(newValue) {
+    createTotalChart();
+  }
+});
+
+watch(() => dashboardStats.value.ongoingContentsByType, (newData) => {
+  if(newData) {
+    createOngoingChart();
+  }
+});
+
 watch(() => dashboardStats.value.regionStats, (newData) => {
   if(newData && newData.length > 0) {
     createRegionChart();
@@ -578,6 +748,8 @@ watch(() => dashboardStats.value.todayContentsByType, (newData) => {
 
 onMounted(async () => {
   await nextTick();
+  createTotalChart();
+  createOngoingChart();
   createRegionChart();
   createGenreChart();
   createTodayChart();

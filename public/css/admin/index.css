@@ -361,6 +361,8 @@ main .content-data .notice table > tbody > tr > td {
 }
 
 /* 추가 */
+.total-chart-container,
+.ongoing-chart-container,
 .today-chart-container {
   display: flex;
   align-items: center !important;
