@@ -56,8 +56,6 @@ const getCookieValue = (name) => {
 
 onMounted(async () => {
   try {
-    console.log("OAuthRedirect 컴포넌트 마운트됨");
-
     // 1. 쿠키에서 토큰 확인
     let token = getCookieValue('jwt_token');
     console.log("쿠키에서 토큰 확인: ", token ? '토큰 있음' : '토큰 없음');
@@ -75,8 +73,6 @@ onMounted(async () => {
 
     // 로그인 성공이고 토큰이 있으면 처리
     if(loginSuccess === 'true' && token) {
-      console.log("토큰 처리 시작");
-
       try {
         const loginSuccess = authStore.login(token);
 
@@ -89,8 +85,6 @@ onMounted(async () => {
         // 리다이렉트 URL 확인
         const rawRedirectUrl = sessionStorage.getItem('redirectUrl') || '/';
         const redirectUrl = normalizeUrl(rawRedirectUrl);
-        console.log("원본 리다이렉트 URL: ", rawRedirectUrl);
-        console.log("정규화된 리다이렉트 URL:", redirectUrl);
 
         // 세션 스토리지 정리
         sessionStorage.removeItem('redirectUrl');

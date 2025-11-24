@@ -45,10 +45,12 @@
 <script setup>
 import { useRuntimeConfig } from '#app';
 import { useAuthStore } from '~/stores/auth.js';
+import { storeToRefs } from 'pinia';
 
-const authStore = useAuthStore();
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
+const authStore = useAuthStore();
+const { user, isLoggedIn } = storeToRefs(authStore);
 
 const passwordModel = ref('');
 const passwordCheck = ref(null);
@@ -56,23 +58,22 @@ const storedUserInfo = ref('');
 
 const passwotdCheckHandler = async () => {
   try {
-    const userId = authStore.user.id;
+    const userId = usre.value.id;
     const passwordCheckDto = {
       id: userId,
       password: passwordModel.value,
     };
 
-    const response = await fetch(`${apiBase}/mypage/passwordCheck`, {
+    const { data, error: fetchError } = await useAuthFetch('/mypage/passwordCheck', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authStore.token}`
-      },
-      body: JSON.stringify(passwordCheckDto),
+      body: passwordCheckDto
     });
     
-    const result = await response.json();
-    if(result === true) {
+    if(fetchError.value) {
+      throw new Error("비밀번호 확인 실패");
+    }
+    
+    if(data.value === true) {
       passwordCheck.value = true;
       navigateTo('/mypage/password/update');
     } else {
@@ -85,12 +86,12 @@ const passwotdCheckHandler = async () => {
   }
 };
 
-onMounted(()=>{
-  if (!authStore.isLoggedIn) {
+onMounted(() => {
+  if (!isLoggedIn.value) {
     navigateTo('/login');
     return;
   }
-  storedUserInfo.value = authStore.user.username;
+  storedUserInfo.value = user.value.username;
 });
 
 </script>

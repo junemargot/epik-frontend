@@ -120,7 +120,7 @@ const currentRoute = computed(() => route.path);
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 const authStore = useAuthStore();
-const { user } = storeToRefs(authStore);
+const { user, isLoggedIn } = storeToRefs(authStore);
 
 // 마이 피드 조회
 const myFeeds = ref([]);
@@ -185,7 +185,7 @@ const handleOutsideClick = (event) => {
 };
 
 onMounted(() => {
-  if (!authStore.isLoggedIn) {
+  if (!isLoggedIn.value) {
     navigateTo('/login');
     return;
   }

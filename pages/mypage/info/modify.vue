@@ -88,10 +88,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '~/stores/auth.js';
+import { storeToRefs } from 'pinia';
 
-const authStore = useAuthStore();
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
+const authStore = useAuthStore();
+const { user, isLoggedIn } = storeToRefs(authStore);
 
 const storedUserInfo = ref('');
 const nicknameModel = ref('');
@@ -107,7 +109,7 @@ const nicknameHandler = async () => {
       nickname: nicknameModel.value
     };
 
-    const response = await fetch(`${apiBase}/signup/checkNickname`, {
+    const response = await useAuthFetch(`${apiBase}/signup/checkNickname`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -165,24 +167,23 @@ const emailCodeHandler = async () => {
 
 const submitForm = async () => {
   try {
-    const userId = authStore.user.id;
+    const userId = user.value.id;
     const infoRequestDto = {
       id: userId,
       nickname: nicknameModel.value,
       email: emailModel.value
     };
 
-    const response = await fetch(`${apiBase}/mypage/info`, {
+    const { data, error: fetchError } = await useAuthFetch('/mypage/info', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authStore.token}`
-      },
-      body: JSON.stringify(infoRequestDto),
+      body: infoRequestDto
     });
 
-    const data = await response.json();
-    authStore.login(data.token);
+    if(fetchError.value) {
+      throw new Error("회원정보 수정 실패");
+    }
+
+    authStore.login(data.value.token);
     alert("회원 정보가 수정되었습니다.");
     navigateTo('/mypage');
   
@@ -215,43 +216,33 @@ const handleFileChange = async(e) => {
     const formData = new FormData();
     formData.append('profileImage', file);
 
-    const response = await fetch(`${apiBase}/mypage/profile-image`, {
+    const { data, error: fetchError } = await useAuthFetch('/mypage/profile-image', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authStore.token}`
-      },
       body: formData
     });
 
-    if (!response.ok) {
+    if(fetchError.value) {
       throw new Error('프로필 이미지 업로드 실패');
     }
 
-    const data = await response.json();
-    if (data.token) {
-      authStore.login(data.token);
+
+    if (data.value?.token) {
+      authStore.login(data.value.token);
     }
-    
     alert('프로필 이미지가 변경되었습니다.');
+  
   } catch (error) {
     console.error('프로필 이미지 업로드 오류:', error);
-    
-    if (error.response?.status === 401) {
-      alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
-      authStore.logout();
-      navigateTo('/login');
-    } else {
-      alert('프로필 이미지 업로드 중 오류가 발생했습니다.');
-    }
+    alert('프로필 이미지 업로드 중 오류가 발생했습니다.');
   }
 };
 
 onMounted(()=>{
-  if(!authStore.isLoggedIn) {
+  if(!isLoggedIn.value) {
     navigateTo('/login');
     return;
   }
-  storedUserInfo.value = authStore.user.username;
+  storedUserInfo.value = user.value.username;
 });
 
 

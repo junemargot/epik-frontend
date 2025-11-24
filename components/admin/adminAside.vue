@@ -120,7 +120,7 @@ import { useAuthStore } from '~/stores/auth.js';
 import { storeToRefs } from 'pinia';
 
 const authStore = useAuthStore();
-const { user } = storeToRefs(authStore);
+const { user, isLoggedIn } = storeToRefs(authStore);
 
 // SIDEBAR DROPDOWN ===========================
 // dropdown status
@@ -269,7 +269,7 @@ const logoutHandler = () => {
 };
 
 onMounted(() => {
-  if(!authStore.isLoggedIn) {
+  if(!isLoggedIn.value) {
     navigateTo('/login');
   }
 });

@@ -103,7 +103,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '~/stores/auth.js';
 import { useRuntimeConfig } from '#app';
 
@@ -114,7 +114,9 @@ const authStore = useAuthStore();
 
 
 watch(() => authStore.isLoggedIn, (newValue) => {
-  console.log('로그인 상태 변경: ', newValue);
+  if(process.dev) {
+    console.log('로그인 상태 변경: ', newValue);
+  }
 }, { immediate: true });
 
 onMounted(() => {

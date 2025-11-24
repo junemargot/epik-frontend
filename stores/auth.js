@@ -80,7 +80,6 @@ export const useAuthStore = defineStore("auth", {
           profileImg: decoded.profileImg || null,
           role: decoded.role,
 				};
-				console.log("로그인 성공: ", this.user);
 				return true;
 			} catch(error) {
 				console.error("토큰 디코딩 오류: ", error);
@@ -129,7 +128,6 @@ export const useAuthStore = defineStore("auth", {
 				const currentTime = Date.now() / 1000;
 
 				if(decoded.exp && decoded.exp < currentTime) {
-					console.log("토큰이 만료되어 자동으로 로그아웃합니다.");
 					this.logout();
 					return false;
 				}

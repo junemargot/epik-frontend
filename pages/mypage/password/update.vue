@@ -51,10 +51,12 @@
 <script setup>
 import { useRuntimeConfig } from '#app';
 import { useAuthStore } from '~/stores/auth.js';
+import { storeToRefs } from 'pinia';
 
-const authStore = useAuthStore();
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
+const authStore = useAuthStore();
+const { user, isLoggedIn } = storeToRefs(authStore);
 
 const pwModel = ref('');
 const pwReModel = ref('');
@@ -64,38 +66,33 @@ const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{6,}$/;
 
 const passwordUpHandler = async() => {
   try {
-    const userId = authStore.user.id;
+    const userId = user.value.id;
     const passwordCheckDto = {
       id: userId,
       password: pwReModel.value,
     };
 
-    const response = await fetch(`${apiBase}/mypage/updatepassword`, {
+    const { data: updateData, error: updateError } = await useAuthFetch('/mypage/updatepassword', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authStore.token}`
-      },
-      body: JSON.stringify(passwordCheckDto),
+      body: passwordCheckDto,
     });
 
-    const data = await response.json();
+    if(updateError.value) {
+      throw new Error("비밀번호 변경 실패");
+    }
     
     // 새 토큰으로 authStore 업데이트 (localStorage 자동 저장)
-    authStore.login(data.token);
+    authStore.login(updateData.value.token);
 
     // 비밀번호 확인 요청
-    const passwordCheckResponse = await fetch(`${apiBase}/mypage/passwordCheck`, {
+    const { data: checkData, error: checkError } = await useAuthFecth('/mypage/passwordCheck', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authStore.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(passwordCheckDto),
+      body: passwordCheckDto,
     });
 
-    const passwordCheckData = await passwordCheckResponse.json();
-    console.log("비밀번호 확인 결과: ", passwordCheckData);
+    if(checkError.value) {
+      console.warn("비밀번호 확인 실패: ", checkError.value);
+    }
     alert("비밀번호 변경이 완료되었습니다.");
     navigateTo('/login');
   
@@ -106,7 +103,7 @@ const passwordUpHandler = async() => {
 }
 
 onMounted(() => {
-  if(!authStore.isLoggedIn) { 
+  if(!isLoggedIn.value) { 
     navigateTo('/login');
   }
 });
