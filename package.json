@@ -14,6 +14,7 @@
     "check": "biome check --write ."
   },
   "dependencies": {
+    "@pinia/nuxt": "^0.11.3",
     "@toast-ui/editor": "^3.2.2",
     "axios": "^1.8.4",
     "boxicons": "^2.1.4",
@@ -22,6 +23,7 @@
     "lenis": "^1.2.3",
     "nuxt": "^3.13.2",
     "pinia": "^3.0.1",
+    "pinia-plugin-persistedstate": "^4.7.1",
     "vue": "latest",
     "vue-router": "latest",
     "vue3-google-login": "^2.0.33"

@@ -13,7 +13,7 @@ export default defineNuxtConfig({
       kakaoLoginApiKey: process.env.NUXT_PUBLIC_KAKAO_LOGIN_API_KEY || '',
     }
   },
-  modules: ['lenis/nuxt'],
+  modules: ['lenis/nuxt', '@pinia/nuxt'],
   vite: {
     build: {
       rollupOptions: {
