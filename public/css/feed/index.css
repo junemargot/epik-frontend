@@ -640,6 +640,7 @@ magin : 상하, 좌우
   text-indent: 5px;
   font-size: 14px;
   font-family: 'pretendard-regular';
+  border-radius: var(--radius-3);
 }
 
 .dropdown-list li a:hover {
@@ -649,7 +650,7 @@ magin : 상하, 좌우
 
 .dropdown button {
   border: none;
-  /* background-color: transparent; */
+  background-color: transparent;
 }
 
 /* feed__menu-column 내의 span에 대한 스타일 */

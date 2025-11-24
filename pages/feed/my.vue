@@ -135,17 +135,32 @@ const categoryMapping = {
 };
 
 const profileImageUrl = computed(() => {
-  if(!userDetails.profileImg.value) {
-    return `${apiBase}/uploads/images/user/basic.png`
-  };
+  const imgValue = userDetails.profileImg.value;
 
-  // profileImg가 'uploads/'로 시작하면 그 뒤 부분만 사용
-  if(userDetails.profileImg.value.startsWith('uploads/')) {
-    return `${apiBase}/uploads/${userDetails.profileImg.value.substring('uploads/'.length)}`;
-  };
+  // null이나 undefined 체크
+  if (!imgValue) {
+    return `${apiBase}/uploads/images/user/basic.png`;
+  }
 
-  return `${apiBase}/uploads/images/user/${userDetails.profileImg.value}`;
+  // 외부 URL 체크 - 소셜 로그인 프로필 이미지
+  if (imgValue.startsWith('http://') || imgValue.startsWith('https://')) {
+    return imgValue;
+  }
+
+  // uploads/ 경로로 시작하는 경우
+  // uploads/ 경로로 시작하는 경우
+  if (imgValue.startsWith('uploads/')) {
+    return `${apiBase}/uploads/${imgValue.substring('uploads/'.length)}`;
+  }
+  
+  // 기본 이미지 파일명만 있는 경우
+  return `${apiBase}/uploads/images/user/${imgValue}`;
 });
+
+const handleImageError = (e) => {
+  e.target.src = `${apiBase}/uploads/user/basic.png`;
+  console.error("프로필 이미지 로드 실패, 기본 이미지로 대체");
+}
 
 const userNickname = computed(() => {
   return userDetails.nickname.value || '사용자';

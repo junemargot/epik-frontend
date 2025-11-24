@@ -119,9 +119,9 @@ watch(() => authStore.isLoggedIn, (newValue) => {
 onMounted(() => {
   // 초기 인증 상태 확인
   authStore.checkAuth();
-  if(authStore.isLoggedIn) {
+  if(authStore.isLoggedIn && authStore.token) {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = authStore.token;
       const userInfo = jwtDecode(token);
       userDetails.setAuthentication({
         id: userInfo.id,
@@ -133,6 +133,7 @@ onMounted(() => {
         nickname: userInfo.nickname,
         token: token
       });
+      
     } catch(error) {
       console.error("토큰 디코딩 오류: ", error);
       authStore.logout(); // 토큰 오류 시 로그아웃 처리

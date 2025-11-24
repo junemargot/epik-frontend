@@ -15,6 +15,7 @@ import { ref, onMounted } from 'vue';
 import { jwtDecode } from 'jwt-decode';
 import { useRuntimeConfig } from '#app';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '~/stores/auth.js';
 
 const loading = ref(true);
 const error = ref(null);
@@ -100,6 +101,10 @@ onMounted(async () => {
           profileImg: userInfo.profileImg,
           token: token
         });
+
+        // authStore 직접 업데이트 (pinia persist)
+        const authStore = useAuthStore();
+        authStore.login(token);
         
         console.log("사용자 인증 정보 설정 완료");
 

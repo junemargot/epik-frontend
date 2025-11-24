@@ -8,7 +8,7 @@
         <div class="mypage__profile">
           <div class="mypage__img">
             <div class="mypage__img-my-box">
-              <img class="mypage__img-my" :src="profileUrl" alt="프로필이미지" ref="imgProfile" />
+              <img class="mypage__img-my" :src="profileUrl" alt="프로필이미지" />
             </div>
             <div class="mypage__edit">
               <div class="mypage__edit-icon-box">
@@ -21,10 +21,10 @@
           </div>
           <div class="mypage__name">
             <div class="mypage__nickname ">
-              {{ userDetails.nickname.value }}
+              {{ user.nickname }}
             </div>
             <div class="mypage__username">
-              {{ userDetails.email.value }}
+              {{ user.email }}
             </div>
           </div>
         </div>
@@ -37,7 +37,7 @@
                 </NuxtLink>
               </li>
               <li class="bookmark">
-                <NuxtLink :to="`/mypage/${userDetails.id.value}/bookmark`">
+                <NuxtLink :to="`/mypage/${user.id}/bookmark`">
                   <i class='mypage__bookmark-icon bx bx-bookmark'></i>북마크
                 </NuxtLink>
               </li>
@@ -101,127 +101,136 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { jwtDecode } from 'jwt-decode';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRuntimeConfig } from '#app';
+import { useAuthStore } from '~/stores/auth';
+import { storeToRefs } from 'pinia';
+
+// SSR 비활성화
+definePageMeta({
+  ssr: false,
+  middleware: 'auth'
+});
 
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 
-const userDetails = useUserDetails();
-
-const currentProfileImg = computed(() => {
-  // userDetails.profileImg이 null이면 localStorage에서 직접 확인
-  if (!userDetails.profileImg.value && process.client) {
-    const storedProfileImg = localStorage.getItem("profile_img");
-    if (storedProfileImg) return storedProfileImg;
-  }
-  return userDetails.profileImg.value;
-});
-
-// 프로필 이미지 url 생성 함수
-const profileUrl = computed(() => {
-  if (currentProfileImg.value.startsWith('uploads/')) {
-    return `${apiBase}/uploads/${currentProfileImg.value.substring('uploads/'.length)}`;
-  } else {
+const profileUrl = ref(`${apiBase}/uploads/images/user/basic.png`);
+const getProfileUrl = (imgValue) => {
+  if(!imgValue) {
     return `${apiBase}/uploads/images/user/basic.png`;
   }
-});
 
-onMounted(() => {
-  let token = localStorage.getItem("access_token");  // 로컬스토리지에서 토큰 가져오기
+  if (imgValue.startsWith('http://') || imgValue.startsWith('https://')) {
+    return imgValue;
+  }
 
-  if (!token) {
-    // 토큰이 없으면 메인 페이지로 리디렉션
-    location.href=('http://localhost:3000');
-  
-  } else {
-    try {
-      const userInfo = jwtDecode(token);  // JWT 토큰 디코딩
-      console.log("토큰에서 정보 가져오기", userInfo);
+  if (imgValue.startsWith('uploads/')) {
+    return `${apiBase}/${imgValue}`;
+  }
 
-      // 먼저 profileImg 값을 명시적으로 확인
-      console.log("토큰의 profileImg 값:", userInfo.profileImg);
+  if (imgValue === 'basic.png' || !imgValue.includes('/')) {
+    return `${apiBase}/uploads/images/user/${imgValue}`;
+  }
 
-      // 역할 정보 처리 (오류 방지)
-      let roles = [];
-      if (userInfo.role) {
-        if (Array.isArray(userInfo.role)) {
-          roles = userInfo.role.map(role => 
-            typeof role === 'object' ? role.authority : role
-          );
-        } else {
-          roles = [userInfo.role];
-        }
+  return `${apiBase}${imgValue}`;
+};
+
+// 스토어의 profileImageUrl getter를 사용
+// const profileUrl = computed(() => authStore.profileImageUrl);
+// const profileUrl = computed(() => {
+//   const imgValue = user.value.profileImg; // storeToRefs의 user 사용
+
+//   if(!imgValue) {
+//     return `${apiBase}/uploads/images/user/basic.png`;
+//   }
+
+//   if(imgValue.startsWith('http://') || imgValue.startsWith('https://')) {
+//     return imgValue;
+//   }
+
+//   if(imgValue.startsWith('uploads/')) {
+//     return `${apiBase}/${imgValue}`;
+//   }
+
+//   if(imgValue === 'basic.png' || !imgValue.includes('/')) {
+//     return `${apiBase}/uploads/images/user/${imgValue};`
+//   }
+
+//   return `${apiBase}${imgValue}`;
+// });
+
+// 프로필사진 변경하기
+const handleFileChange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert("이미지 파일만 업로드 가능합니다.");
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert("파일 크기는 5MB 이하여야 합니다.");
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('profileImage', file);
+
+    // $fetch 대신 useAuthFetch와 같은 인증된 fetch 래퍼를 사용하는 것을 고려해보세요.
+    const response = await $fetch(`${apiBase}/mypage/profile-image`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
       }
-      
-      userDetails.setAuthentication({
-        id: userInfo.id,
-        nickname: userInfo.nickname,
-        username: userInfo.username,
-        email: userInfo.email,
-        profileImg: userInfo.profileImg,
-        role: userInfo.role.map(role => role.authority),
-        token: token
-      });
+    });
+    
+    // 응답 구조에 따라 token과 profileImg를 정확히 파싱해야 합니다.
+    // 예시: response.data.token, response.data.profileImg
+    if (response && response.token && response.profileImg) {
+      authStore.updateProfileImage(response.token, response.profileImg);
 
-      console.log("토큰에서 정보 가져오기", userInfo);
-      console.log("userDetails 설정 후:", {
-        nickname: userDetails.nickname.value,
-        profileImg: userDetails.profileImg.value,
-        email: userDetails.email.value
-      });
-    } catch(error) {
-      console.error('토큰 디코딩 오류: ', error);
+      localStorage.setItem("access_token", response.token);
+      localStorage.setItem("profile_img", response.profileImg);
+
+      alert("프로필 이미지가 변경되었습니다.");
+    } else {
+      // 서버 응답 구조를 확인하고, 필요시 아래 코드를 수정하세요.
+      // 임시로 프로필 이미지만 업데이트하는 경우
+      if (response.profileImg) {
+        authStore.updateProfileImage(null, response.profileImg);
+        localStorage.setItem("profile_img", response.profileImg);
+        alert("프로필 이미지가 변경되었습니다.");
+      } else {
+        throw new Error("서버 응답에서 프로필 정보를 찾을 수 없습니다.");
+      }
+    }
+  } catch (error) {
+    console.error("프로필 이미지 업로드 오류:", error);
+
+    if (error.status === 401) {
+      alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
+      authStore.logout();
+      navigateTo('/login');
+    } else {
+      const errorMessage = error.data?.message || '프로필 이미지 업로드 중 오류가 발생했습니다.';
+      alert(errorMessage);
     }
   }
-})
+};
 
-//프로필사진 변경하기
-const handleFileChange = async (event) => {
+onMounted(() => {
+  profileUrl.value = getProfileUrl(user.value.profileImg);
 
-
-  //로컬호스트 유지
-  let token = localStorage.getItem("access_token");  // 로컬스토리지에서 토큰 가져오기
-
-
-  // 토큰이 있으면, 토큰을 디코딩하여 사용자 정보 추출
-  const userInfo = jwtDecode(token); // JWT 토큰 디코딩
-  userDetails.setAuthentication({
-    id: userInfo.id,
-    nickname: userInfo.nickname,
-    username: userInfo.username,
-    email: userInfo.email,
-    profileImg: userInfo.profileImg || 'basic.png',
-    role: userInfo.role.map(role => role.authority),
-    token: token
-  });
-
-  //id값만 담기
-  const idtest = userInfo.id;
-
-  const file = event.target.files[0];  // 사용자가 선택한 파일
-  if (file) {
-    const formData = new FormData();
-    formData.append('profileImage', file);  // 파일을 FormData에 추가
-
-
-    //이미지랑 아이디 전달 패치 
-    const reponse = await fetch('유저아이디랑 이미지 전달할 컨트롤러', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(passwordCheckDto),
-    })
-  }
-}
-
-
-
-
-
-
+  watch(() => user.value.profileImg, (newVal) => {
+    profileUrl.value = getProfileUrl(newVal);
+  }, { immediate: true });
+});
 
 </script>
 
