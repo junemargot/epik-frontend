@@ -16,7 +16,21 @@ export const useAuthStore = defineStore("auth", {
 	}),
 
 	getters: {
-		// 프로필 이미지 URL 생성
+		isAnonymous: (state) => state.user.username === null,
+		isAuthenticated: (state) => state.isLoggedIn && !!state.token,
+		hasRole: (state) => (roleToCheck) => {
+			if(!state.user.role) return false;
+			if(Array.isArray(state.user.role)) {
+				return state.user.info.some(r => {
+					if(typeof r === 'object' && r.authority) {
+						return r.authority === roleToCheck;
+					}
+					return r === roleToCheck;
+				});
+			}
+
+			return state.user.role === roleToCheck;
+		},
 		profileImageUrl: (state) => {
 			const config = useRuntimeConfig();
 			const apiBase = config.public.apiBase;
@@ -40,8 +54,6 @@ export const useAuthStore = defineStore("auth", {
 
 			return `${apiBase}${imgValue}`;
 		},
-
-		isAuthenticated: (state) => state.isLoggedIn && !!state.token,
 	},
 
 	actions: {
@@ -89,6 +101,16 @@ export const useAuthStore = defineStore("auth", {
         profileImg: null,
         role: null,
       };
+
+			if(process.client) {
+				localStorage.removeItem('access_token');
+				localStorage.removeItem('profile_img');
+				localStorage.removeItem('nickname');
+				localStorage.removeItem('id');
+				localStorage.removeItem('username');
+				localStorage.removeItem('email');
+				localStorage.removeItem('role');
+			}
 
 			if(options.navigate) {
 				return navigateTo('/login');

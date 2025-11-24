@@ -111,15 +111,16 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from '~/stores/auth.js';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const router = useRouter();
 const currentRoute = computed(() => route.path);
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
-
-// 사용자 정보 
-const userDetails = useUserDetails()
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 
 // 마이 피드 조회
 const myFeeds = ref([]);
@@ -135,35 +136,16 @@ const categoryMapping = {
 };
 
 const profileImageUrl = computed(() => {
-  const imgValue = userDetails.profileImg.value;
-
-  // null이나 undefined 체크
-  if (!imgValue) {
-    return `${apiBase}/uploads/images/user/basic.png`;
-  }
-
-  // 외부 URL 체크 - 소셜 로그인 프로필 이미지
-  if (imgValue.startsWith('http://') || imgValue.startsWith('https://')) {
-    return imgValue;
-  }
-
-  // uploads/ 경로로 시작하는 경우
-  // uploads/ 경로로 시작하는 경우
-  if (imgValue.startsWith('uploads/')) {
-    return `${apiBase}/uploads/${imgValue.substring('uploads/'.length)}`;
-  }
-  
-  // 기본 이미지 파일명만 있는 경우
-  return `${apiBase}/uploads/images/user/${imgValue}`;
+  return authStore.profileImageUrl;
 });
 
 const handleImageError = (e) => {
-  e.target.src = `${apiBase}/uploads/user/basic.png`;
+  e.target.src = `${apiBase}/uploads/images/user/basic.png`;
   console.error("프로필 이미지 로드 실패, 기본 이미지로 대체");
 }
 
 const userNickname = computed(() => {
-  return userDetails.nickname.value || '사용자';
+  return user.value.nickname || '사용자';
 });
 
 const fetchMyFeeds = async () => {
@@ -176,8 +158,10 @@ const fetchMyFeeds = async () => {
 
     const { data } = await useAuthFetch(url);
     myFeeds.value = data.value || [];
+
   } catch(error) {
     console.error("마이 피드 조회 실패: ", error);
+  
   } finally {
     loading.value = false;
   }
@@ -201,7 +185,11 @@ const handleOutsideClick = (event) => {
 };
 
 onMounted(() => {
-  userDetails.loadUserFromStorage();
+  if (!authStore.isLoggedIn) {
+    navigateTo('/login');
+    return;
+  }
+
   fetchMyFeeds();
   document.addEventListener('click', handleOutsideClick);
 });

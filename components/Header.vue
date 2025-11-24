@@ -38,7 +38,7 @@
               </div>
             </div>
 
-            <!-- <div class="search-bar">
+            <div class="search-bar">
               <form>
                 <button type="submit" class="search-bar__submintbutton">
                   <i class='bx bx-search'></i>
@@ -50,7 +50,7 @@
                   </button>
                 </div>
               </form>
-            </div> -->
+            </div>
 
             <nav>
               <ul>
@@ -104,41 +104,21 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue';
-import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '~/stores/auth.js';
-import { storeToRefs } from 'pinia'
+import { useRuntimeConfig } from '#app';
 
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
 const router = useRouter()
-const userDetails = useUserDetails();  // 사용자 정보를 가져오는 함수
 const authStore = useAuthStore();
+
 
 watch(() => authStore.isLoggedIn, (newValue) => {
   console.log('로그인 상태 변경: ', newValue);
 }, { immediate: true });
 
 onMounted(() => {
-  // 초기 인증 상태 확인
   authStore.checkAuth();
-  if(authStore.isLoggedIn && authStore.token) {
-    try {
-      const token = authStore.token;
-      const userInfo = jwtDecode(token);
-      userDetails.setAuthentication({
-        id: userInfo.id,
-        username: userInfo.username,
-        email: userInfo.email,
-        role: Array.isArray(userInfo.role)
-          ? userInfo.role.map(role => typeof role === 'object' ? role.authority : role).filter(Boolean)
-          : [userInfo.role].filter(Boolean),
-        nickname: userInfo.nickname,
-        token: token
-      });
-      
-    } catch(error) {
-      console.error("토큰 디코딩 오류: ", error);
-      authStore.logout(); // 토큰 오류 시 로그아웃 처리
-    }
-  }
 });
 
 //로그인 화면 이동 핸들러
@@ -149,25 +129,22 @@ const goToLoginPageHandler = () => {
   
   // 로그인 페이지로 이동
   router.push('/login');
-  // location.href = 'http://localhost:3000/login/'
 };
 
 //로그아웃 핸들러
 const logoutHandler = async () => {
   try {
     // 백엔드 로그아웃 API 호출 (쿠키 삭제)
-    await $fetch('http://localhost:8081/api/v1/auth/logout', {
+    await $fetch(`${apiBase}/auth/logout`, {
       method: 'POST',
       credentials: 'include'
     });
   
   } catch(error) {
     console.error("로그아웃 에러: ", error);
-  } finally {
-    // localStorage 정리
-    userDetails.logout();
 
-    // 완전한 새로고침
+  } finally {
+    authStore.logout();
     window.location.href = '/';
   }
 };
