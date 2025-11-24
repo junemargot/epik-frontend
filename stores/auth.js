@@ -16,7 +16,21 @@ export const useAuthStore = defineStore("auth", {
 	}),
 
 	getters: {
-		// 프로필 이미지 URL 생성
+		isAnonymous: (state) => state.user.username === null,
+		isAuthenticated: (state) => state.isLoggedIn && !!state.token,
+		hasRole: (state) => (roleToCheck) => {
+			if(!state.user.role) return false;
+			if(Array.isArray(state.user.role)) {
+				return state.user.role.some(r => {
+					if(typeof r === 'object' && r.authority) {
+						return r.authority === roleToCheck;
+					}
+					return r === roleToCheck;
+				});
+			}
+
+			return state.user.role === roleToCheck;
+		},
 		profileImageUrl: (state) => {
 			const config = useRuntimeConfig();
 			const apiBase = config.public.apiBase;
@@ -40,8 +54,6 @@ export const useAuthStore = defineStore("auth", {
 
 			return `${apiBase}${imgValue}`;
 		},
-
-		isAuthenticated: (state) => state.isLoggedIn && !!state.token,
 	},
 
 	actions: {
@@ -68,7 +80,6 @@ export const useAuthStore = defineStore("auth", {
           profileImg: decoded.profileImg || null,
           role: decoded.role,
 				};
-				console.log("로그인 성공: ", this.user);
 				return true;
 			} catch(error) {
 				console.error("토큰 디코딩 오류: ", error);
@@ -90,6 +101,16 @@ export const useAuthStore = defineStore("auth", {
         role: null,
       };
 
+			if(process.client) {
+				localStorage.removeItem('access_token');
+				localStorage.removeItem('profile_img');
+				localStorage.removeItem('nickname');
+				localStorage.removeItem('id');
+				localStorage.removeItem('username');
+				localStorage.removeItem('email');
+				localStorage.removeItem('role');
+			}
+
 			if(options.navigate) {
 				return navigateTo('/login');
 			}
@@ -107,7 +128,6 @@ export const useAuthStore = defineStore("auth", {
 				const currentTime = Date.now() / 1000;
 
 				if(decoded.exp && decoded.exp < currentTime) {
-					console.log("토큰이 만료되어 자동으로 로그아웃합니다.");
 					this.logout();
 					return false;
 				}

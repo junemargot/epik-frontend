@@ -10,12 +10,17 @@
       <div class="memberInfoUpdate__img-wrap">
         <div class="memberInfoUpdate__img">
           <div class="memberInfoUpdate__img-my-box">
-            <img class="memberInfoUpdate__img-my" src="/public/images/mypage/profile-baek.png" alt="profile pic">
+            <img 
+              class="memberInfoUpdate__img-my" 
+              :src="authStore.profileImageUrl" 
+              alt="프로필 이미지" 
+              @error="handleImageError"
+            >
           </div>
           <div class="memberInfoUpdate__edit">
             <div class="memberInfoUpdate__edit-icon-box">
               <label for="inputFile">
-                <input id="inputFile" style="display:none" type="file">
+                <input type="file" id="inputFile" style="display:none" @change="handleFileChange">
                 <i class='bx bx-pencil'></i>
               </label>
             </div>
@@ -82,186 +87,163 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { jwtDecode } from 'jwt-decode';
+import { useAuthStore } from '~/stores/auth.js';
+import { storeToRefs } from 'pinia';
 
-const userDetails = useUserDetails();
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+const authStore = useAuthStore();
+const { user, isLoggedIn } = storeToRefs(authStore);
 
-//-----------------------------
-
-//usrname 띄우기
 const storedUserInfo = ref('');
-onMounted(()=>{
-  storedUserInfo.value = localStorage.getItem("username");
-  console.log(storedUserInfo);
-  let token = localStorage.getItem("access_token");  
-  if (!token) 
-    // 토큰이 없으면 메인 페이지로 리디렉션
-    location.href=('http://localhost:3001'); 
-})
-
-
-//닉네임 조건
 const nicknameModel = ref('');
 const nicknameCheck = ref('');
-
-const nicknameHandler = async () => {
-  console.log("입력한 닉네임-"+nicknameModel.value);
-  const nicknameCheckDto = {
-    nickname: nicknameModel.value
-  };
-
-  const response = await fetch('http://localhost:8081/api/v1/signup/checkNickname', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(nicknameCheckDto),
-  });
-
-  const result = await response.json();
-  console.log("디비에 있는 닉네임-"+result.nickname);
-
-  if(nicknameModel.value===result.nickname){
-  console.log("사용불가")
-    nicknameCheck.value=false;}
-  else{
-    nicknameCheck.value=true;
-    console.log("사용가능")
-  }
-};
-
-
-// //이메일 인증 요청
 const emailModel = ref('');
 const emailCodeModel = ref('');
 const emailCodeCheck = ref('');
 const serverVerificationCode = ref('');
 
+const nicknameHandler = async () => {
+  try {
+    const nicknameCheckDto = {
+      nickname: nicknameModel.value
+    };
 
-const emailHandler = async () => {
-  const emailCheckDto = {
-    email: emailModel.value
-  };
-  console.log(emailCheckDto);
+    const response = await useAuthFetch(`${apiBase}/signup/checkNickname`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(nicknameCheckDto),
+    });
 
-  const response = await fetch('http://localhost:8081/api/v1/signup/checkEmail', {
-    method: "POST",
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(emailCheckDto)
-  });
-
-  const result = await response.json();
-  console.log(result);
-
-  if (result.message === "ok") {
-    serverVerificationCode.value = result.verificationCode;
-    console.log("이메일 전송");
-    console.log("1-" + result.verificationCode);
-    console.log("4-" + serverVerificationCode.value);
-  } else if (result.message==="error") {
-    console.log("중복 이메일");
+    const result = await response.json();
+    if(nicknameModel.value === result.nickname){
+      nicknameCheck.value = false;
+    } else {
+      nicknameCheck.value = true;
+    }
+  } catch(error) {
+    console.error("닉네임 확인 오류: ", error);
   }
-
 };
 
-//인증 코드 확인
-const emailCodeHandler=async () => {
-  if (emailCodeModel.value===serverVerificationCode.value) {
+const emailHandler = async () => {
+  try {
+    const emailCheckDto = {
+      email: emailModel.value
+    };
+
+    const response = await fetch(`${apiBase}/signup/checkEmail`, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailCheckDto)
+    });
+
+    const result = await response.json();
+
+    if (result.message === "ok") {
+      serverVerificationCode.value = result.verificationCode;
+      alert("인증번호가 발송되었습니다.");
+      console.log("1-" + result.verificationCode);
+      console.log("4-" + serverVerificationCode.value);
+    } else if (result.message === "error") {
+      alert("이미 사용 중인 이메일입니다.");
+    }
+  } catch(error) {
+    console.error("이메일 확인 오류: ", error);
+  }
+};
+
+const emailCodeHandler = async () => {
+  if (emailCodeModel.value === serverVerificationCode.value) {
     emailCodeCheck.value=true;
-    console.log("2-"+ emailCodeModel.value);
   } else {
     emailCodeCheck.value=false;
-    console.log("3-"+ emailCodeModel.value);
   }
-}
-
-
-//수정 확인 폼 제출
-const usernameFix = ref('');
+};
 
 const submitForm = async () => {
+  try {
+    const userId = user.value.id;
+    const infoRequestDto = {
+      id: userId,
+      nickname: nicknameModel.value,
+      email: emailModel.value
+    };
 
-  //로컬호스트 유지
-  let token = localStorage.getItem("access_token");  // 로컬스토리지에서 토큰 가져오기
-
-    // 토큰이 있으면, 토큰을 디코딩하여 사용자 정보 추출
-    const userInfo = jwtDecode(token); // JWT 토큰 디코딩
-    userDetails.setAuthentication({
-      id: userInfo.id,
-      nickname: userInfo.nickname,
-      username: userInfo.username,
-      email: userInfo.email,
-      role: userInfo.role.map(role => role.authority),
-      token: token
+    const { data, error: fetchError } = await useAuthFetch('/mypage/info', {
+      method: 'POST',
+      body: infoRequestDto
     });
 
-
-const idtest = userInfo.id;
-
-    console.log(userInfo)
-    console.log("토큰에서 정보 가져오기")
-
-
-  const InfoRequestDto={
-    id: idtest,
-    nickname: nicknameModel.value,
-    email: emailModel.value
-  };
-
-  console.log(InfoRequestDto);
-
-  // 백엔드 API로 추가된 정보 전달
-  const response = await fetch('http://localhost:8081/api/v1/mypage/info', 
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(InfoRequestDto),
-    credentials: 'include'
-  }
-  );
-
-
-  const data = await response.json();
-   console.log(data);
-
-    console.log("리스판스 콘솔 확인-" + data.token)
-    localStorage.clear;
-    localStorage.setItem("access_token", data.token)
-    getMemberInfo()
-    
-}
-
-
-const getMemberInfo = () => {
-  console.log("토큰 분해 중 ")
-  try{
-    let token = localStorage.getItem("access_token")
-    let userInfo = jwtDecode(token);
-    console.log("User Info from token:", userInfo);
-    // 상태에 사용자 정보 설정
-    userDetails.setAuthentication({
-      id: userInfo.id,
-      username: userInfo.username,
-      email: userInfo.email,
-      nickname: userInfo.nickname,
-      role: userInfo.role.map((role) => role.authority),
-      token: token
-    });
-    userInfo.role.map(role => { console.log(role, role.authority) });
-
-    console.log("새로운 토큰 사용했당")
-    location.href="http://localhost:3001/mypage"; 
-
-  }
-    catch{
-      console.log("토큰분해 오류")
+    if(fetchError.value) {
+      throw new Error("회원정보 수정 실패");
     }
-}
 
+    authStore.login(data.value.token);
+    alert("회원 정보가 수정되었습니다.");
+    navigateTo('/mypage');
+  
+  } catch(error) {
+    console.error("회원 정보 수정 오류: ", error);
+    alert("회원 정보 수정 중 오류가 발생했습니다.");
+  }
+};
+
+const handleImageError = (e) => {
+  e.target.src = `${apiBase}/uploads/images/user/basic.png`;
+  console.error("프로필 이미지 로드 실패, 기본 이미지로 대체");
+};
+
+const handleFileChange = async(e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+
+  if(!file.type.startsWith('image/')) {
+    alert("이미지 파일만 업로드 가능합니다.");
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert('파일 크기는 5MB 이하여야 합니다.');
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('profileImage', file);
+
+    const { data, error: fetchError } = await useAuthFetch('/mypage/profile-image', {
+      method: 'POST',
+      body: formData
+    });
+
+    if(fetchError.value) {
+      throw new Error('프로필 이미지 업로드 실패');
+    }
+
+
+    if (data.value?.token) {
+      authStore.login(data.value.token);
+    }
+    alert('프로필 이미지가 변경되었습니다.');
+  
+  } catch (error) {
+    console.error('프로필 이미지 업로드 오류:', error);
+    alert('프로필 이미지 업로드 중 오류가 발생했습니다.');
+  }
+};
+
+onMounted(()=>{
+  if(!isLoggedIn.value) {
+    navigateTo('/login');
+    return;
+  }
+  storedUserInfo.value = user.value.username;
+});
 
 
 </script>

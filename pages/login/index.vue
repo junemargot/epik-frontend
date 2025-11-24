@@ -39,8 +39,12 @@
         <div class="log-in__search">
           <nav>
             <ul class="log-in__search-form">
-              <li><a href="http://localhost:3000/find/id" class="log-in__search-id">아이디찾기</a></li>
-              <li><a href="http://localhost:3000/find/password" class="log-in__search-password">비밀번호찾기</a></li>
+              <li>
+                <RouterLink to="/find/id" class="log-in__search-id">아이디찾기</RouterLink>
+              </li>
+              <li>
+                <RouterLink to="/find/password" class="log-in__search-password">비밀번호찾기</RouterLink>
+              </li>
             </ul>
           </nav>
         </div>
@@ -88,13 +92,15 @@ const localLoginHandler = async () => {
       return;
     }
 
-    // ✅ 가장 중요한 부분: authStore의 login 액션만 호출합니다.
-    // 이 액션이 토큰 저장, 사용자 정보 저장을 모두 처리합니다.
     const loginSuccess = authStore.login(data.token);
-
     if (loginSuccess) {
+      if(authStore.hasRole('ROLE_ADMIN')) {
+        router.push('/admin');
+        return;
+      }
+
+      // 일반 회원이면 redirectUrl 또는 메인페이지로
       const fullUrl = sessionStorage.getItem('redirectUrl') || '/';
-      // 로그인 성공 시, 이전 페이지 또는 메인 페이지로 이동
       sessionStorage.removeItem('redirectUrl');
 
       const redirectPath = new URL(fullUrl, window.location.origin).pathname;

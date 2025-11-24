@@ -50,16 +50,51 @@
 </template>
 
 <script setup>
+import { useRuntimeConfig } from '#app';
 
-//비밀번호 조건
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+
 const pwModel = ref('');
 const pwReModel = ref('');
 const pwCheck = ref('');
 const pwReCheck = ref('');
 const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{6,}$/;
-import { jwtDecode } from 'jwt-decode';
 
-const userDetails = useUserDetails();
+const passwordUpHandler = async() => {
+  try {
+    // 비밀번호 찾기 플로우에서 임시 저장한 username
+    const usernameValue = localStorage.getItem('username');
+
+    if(!usernameValue) {
+      alert("잘못된 접근입니다.");
+      navigateTo('/login');
+      return;
+    }
+
+    const usernameCheckDto = {
+      username: usernameValue,
+      password: pwReModel.value,
+    };
+
+    const response = await fetch(`${apiBase}/find/password/resetPassword`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(usernameCheckDto),
+    });
+    const data = await response.text();
+    localStorage.removeItem('username'); // 비밀번호 변경 성공 후 임시 저장한 username 제거
+    alert("비밀번호가 변경되었습니다. 로그인해주세요.");
+    navigateTo("/login");
+
+  } catch(error) {
+    console.error("비밀번호 변경 오류: ", error);
+    alert('비밀번호 변경 중 오류가 발생했습니다.');
+  }
+};
+
 
 watch([pwModel], () => {
   if (regex.test(pwModel.value))
@@ -73,40 +108,11 @@ watch([pwModel, pwReModel], () => {
     pwReCheck.value = true
   } else if ((!(pwModel.value === pwReModel.value)) && pwCheck.value === true) {
     pwReCheck.value = false
-  }
-  else {
-    pwReCheck.value = ''; // 초기 상태일 때는 메시지 안 보이도록 설정
+  } else {
+    pwReCheck.value = '';
   }
 });
 
-//전달받은 username으로 백단 넘겨서 정보 업데이트하기
-import { useRoute } from 'vue-router';
-const route = useRoute();
-
-
-const passwordUpHandler = async()=>{
-
-   //id값만 담기
-   const usernameValue = localStorage.getItem('username');
-   console.log("전달받은 username-" + usernameValue);
-
-  const usernameCheckDto = {
-    username: usernameValue,
-    password: pwReModel.value,
-  };
-
-  const response = await fetch('http://localhost:8081/api/v1/find/password/resetPassword', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(usernameCheckDto),
-  });
-
-  const data = await response.text();
-   console.log(data);
-
-}
 </script>
 
 <style>

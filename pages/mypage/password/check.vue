@@ -22,7 +22,7 @@
           <label>
             <div class="star_top">현재 비밀번호</div>
             <div class="gap-mt_1">
-              <input class="form" type="text" v-model="passwordModel" placeholder="현재 비밀번호를 입력해주세요">
+              <input class="form" type="password" v-model="passwordModel" placeholder="현재 비밀번호를 입력해주세요">
             </div>
           </label>
           <div class="message-container">
@@ -43,71 +43,56 @@
 </template>
 
 <script setup>
-const passwordModel = ref('');
-const userDetails = useUserDetails();
-const passwordCheck = ref(null);
-import { jwtDecode } from 'jwt-decode';
+import { useRuntimeConfig } from '#app';
+import { useAuthStore } from '~/stores/auth.js';
+import { storeToRefs } from 'pinia';
 
-//usrname 띄우기
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+const authStore = useAuthStore();
+const { user, isLoggedIn } = storeToRefs(authStore);
+
+const passwordModel = ref('');
+const passwordCheck = ref(null);
 const storedUserInfo = ref('');
 
-onMounted(()=>{
-  storedUserInfo.value = localStorage.getItem("username");
-  console.log(storedUserInfo)
-  
-  let token = localStorage.getItem("access_token");
-  
-  if (!token) 
-    // 토큰이 없으면 메인 페이지로 리디렉션
-    location.href=('http://localhost:3001'); 
-})
-
-
 const passwotdCheckHandler = async () => {
+  try {
+    const userId = usre.value.id;
+    const passwordCheckDto = {
+      id: userId,
+      password: passwordModel.value,
+    };
 
-  //로컬호스트 유지
-  let token = localStorage.getItem("access_token");  // 로컬스토리지에서 토큰 가져오기
-
-
-  // 토큰이 있으면, 토큰을 디코딩하여 사용자 정보 추출
-  const userInfo = jwtDecode(token); // JWT 토큰 디코딩
-  userDetails.setAuthentication({
-    id: userInfo.id,
-    nickname: userInfo.nickname,
-    username: userInfo.username,
-    email: userInfo.email,
-    role: userInfo.role.map(role => role.authority),
-    token: token
-  });
-
-  //id값만 담기
-  const idtest = userInfo.id;
-
-  console.log("입력한 현재 비밀번호" + passwordModel.value)
-  const passwordCheckDto = {
-    id: idtest,
-    password: passwordModel.value,
-  };
-
-  const response = await fetch('http://localhost:8081/api/v1/mypage/passwordCheck', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(passwordCheckDto),
-  });
-
-  const result = await response.json();
-  console.log(result);
-
-  if (result === true) {
-    passwordCheck.value = true;
-    location.href='http://localhost:3001/mypage/password/update' // 비밀번호 일치
-  } else {
-    passwordCheck.value = false;  // 비밀번호 불일치
+    const { data, error: fetchError } = await useAuthFetch('/mypage/passwordCheck', {
+      method: 'POST',
+      body: passwordCheckDto
+    });
+    
+    if(fetchError.value) {
+      throw new Error("비밀번호 확인 실패");
+    }
+    
+    if(data.value === true) {
+      passwordCheck.value = true;
+      navigateTo('/mypage/password/update');
+    } else {
+      passwordCheck.value = false;
+    }
+    
+  } catch(error) {
+    console.error("비밀번호 확인 오류: ", error);
+    alert("비밀번호 확인 중 오류가 발생했습니다.");
   }
 };
 
+onMounted(() => {
+  if (!isLoggedIn.value) {
+    navigateTo('/login');
+    return;
+  }
+  storedUserInfo.value = user.value.username;
+});
 
 </script>
 

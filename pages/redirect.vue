@@ -12,17 +12,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { jwtDecode } from 'jwt-decode';
 import { useRuntimeConfig } from '#app';
-import { useRouter } from 'vue-router';
 import { useAuthStore } from '~/stores/auth.js';
 
+const config = useRuntimeConfig();
+const authStore = useAuthStore();
 const loading = ref(true);
 const error = ref(null);
-const userDetails = useUserDetails();
-const router = useRouter();
-const config = useRuntimeConfig();
-const apiBase = config.public.apiBase;
 
 const goToLogin = () => {
   navigateTo('/login');
@@ -60,8 +56,6 @@ const getCookieValue = (name) => {
 
 onMounted(async () => {
   try {
-    console.log("OAuthRedirect 컴포넌트 마운트됨");
-
     // 1. 쿠키에서 토큰 확인
     let token = getCookieValue('jwt_token');
     console.log("쿠키에서 토큰 확인: ", token ? '토큰 있음' : '토큰 없음');
@@ -79,43 +73,18 @@ onMounted(async () => {
 
     // 로그인 성공이고 토큰이 있으면 처리
     if(loginSuccess === 'true' && token) {
-      console.log("토큰 처리 시작");
-      
-      // 토큰 저장 (백업용)
-      localStorage.setItem('access_token', token);
-      
       try {
-        // 토큰 디코딩
-        const userInfo = jwtDecode(token);
-        console.log("토큰 디코딩 성공:", userInfo);
-        
-        // 전역 사용자 상태 업데이트
-        userDetails.setAuthentication({
-          id: userInfo.id,
-          username: userInfo.username,
-          email: userInfo.email,
-          role: Array.isArray(userInfo.role) ? 
-                userInfo.role.map(r => typeof r === 'string' ? r : r.authority) : 
-                [userInfo.role],
-          nickname: userInfo.nickname,
-          profileImg: userInfo.profileImg,
-          token: token
-        });
+        const loginSuccess = authStore.login(token);
 
-        // authStore 직접 업데이트 (pinia persist)
-        const authStore = useAuthStore();
-        authStore.login(token);
-        
-        console.log("사용자 인증 정보 설정 완료");
+        if(!loginSuccess) {
+          throw new Error("토큰 검증 실패");
+        }
 
-        // 쿠키 확인 로그
-        console.log("현재 브라우저 쿠키: ", document.cookie);
-        
+        console.log("사용자 인증 정보 설정 완료: ", authStore.user);
+
         // 리다이렉트 URL 확인
         const rawRedirectUrl = sessionStorage.getItem('redirectUrl') || '/';
         const redirectUrl = normalizeUrl(rawRedirectUrl);
-        console.log("원본 리다이렉트 URL: ", rawRedirectUrl);
-        console.log("정규화된 리다이렉트 URL:", redirectUrl);
 
         // 세션 스토리지 정리
         sessionStorage.removeItem('redirectUrl');
@@ -123,10 +92,10 @@ onMounted(async () => {
         // 정규화된 내부 경로로 리다이렉트
         await navigateTo(redirectUrl, { external: false });
         return;
-        
-      } catch (decodeError) {
-        console.error("토큰 디코딩 실패:", decodeError);
-        error.value = "토큰 처리 중 오류가 발생했습니다: " + decodeError.message;
+      
+      } catch(decodeError) {
+        console.error("토큰 처리 실패: ", decodeError);
+        error.value = "토큰 처리 중 오류가 발생했습니다.";
       }
     } else {
       console.error("토큰 또는 로그인 성공 파라미터 없음");
