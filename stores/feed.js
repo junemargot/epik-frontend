@@ -113,8 +113,9 @@ export const useFeedStore = defineStore('feed', {
     // 좋아요 토글
     async toggleLike(feedId, isLiked) {
       try {
-        const method = isLiked ? 'DELETE' : 'POST';
-        const response = await useAuthFetch(`/feed/${feedId}/like`, { method });
+        const response = await useAuthFetch(`/feed/${feedId}/like`, { 
+          method: 'POST',
+        });
 
         // 에러 체크
         if(response.error.value) {

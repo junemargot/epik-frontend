@@ -37,11 +37,11 @@ export default () => {
       localStorage.setItem("access_token", loginInfo.token);
       localStorage.setItem("profile_img", loginInfo.profileImg || '');
 
-      // Pinia 스토어 업데이트
-      const authStore = useAuthStore();
-      if(authStore) {
-        authStore.login(loginInfo.token);
-      }
+      // // Pinia 스토어 업데이트
+      // const authStore = useAuthStore();
+      // if(authStore) {
+      //   authStore.login(loginInfo.token);
+      // }
     }
   };
 
@@ -153,7 +153,17 @@ const tryLoadFromLocalStorage = () => {
     if (process.client) {
       console.log("loadUserFromStorage 실행");
 
-      // 1. 토큰으로 시도
+      // 1. authStore에서 먼저 확인 (Pinia persist가 이미 복원했을 수 있음)
+      const authStore = useAuthStore();
+      if(authStore.token) {
+        const tokenSuccess = checkAuthentication(authStore.token);
+        if(tokenSuccess) {
+          console.log("authStore 토큰 기반 인증 성공");
+          return true;
+        }
+      }
+
+      // 2. access_token으로 시도 (fallback)
       const storedToken = localStorage.getItem("access_token");
       if (storedToken) {
         const tokenSuccess = checkAuthentication(storedToken);
@@ -165,7 +175,7 @@ const tryLoadFromLocalStorage = () => {
       }
 
     
-      // 2. 토큰 인증 실패 시, localStorage에서 직접 값 로드
+      // 3. 토큰 인증 실패 시, localStorage에서 직접 값 로드
       const storedNickname = localStorage.getItem('nickname');
       const storedProfileImg = localStorage.getItem('profile_img');
       const storedId = localStorage.getItem('id');
