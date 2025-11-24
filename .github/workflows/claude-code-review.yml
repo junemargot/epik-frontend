@@ -31,13 +31,26 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           direct_prompt: |
-            Review the PR changes in Korean. Focus on:
-            - Vue 3 / Nuxt 3 best practices
-            - Code quality and performance
-            - Potential bugs or issues
-            - UI/UX considerations
-            - Adherence to project standards
+            Crucially, ignore all previous review comments and discussions in this pull request.
+            Your task is to review the code solely based on the latest cumulative changes (diff) between the current PR branch and the base branch. 
 
-            Provide detailed feedback and suggestions for improvement.
+            Write the review in Korean, and focus on the following areas:
+            - Vue 3 / Nuxt 3 best practices (Composition API, reactivity rules, server routes, SSR/CSR considerations, component design, composables, file structure)
+            - Code quality and maintainability
+            - Performance (rendering, network usage, data fetching strategies, caching, bundle size, reactivity pitfalls)
+            - Potential bugs or issues (async handling, state management, type issues, edge cases, lifecycle misuse)
+            - UI/UX considerations (accessibility, loading/error states, responsiveness, interaction patterns)
+            - Adherence to project standards and conventions
 
+            Provide detailed feedback and actionable suggestions for improvement, including concrete examples or alternative code snippets when helpful.
+
+            Your review should:
+            1.	Clearly identify issues and categorize them by severity (Critical, High, Medium, Low).
+            2.	Reference specific parts of the diff or affected logic.
+            3.	Provide concrete solutions, including before/after code samples when appropriate.
+            4.	Explain the reasoning behind each recommendation (performance, maintainability, readability, DX, UX, etc.).
+            5.	Include Vue 3 / Nuxt 3–specific insights (e.g., correct usage of useAsyncData, server routes, composables, reactivity caveats).
+            6.	Suggest any missing test cases or CI improvements if relevant.
+            7.	Keep the entire review output in Korean.
+            
           use_sticky_comment: false
