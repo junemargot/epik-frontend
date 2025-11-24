@@ -21,7 +21,7 @@ export const useAuthStore = defineStore("auth", {
 		hasRole: (state) => (roleToCheck) => {
 			if(!state.user.role) return false;
 			if(Array.isArray(state.user.role)) {
-				return state.user.info.some(r => {
+				return state.user.role.some(r => {
 					if(typeof r === 'object' && r.authority) {
 						return r.authority === roleToCheck;
 					}

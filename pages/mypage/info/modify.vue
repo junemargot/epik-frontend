@@ -10,12 +10,17 @@
       <div class="memberInfoUpdate__img-wrap">
         <div class="memberInfoUpdate__img">
           <div class="memberInfoUpdate__img-my-box">
-            <img class="memberInfoUpdate__img-my" src="/public/images/mypage/profile-baek.png" alt="profile pic">
+            <img 
+              class="memberInfoUpdate__img-my" 
+              :src="authStore.profileImageUrl" 
+              alt="프로필 이미지" 
+              @error="handleImageError"
+            >
           </div>
           <div class="memberInfoUpdate__edit">
             <div class="memberInfoUpdate__edit-icon-box">
               <label for="inputFile">
-                <input id="inputFile" style="display:none" type="file">
+                <input type="file" id="inputFile" style="display:none" @change="handleFileChange">
                 <i class='bx bx-pencil'></i>
               </label>
             </div>
@@ -184,6 +189,60 @@ const submitForm = async () => {
   } catch(error) {
     console.error("회원 정보 수정 오류: ", error);
     alert("회원 정보 수정 중 오류가 발생했습니다.");
+  }
+};
+
+const handleImageError = (e) => {
+  e.target.src = `${apiBase}/uploads/images/user/basic.png`;
+  console.error("프로필 이미지 로드 실패, 기본 이미지로 대체");
+};
+
+const handleFileChange = async(e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+
+  if(!file.type.startsWith('image/')) {
+    alert("이미지 파일만 업로드 가능합니다.");
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert('파일 크기는 5MB 이하여야 합니다.');
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('profileImage', file);
+
+    const response = await fetch(`${apiBase}/mypage/profile-image`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error('프로필 이미지 업로드 실패');
+    }
+
+    const data = await response.json();
+    if (data.token) {
+      authStore.login(data.token);
+    }
+    
+    alert('프로필 이미지가 변경되었습니다.');
+  } catch (error) {
+    console.error('프로필 이미지 업로드 오류:', error);
+    
+    if (error.response?.status === 401) {
+      alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      authStore.logout();
+      navigateTo('/login');
+    } else {
+      alert('프로필 이미지 업로드 중 오류가 발생했습니다.');
+    }
   }
 };
 

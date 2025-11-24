@@ -39,8 +39,12 @@
         <div class="log-in__search">
           <nav>
             <ul class="log-in__search-form">
-              <li><a href="http://localhost:3000/find/id" class="log-in__search-id">아이디찾기</a></li>
-              <li><a href="http://localhost:3000/find/password" class="log-in__search-password">비밀번호찾기</a></li>
+              <li>
+                <RouterLink to="/find/id" class="log-in__search-id">아이디찾기</RouterLink>
+              </li>
+              <li>
+                <RouterLink to="/find/password" class="log-in__search-password">비밀번호찾기</RouterLink>
+              </li>
             </ul>
           </nav>
         </div>
