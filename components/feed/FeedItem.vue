@@ -5,8 +5,9 @@
       <div class="feed__user-profile">
         <img 
           v-if="feed.writerProfileImage" 
-          :src="`${apiBase}${feed.writerProfileImage}`" 
-          alt="profile" 
+          :src="getProfileImageUrlForFeed()" 
+          alt="feed.writer"
+          @error="handleProfileImageError"
         />
         <span>{{ feed.writer }}</span>
       </div>
@@ -143,6 +144,8 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRuntimeConfig } from '#app';
 import { useFeedStore } from '~/stores/feed';
+import { useAuthStore } from '~/stores/auth';
+import { useProfileImage } from '~/composables/useProfileImage';
 
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
@@ -156,8 +159,23 @@ const props = defineProps({
 
 const emit = defineEmits(['delete', 'update']);
 
+const { getProfileImageUrl } = useProfileImage();
+
 // pinia store 사용
 const feedStore = useFeedStore();
+const authStore = useAuthStore();
+
+const isMyFeed = computed(() => {
+  return authStore.user.nickname === props.feed.writer;
+});
+
+const getProfileImageUrlForFeed = () => {
+  if(isMyFeed.value) {
+    return authStore.profileImageUrl;
+  } else {
+    return getProfileImageUrl(props.feed.writerProfileImage);
+  }
+};
 
 // 로컬 피드 상태 (좋아요 수 등 실시간 업데이트용)
 const localFeed = reactive({ 
@@ -166,14 +184,15 @@ const localFeed = reactive({
   commentCount: Math.max(props.feed.commentCount || 0, 0)
 });
 
-// 디버깅: 초기값 확인
-console.log('🔍 FeedItem 초기화:', {
-  feedId: props.feed.feedId,
-  'props.feed.likeCount': props.feed.likeCount,
-  'localFeed.likeCount': localFeed.likeCount,
-  'props.feed.isLiked': props.feed.isLiked,
-  'localFeed.isLiked': localFeed.isLiked
-});
+const handleProfileImageError = (e) => {
+  console.error("프로필 이미지 로드 실패: ", {
+    src: e.target.src,
+    writerProfileImage: props.feed.writerPforileImage,
+    writer: props.feed.writer
+  });
+
+  e.target.src = `${apiBase}/uploads/images/user/basic.png`;
+};
 
 // 각 피드별 독립적인 상태
 const isDropdownOpen = ref(false);

@@ -6,7 +6,8 @@ export const useFeedStore = defineStore('feed', {
     loading: false,
     hasMore: true,
     lastId: null,
-    initialized: false // 초기화 여부 플래그
+    initialized: false, // 초기화 여부 플래그
+    version: 2
   }),
 
   actions: {
@@ -17,6 +18,14 @@ export const useFeedStore = defineStore('feed', {
           const saved = localStorage.getItem('feedStore');
           if (saved) {
             const data = JSON.parse(saved);
+
+            // 버전 체크: 버전이 다르면 localStorage 무시
+            if(data.version !== this.version) {
+              console.log("localStorage 버전 불일치. 데이터 초기화");
+              localStorage.removeItem('feedStore');
+              return;
+            }
+
             this.feeds = data.feeds || [];
             this.lastId = data.lastId || null;
             this.hasMore = data.hasMore ?? true;
@@ -37,7 +46,8 @@ export const useFeedStore = defineStore('feed', {
             feeds: this.feeds,
             lastId: this.lastId,
             hasMore: this.hasMore,
-            initialized: this.initialized
+            initialized: this.initialized,
+            version: this.version
           };
           localStorage.setItem('feedStore', JSON.stringify(data));
         } catch (error) {
