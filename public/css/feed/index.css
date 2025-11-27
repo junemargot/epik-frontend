@@ -313,7 +313,9 @@
 .feed__text {
   font-size: var(--font-size-6);
   line-height: 20px;
-  /* 행간 설정 */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .feed__tags {
