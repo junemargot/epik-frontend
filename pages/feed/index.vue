@@ -1,8 +1,8 @@
 <template>
   <section class="feed">
-    <RouterLink to="/feed/reg" class="feed__floating-btn">
+    <Button @click="handleCreateFeed" class="feed__floating-btn">
       <i class='bx bx-plus'></i>
-    </RouterLink>
+    </Button>
     <div class="feed__header">
       <h1 class="feed__title">feed</h1>
       <form class="feed__form" @submit.prevent="handleSearch">
@@ -12,12 +12,6 @@
         </label>
         <input type="submit" value="submit" style="display: none;">
       </form>
-      <!-- 피드 등록 -->
-      <!-- <div class="feed__actions">
-        <RouterLink to="/feed/reg" class="feed__create-btn">
-          <i class="bx bx-plus"></i>
-        </RouterLink>
-      </div> -->
     </div>
 
     <!-- 메뉴 -->
@@ -152,13 +146,16 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import FeedItem from '~/components/feed/FeedItem.vue';
 import { useFeedStore } from '~/stores/feed';
+import { useAuthStore } from '~/stores/auth';
 
 const route = useRoute();
+const router = useRouter();
 const currentRoute = computed(() => route.path);
 const feedStore = useFeedStore();
+const authStore = useAuthStore();
 
 // computed로 store 상태 참조
 const feeds = computed(() => feedStore.feeds);
@@ -182,7 +179,19 @@ const filterByCategory = (category) => {
   selectedCategory.value = categoryMapping[category];
   feedStore.resetFeeds();
   feedStore.fetchFeeds(selectedCategory.value);
-}
+};
+
+const handleCreateFeed = () => {
+  if(!authStore.isAuthenticated) {
+    const confirmed = confirm("로그인이 필요한 기능입니다. \n로그인 페이지로 이동하시겠습니까?");
+    if(confirmed) {
+      router.push('/login');
+    }
+    return;
+  }
+
+  router.push('/feed/reg');
+};
 
 const handleSearch = () => {
   // TODO: 검색 API 구현 필요
