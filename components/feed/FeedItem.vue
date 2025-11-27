@@ -17,9 +17,15 @@
         <button @click="toggleDropdown">
           <i class='bx bx-dots-horizontal-rounded'></i>
         </button>
-        <ul v-if="isDropdownOpen" class="dropdown-list">
+        <!-- 본인 글: 수정/삭제 -->
+        <ul v-if="isDropdownOpen && isMyFeed" class="dropdown-list">
           <li><button @click="handleEdit">수정</button></li>
           <li><button @click.prevent="feedRemove">삭제</button></li>
+        </ul>
+        <!-- 다른사람 글 or 비로그인: 신고/취소 -->
+        <ul v-if="isDropdownOpen && !isMyFeed" class="dropdown-list">
+          <li><button @click="handleReport">신고</button></li>
+          <li><button @click="toggleDropdown">취소</button></li>
         </ul>
         
         <!-- 삭제 모달 -->
@@ -186,15 +192,9 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['delete', 'update']);
-
+const emit = defineEmits(['delete', 'update', 'report']);
 const { getProfileImageUrl } = useProfileImage();
 const { formatTimeAgo } = useDateUtils();
-
-// 디버깅
-console.log('전체 feed 객체:', props.feed)
-console.log('feed.createdAt:', props.feed.createdAt)
-console.log('feed의 모든 키:', Object.keys(props.feed))
 
 // pinia store 사용
 const feedStore = useFeedStore();
@@ -278,6 +278,12 @@ const handleEdit = () => {
   console.log('Edit feed:', props.feed.feedId);
 };
 
+// 신고
+const handleReport = () => {
+  isDropdownOpen.value = false;
+  emit('report', props.feed.feedId);
+}
+
 // ===== 좋아요 관련 =====
 const handleToggleLike = async () => {
   const currentIsLiked = localFeed.isLiked;
@@ -345,11 +351,6 @@ const openReplyForm = (commentId) => {
   console.log('Reply to comment:', commentId);
 };
 
-const openReportModal = (commentId) => {
-  // TODO: 신고 기능 구현
-  console.log('Report comment:', commentId);
-};
-
 // ===== 외부 클릭 감지 =====
 const handleOutsideClick = (e) => {
   if (!e.target.closest('.dropdown')) {
@@ -385,6 +386,5 @@ onUnmounted(() => {
 
 <style scoped>
 @import url('public/css/feed/index.css');
-@import url('public/css/feed/check-report-modal.css');
 @import url('public/css/feed/report-modal.css');
 </style>

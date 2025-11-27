@@ -375,7 +375,7 @@
 }
 
 .feed__form .feed__input:focus {
-  border-radius: 15px;
+  border-radius: var(--radius-5);
   border: 1px solid var(--color-grey-4);
   background-color: var(--white);
   width: 230px;
@@ -460,7 +460,6 @@ magin : 상하, 좌우
 
 .comment__item {
   display: flex;
-  /* flex-direction: column; */
   justify-content: space-between;
   margin-bottom: 10px;
 }
@@ -474,7 +473,6 @@ magin : 상하, 좌우
 .comment__profile img {
   width: 32px;
   height: 32px;
-  /* margin-top: 10px; */
   border-radius: 50%;
 }
 
@@ -484,17 +482,17 @@ magin : 상하, 좌우
 
 .comment__username {
   font-family: 'pretendard-semibold';
-  font-size: 14px;
+  font-size: var(--font-size-6);
 }
 
 .comment__time {
   font-family: 'pretendard-medium';
-  font-size: 8px;
-  color: #828282;
+  font-size: var(--font-size-3);
+  color: var(--color-grey-7);
 }
 
 .comment__text span {
-  font-size: 14px;
+  font-size: var(--font-size-6);
 }
 
 /* ** 댓글 작성 영역** */
@@ -508,7 +506,7 @@ magin : 상하, 좌우
   border: none;
   width: 400px;
   height: 20px;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid var(--black);
 }
 
 ::placeholder {
@@ -529,24 +527,15 @@ magin : 상하, 좌우
   /* background-color: #093982; */
   display: flex;
   flex-direction: column;
-  border: 1px solid gray;
+  width: 370px;
+  border: 1px solid var(--color-grey-7);
   border-radius: 10px;
   padding-bottom: 10px;
   margin-bottom: 10px;
-  width: 370px;
   margin-left: 38px;
-  /* display: none; */
-  /* opacity: 0; */
 }
 
-/* .comment__reply.show {
-  display: flex;
-  opacity: 1;
-  z-index: 1;
-} */
-
 .comment__reply-input {
-  /* margin-top: 10px; */
   box-sizing: border-box;
   padding: 10px 12px;
   width: 360px;
@@ -556,7 +545,7 @@ magin : 상하, 좌우
 }
 
 .comment__reply-input::placeholder {
-  color: gray;
+  color: var(--color-grey-7);
 }
 
 .comment__reply-id {
@@ -574,7 +563,7 @@ magin : 상하, 좌우
 .comment__reply-buttons button {
   border: none;
   background-color: transparent;
-  color: gray;
+  color: var(--color-grey-7);
   margin-left: 10px;
 }
 
@@ -586,32 +575,25 @@ magin : 상하, 좌우
   bottom: 0;
   right: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  /* 화면 중앙 배치 */
-  /* display: flex; -> */
   display: flex;
-  /* display: none; */
   justify-content: center;
   align-items: center;
 }
 
-/* .feed-modal.active {
-  display: flex;
-} */
-
 .feed-modal__contents {
   width: 358px;
   height: 187px;
-  background-color: white;
-  border-radius: 15px;
+  background-color: var(--white);
+  border-radius: var(--radius-5);
   text-align: center;
   box-sizing: border-box;
   padding-top: 40px;
-  font-size: 16px;
+  font-size: var(--font-size-7);
 }
 
 .feed-modal__text {
   font-family: 'pretendard-regular';
-  font-size: 18px;
+  font-size: var(--font-size-8);
 }
 
 .feed-modal__buttons {
@@ -628,22 +610,22 @@ magin : 상하, 좌우
   margin-top: 25px;
   cursor: pointer;
   font-family: 'pretendard-semibold';
-  font-size: 16px;
+  font-size: var(--font-size-7);
 }
 
 .feed-modal__cancel {
-  background-color: #666666;
-  border-radius: 10px;
-  color: white;
-  font-size: 18px;
+  background-color: var(--color-grey-9);
+  border-radius: var(--radius-3);
+  color: var(--white);
+  font-size: var(--font-size-8);
 
 }
 
 .feed-modal__delete {
-  background-color: #EA3921;
-  border-radius: 10px;
-  color: white;
-  font-size: 18px;
+  background-color: var(--accent-1);
+  border-radius: var(--radius-3);
+  color: var(--white);
+  font-size: var(--font-size-8);
 }
 
 /* ######### dropdown.css #########  */
@@ -656,24 +638,15 @@ magin : 상하, 좌우
   top: 15px;
   right: -45px;
   box-shadow: 4px 4px 16px rgba(0, 0, 0, .1);
-  background-color: white;
+  background-color: var(--white);
   border-radius: 10px;
   width: 90px;
-  /* display: none; */
   flex-direction: column;
   padding: 5px 0;
   transition: all .3s ease;
-  /* opacity: 0; */
-  /* visibility: hidden; */
   display: flex;
   z-index: 1;
 }
-
-/* .dropdown-list.show {
-  display: flex;
-  opacity: 1;
-  visibility: visible;
-} */
 
 .dropdown-list li {
   /* width: 100%; */
@@ -689,35 +662,19 @@ magin : 상하, 좌우
   color: var(--accent-1);
 }
 
-/* .feed__dropdown-list li:first-child {
-  border-bottom: 1px solid black;
-} */
-
-
-.dropdown-list li:nth-child(2) {
-  /* margin-top: -2px; */
-}
-
-
-
 .dropdown-list li button {
   display: block;
-  /* text-align: center; */
-  /* margin-top: 10px; */
   padding: 10px 16px;
-  /* margin-bottom: -1px; */
-  /* margin-left: -30px; */
   text-align: left;
   text-indent: 5px;
-  font-size: 14px;
+  font-size: var(--font-size-6);
   font-family: 'pretendard-regular';
   border-radius: var(--radius-3);
 }
 
 .dropdown-list li a:hover {
-  color: #EA3921;
+  color: var(--accent-1);
 }
-
 
 .dropdown button {
   border: none;
@@ -726,11 +683,11 @@ magin : 상하, 좌우
 
 /* feed__menu-column 내의 span에 대한 스타일 */
 .feed__menu-column span.is-active {
-  color: var(--black); /* 선택된 경우 검정색 */
+  color: var(--black);
   font-weight: bold;
 }
 
 .feed__menu-column span.is-inactive {
-  color: #C1C1C1; /* 비활성화된 경우 회색 */
+  color: var(--color-grey-5);
   font-weight: normal;
 }

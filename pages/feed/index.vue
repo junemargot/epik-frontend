@@ -59,6 +59,7 @@
           :feed="feed"
           @delete="handleDeleteFeed"
           @update="handleUpdateFeed"
+          @report="handleReportFeed"
         />
       </div>
     </div>
@@ -86,39 +87,43 @@
         <form class="modal-report__form">
           <div class="modal-report__radio-group">
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason1" name="report-reason">
+              <input type="radio" id="reason1" name="report-reason" value="욕설, 비방, 차별, 혐오" v-model="reportReason">
               <label for="reason1">욕설, 비방, 차별, 혐오</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason2" name="report-reason">
+              <input type="radio" id="reason2" name="report-reason" value="홍보, 영리목적" v-model="reportReason">
               <label for="reason2">홍보, 영리목적</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason3" name="report-reason">
+              <input type="radio" id="reason3" name="report-reason" value="불법 정보" v-model="reportReason">
               <label for="reason3">불법 정보</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason4" name="report-reason">
+              <input type="radio" id="reason4" name="report-reason" value="음란, 청소년 유해" v-model="reportReason">
               <label for="reason4">음란, 청소년 유해</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason5" name="report-reason">
+              <input type="radio" id="reason5" name="report-reason" value="개인 정보 유출, 유포, 거래" v-model="reportReason">
               <label for="reason5">개인 정보 유출, 유포, 거래</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason6" name="report-reason">
+              <input type="radio" id="reason6" name="report-reason" value="도배, 스팸" v-model="reportReason">
               <label for="reason6">도배, 스팸</label>
             </div>
             <div class="modal-report__radio-item">
-              <input class="report-reason" type="radio" id="reason7" name="report-reason">
-              <label class="report-reason" for="reason7">기타</label>
-              <div class="modal-report__text-input">
-                <textarea placeholder="신고 사유를 직접 입력해주세요.(최대 500자)"></textarea>
-              </div>
+              <input class="report-reason" type="radio" id="reason7" name="report-reason" value="기타" v-model="reportReason">
+              <label for="reason7">기타</label>
+            </div>
+            <div class="modal-report__text-input" v-if="reportReason === '기타'">
+              <textarea 
+                v-model="reportDetail"
+                placeholder="신고 사유를 직접 입력해주세요.(최대 500자)"
+                maxlength="500"
+              ></textarea>
             </div>
           </div>
           <p class="modal-report__warning">
-            ** 허위 신고일 경우, 신고자의 서비스 활동이 제한될 수 있습니다.<br>
+            허위 신고일 경우, 신고자의 서비스 활동이 제한될 수 있습니다.<br>
             이 점 유의하시어 신중하게 신고해주세요.
           </p>
           <div class="modal-report__buttons">
@@ -219,37 +224,55 @@ const handleScroll = () => {
 }
 
 // ===== 신고 모달 =====
-const isReportModalOpen = ref(false)
-const isReportCheckModalOpen = ref(false)
-const reportReason = ref('')
-const reportDetail = ref('')
+const isReportModalOpen = ref(false);
+const isReportCheckModalOpen = ref(false);
+const reportReason = ref('');
+const reportDetail = ref('');
+const reportingFeedId = ref(null);
+
+const handleReportFeed = (feedId) => {
+  reportingFeedId.value = feedId;
+  openReportModal();
+};
 
 const openReportModal = () => {
-  isReportModalOpen.value = true
-}
+  isReportModalOpen.value = true;
+};
 
 const closeReportModal = () => {
-  isReportModalOpen.value = false
-  reportReason.value = ''
-  reportDetail.value = ''
-}
+  isReportModalOpen.value = false;
+  reportReason.value = '';
+  reportDetail.value = '';
+  reportingFeedId.value = null;
+};
 
 const confirmReport = async () => {
   if (!reportReason.value) {
-    alert('신고 사유를 선택해주세요.')
-    return
+    alert('신고 사유를 선택해주세요.');
+    return;
   }
 
-  // TODO: 신고 API 호출
-  console.log('Report:', reportReason.value, reportDetail.value)
-  
-  closeReportModal()
-  isReportCheckModalOpen.value = true
-}
+  try {
+    const response = await useAuthFetch(`/feed/${reportingFeedId.value}/report`, {
+      method: 'POST',
+      body: {
+        reason: reportReason.value,
+        detail: reportDetail.value
+      }
+    });
+    console.log('Report:', reportReason.value, reportDetail.value)
+    
+    closeReportModal();
+    isReportCheckModalOpen.value = true;
+  } catch (error) {
+    console.error("신고 실패: ", error);
+    alert("신고 처리 중 오류가 발생했습니다.");
+  }
+};
 
 const closeReportCheckModal = () => {
-  isReportCheckModalOpen.value = false
-}
+  isReportCheckModalOpen.value = false;
+};
 
 
 // ######### hook ######### 
@@ -278,7 +301,6 @@ onUnmounted(() => {
 </script>
 <style scoped>
 @import url('public/css/feed/index.css');
-@import url('public/css/feed/check-report-modal.css');
 @import url('public/css/feed/report-modal.css');
 
 </style>
