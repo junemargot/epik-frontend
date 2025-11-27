@@ -36,12 +36,40 @@
     </div>
 
     <!-- 이미지 영역 -->
-    <div class="feed__image" v-if="feed.images && feed.images.length > 0">
-      <img 
-      :src="`${apiBase}${feed.images[0].imagePath}`"
-      :alt="feed.content" 
-      @error="handleImageError"
-    />
+    <div class="feed__image-container" v-if="feed.images && feed.images.length > 0">
+      <div class="feed__image-slider">
+        <img 
+          :src="`${apiBase}${feed.images[currentImageIndex].imagePath}`"
+          :alt="feed.content" 
+          @error="handleImageError"
+        />
+      </div>
+      <!-- 이전 버튼 -->
+      <button 
+        v-if="canGoPrev"
+        class="feed__image-nav feed__image-nav--prev"
+        @click="prevImage"
+      >
+        <i class='bx bx-chevron-left'></i>
+      </button>
+
+      <!-- 다음 버튼 -->
+      <button 
+        v-if="canGoNext"
+        class="feed__image-nav feed__image-nav--next"
+        @click="nextImage"
+      >
+        <i class='bx bx-chevron-right'></i>
+      </button>
+
+      <!-- 인디케이터 -->
+      <div class="feed__image-indicators" v-if="hasMultipleImages">
+        <span 
+          v-for="(image, index) in feed.images" 
+          :key="index"
+          :class="['feed__image-indicator', { active: index === currentImageIndex }]"
+        ></span>
+      </div>
     </div>
 
     <!-- 아이콘 영역 -->
@@ -208,6 +236,13 @@ const isCommentVisible = ref(false);
 const activeCommentDropdown = ref(null);
 const isReplyFormOpen = ref(false);
 
+// 이미지 슬라이드 상태
+const currentImageIndex = ref(0);
+const imageCount = computed(() => props.feed.images?.length || 0);
+const hasMultipleImages = computed(() => imageCount.value > 1);
+const canGoPrev = computed(() => currentImageIndex.value > 0);
+const canGoNext = computed(() => currentImageIndex.value < imageCount.value - 1);
+
 // 댓글 관련 상태
 const comments = ref([]);
 const newCommentContent = ref('');
@@ -320,6 +355,18 @@ const handleOutsideClick = (e) => {
   if (!e.target.closest('.dropdown')) {
     isDropdownOpen.value = false;
     activeCommentDropdown.value = null;
+  }
+};
+
+const prevImage = () => {
+  if (canGoPrev.value) {
+    currentImageIndex.value--;
+  }
+};
+
+const nextImage = () => {
+  if (canGoNext.value) {
+    currentImageIndex.value++;
   }
 };
 
