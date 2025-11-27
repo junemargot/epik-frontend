@@ -92,8 +92,56 @@ export const useDateUtils = () => {
     }
   };
 
+  /**
+   * 1주일까지는 상대시간, 그 이후는 날짜 형식으로 표시
+   * @param {string} dateString - 날짜 문자열
+   * @returns {string} - "5분 전" 또는 "11월 27일" 또는 "2023년 11월 27일"
+   */
+  const formatTimeAgo = (dateString) => {
+    if(!dateString) return "";
+
+    try {
+      const now = new Date();
+      const past = new Date(dateString);
+      const diffInMs = now - past;
+      const diffInSeconds = Math.floor(diffInMs / 1000);
+      const diffInMinutes = Math.floor(diffInSeconds / 60);
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      const diffInDays = Math.floor(diffInHours / 24);
+
+      // 1주일(7일) 이내: 상대 시간 표시
+      if (diffInSeconds < 60) {
+        return '방금 전';
+      } else if (diffInMinutes < 60) {
+        return `${diffInMinutes}분 전`;
+      } else if (diffInHours < 24) {
+        return `${diffInHours}시간 전`;
+      } else if (diffInDays < 7) {
+        return `${diffInDays}일 전`;
+      }
+
+      // 1주일 이후: 날짜 형식으로 표시
+      const pastYear = past.getFullYear();
+      const currentYear = now.getFullYear();
+      const month = past.getMonth() + 1; // 0-based이므로 +1
+      const day = past.getDate();
+
+      // 올해 게시글: 월, 일만 표시
+      if(pastYear === currentYear) {
+        return `${month}월 ${day}일`;
+      }
+
+      // 작년 이전 게시글: 연도 포함
+      return `${pastYear}년 ${month}월 ${day}일`;
+    } catch(error) {
+      console.error("Time ago formatting error: ", error);
+      return "";
+    }
+  };
+
   return {
     formatDate,
-    formatRelativeDate
+    formatRelativeDate,
+    formatTimeAgo
   };
 };

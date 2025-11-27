@@ -77,7 +77,7 @@
     <!-- 푸터 영역 -->
     <div class="feed__footer">
       <button class="feed__comment-icon" @click.stop="toggleComment">댓글 모두 보기</button>
-      <a><span>{{ formatTimeAgo(feed.createdAt) }}</span></a>
+      <a><span>{{ formatTimeAgo(feed.writeDate) }}</span></a>
     </div>
 
     <!-- 댓글 영역 - API 연동 -->
@@ -99,7 +99,7 @@
             <div class="comment__details">
               <div class="comment__info">
                 <span class="comment__username">{{ comment.memberNickname }}</span>
-                <span class="comment__time">{{ formatTimeAgo(comment.createdAt) }}</span>
+                <span class="comment__time">{{ formatTimeAgo(comment.writeDate) }}</span>
               </div>
               <div class="comment__text">
                 <span>{{ comment.content }}</span>
@@ -146,6 +146,7 @@ import { useRuntimeConfig } from '#app';
 import { useFeedStore } from '~/stores/feed';
 import { useAuthStore } from '~/stores/auth';
 import { useProfileImage } from '~/composables/useProfileImage';
+import { useDateUtils } from '~/composables/useDateUtils';
 
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
@@ -160,6 +161,12 @@ const props = defineProps({
 const emit = defineEmits(['delete', 'update']);
 
 const { getProfileImageUrl } = useProfileImage();
+const { formatTimeAgo } = useDateUtils();
+
+// 디버깅
+console.log('전체 feed 객체:', props.feed)
+console.log('feed.createdAt:', props.feed.createdAt)
+console.log('feed의 모든 키:', Object.keys(props.feed))
 
 // pinia store 사용
 const feedStore = useFeedStore();
@@ -306,12 +313,6 @@ const openReplyForm = (commentId) => {
 const openReportModal = (commentId) => {
   // TODO: 신고 기능 구현
   console.log('Report comment:', commentId);
-};
-
-// ===== 유틸리티 =====
-const formatTimeAgo = (dateString) => {
-  // TODO: 시간 포맷팅 로직 구현 필요
-  return '1시간 전';
 };
 
 // ===== 외부 클릭 감지 =====
