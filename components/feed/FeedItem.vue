@@ -13,7 +13,7 @@
       </div>
       
       <!-- 피드별 독립적인 드롭다운 -->
-      <div class="dropdown">
+      <div class="dropdown" v-if="authStore.isAuthenticated">
         <button @click="toggleDropdown">
           <i class='bx bx-dots-horizontal-rounded'></i>
         </button>

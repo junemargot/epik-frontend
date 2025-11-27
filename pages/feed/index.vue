@@ -123,8 +123,9 @@
             </div>
           </div>
           <p class="modal-report__warning">
-            허위 신고일 경우, 신고자의 서비스 활동이 제한될 수 있습니다.<br>
-            이 점 유의하시어 신중하게 신고해주세요.
+            신고가 허위 또는 악의적인 목적으로 판단될 경우,<br />
+            운영 정책에 따라 신고자의 활동이 제한될 수 있습니다.<br />
+            정확한 내용을 바탕으로 신고해 주시기 바랍니다.
           </p>
           <div class="modal-report__buttons">
             <button type="button" class="modal-report__cancel" @click="closeReportModal">취소</button>
@@ -137,11 +138,11 @@
     <!-- 신고 확인 모달 -->
     <div class="modal-check" v-if="isReportCheckModalOpen">
       <div class="modal-check__contents">
-        <h2 class="modal-check__title">신고가 완료되었습니다.</h2>
+        <h2 class="modal-check__title">신고가 접수되었습니다.</h2>
         <p class="modal-check__text">
-          신고해주셔서 감사합니다.<br><br>
-          보내주신 신고는 EPIK에서 빠르게 확인 후<br> 처리하도록 하겠습니다!<br><br>
-          EPIK을 이용해주셔서 감사합니다.
+          신고 내용이 정상적으로 접수되었습니다.<br />
+          보내주신 내용은 운영팀에서 확인 후 규정에 따라 처리될 예정입니다.<br />
+          처리에 다소 시간이 소요될 수 있는 점 양해 부탁드립니다.
         </p>
         <button class="modal-check__close" @click.stop="closeReportCheckModal">확인</button>
       </div>
@@ -248,7 +249,12 @@ const closeReportModal = () => {
 
 const confirmReport = async () => {
   if (!reportReason.value) {
-    alert('신고 사유를 선택해주세요.');
+    alert("신고 사유를 선택해주세요.");
+    return;
+  }
+
+  if(reportReason.value === '기타' && !reportDetail.value) {
+    alert("신고 사유를 입력해주세요.");
     return;
   }
 
@@ -257,13 +263,21 @@ const confirmReport = async () => {
       method: 'POST',
       body: {
         reason: reportReason.value,
-        detail: reportDetail.value
+        detail: reportDetail.value || ''
       }
     });
-    console.log('Report:', reportReason.value, reportDetail.value)
+
+    if(response.error.value) {
+      throw new Error("신고 실패");
+    }
     
+    console.log("신고 완료, 모달 닫기");
     closeReportModal();
+
+    console.log("신고 완료 모달 열기");
     isReportCheckModalOpen.value = true;
+    console.log('isReportCheckModalOpen: ', isReportCheckModalOpen.value);
+
   } catch (error) {
     console.error("신고 실패: ", error);
     alert("신고 처리 중 오류가 발생했습니다.");
@@ -302,5 +316,6 @@ onUnmounted(() => {
 <style scoped>
 @import url('public/css/feed/index.css');
 @import url('public/css/feed/report-modal.css');
+@import url('public/css/feed/check-report-modal.css');
 
 </style>
