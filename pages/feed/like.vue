@@ -111,7 +111,7 @@ const fetchLikedFeeds = async () => {
   loading.value = true;
   try {
     // 카테고리 파라미터
-    let url = `/feed/liked?sort=${sortOrder.value}`;
+    let url = `/member/feed/liked?sort=${sortOrder.value}`;
     if(selectedCategory.value) {
       url += `&categoryId=${selectedCategory.value}`;
     }

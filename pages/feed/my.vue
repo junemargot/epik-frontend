@@ -151,7 +151,7 @@ const userNickname = computed(() => {
 const fetchMyFeeds = async () => {
   loading.value = true;
   try {
-    let url = '/feed/my';
+    let url = '/member/feed/my';
     if(selectedCategory.value) {
       url += `?categoryId=${selectedCategory.value}`;
     }

@@ -216,7 +216,8 @@ const getProfileImageUrlForFeed = () => {
 const localFeed = reactive({ 
   ...props.feed,
   likeCount: Math.max(props.feed.likeCount || 0, 0),
-  commentCount: Math.max(props.feed.commentCount || 0, 0)
+  commentCount: Math.max(props.feed.commentCount || 0, 0),
+  isLiked: props.feed.isLiked
 });
 
 const handleProfileImageError = (e) => {
