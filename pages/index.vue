@@ -101,8 +101,13 @@
           >
           <div class="card__info">
             <!-- 상태 라벨 -->
-            <div class="card__status-tag">
-              <span class="card__status">진행중</span>
+            <div class="card__status-tag" style="display: flex; gap: 5px;">
+              <span class="card__status status-region">
+                {{ getRegionLabel(item) }}
+              </span>
+              <span class="card__status" :class="getStatusClass(item.performanceStatus)">
+                {{ item.performanceStatus }}
+              </span>
             </div>
             <div class="card__info-header">
               <h3>{{ item.title }}</h3>
@@ -138,8 +143,13 @@
           >
           <div class="card__info">
             <!-- 상태 라벨 -->
-            <div class="card__status-tag">
-              <span class="card__status">진행중</span>
+            <div class="card__status-tag" style="display: flex; gap: 5px;">
+              <span class="card__status status-region">
+                {{ getRegionLabel(item) }}
+              </span>
+              <span class="card__status" :class="getStatusClass(item.performanceStatus)">
+                {{ item.performanceStatus }}
+              </span>
             </div>
             <div class="card__info-header">
               <h3>{{ item.title }}</h3>
@@ -177,7 +187,12 @@
 
     <!-- 전시회 -->
     <div class="exhibition">
+      <div class="section-header">
       <h2 class="card__title">Exhibition</h2>
+      <RouterLink to="/exhibition" class="more-btn">
+          더보기 <i class="bx bx-chevron-right"></i>
+        </RouterLink>
+      </div>
       <div class="card__grid">
         <div v-for="(item, index) in exhibitionItems" :key="index" class="card__item">
           <RouterLink :to="`/exhibition/${item.id}`" class="card__link" />
@@ -186,7 +201,9 @@
                 @error="handleImageError">
           <div class="card__info">
             <div class="card__status-tag">
-              <span class="card__status">진행중</span>
+              <span class="card__status" :class="getStatusClass(item.performanceStatus)">
+                {{ item.performanceStatus }}
+              </span>
             </div>
             <div class="card__info-header">
               <h3>{{ item.title }}</h3>
@@ -350,6 +367,32 @@ const handleImageError = (event) => {
   event.target.style.display = 'none';
 };
 
+// 상태별 CSS 클래스 반환 함수
+const getStatusClass = (status) => {
+  switch(status) {
+    case '진행중':
+      return 'status-ongoing';
+    case '공연예정':
+      return 'status-upcoming';
+    case '종료':
+      return 'status-ended';
+    default:
+      return '';
+  }
+};
+
+const getRegionLabel = (item) => {
+  if(!item.regionName) return '';
+  const region = item.regionName;
+
+  return region
+    .replace('특별시', '')
+    .replace('광역시', '')
+    .replace('북도', '')
+    .replace('남도', '')
+    .replace('도', '')
+    .trim();
+};
 
 // YouTube URL 관리
 const youtubeUrls = ref([

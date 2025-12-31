@@ -757,7 +757,7 @@ h2 {
 
 /* 더보기 버튼 */
 .region__more-btn,
-.categor__more-btn {
+.category__more-btn {
   display: block;
   margin: 40px auto 0;
   padding: 12px 40px;
