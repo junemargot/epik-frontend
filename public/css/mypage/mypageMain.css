@@ -79,7 +79,7 @@
   font-size: 14px;
 }
 
-.mypage__fuction-icons {
+.mypage__function-icons {
   display: flex;
   justify-content: space-between;
   text-align: center;
@@ -87,14 +87,14 @@
   margin-top: 0;
 }
 
-.mypage__fuction-icons li {
+.mypage__function-icons li {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.mypage__fuction-icons li a {
+.mypage__function-icons li a {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -103,9 +103,45 @@
   gap: 4px;
 }
 
-.mypage__fuction-icons li i {
+.mypage__function-icons li i {
   font-size: 18px;
   margin-bottom: 4px;
+}
+
+.mypage__menulist li a,
+.mypage__function-icons li a {
+  font-weight: normal;
+  transition: font-weight 0.3s ease, transform 0.3s ease;
+}
+
+.mypage__menulist li a:hover,
+.mypage__function-icons li a:hover {
+  font-weight: bold;
+  transform: scale(1.005);
+  cursor: pointer;
+}
+
+.mypage__menulist li a .mypage__icon-wrap,
+.mypage__function-icons li a .mypage__icon-wrap {
+  font-weight: normal;
+  transition: font-weight 0.3s ease;
+}
+
+.mypage__menulist li a:hover .mypage__icon-wrap,
+.mypage__function-icons li a:hover .mypage__icon-wrap {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.mypage__menulist li a .mypage__angleright-icon,
+.mypage__function-icons li a i {
+  transition: transform 0.3s ease;
+}
+
+.mypage__menulist li a:hover .mypage__angleright-icon,
+.mypage__function-icons li a:hover i {
+  transform: scale(1.2);
+  cursor: pointer;
 }
 
 .mypage__wrap-menulist {
@@ -154,8 +190,5 @@
 .small-wrap {
   width: 353px;
   height: auto;
-  margin-left: 314px;
-  margin-right: 314px;
-  margin-top: 96px;
-  margin-bottom: 110px;
+  margin: 96px auto 110px auto;
 }
