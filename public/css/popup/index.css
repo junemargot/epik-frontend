@@ -185,7 +185,7 @@ h2 {
 }
 
 .photo-slider__title {
-  font-size: 23px;
+  font-size: 21px;
   line-height: 1.2;
   font-family: 'Pretendard-Bold';
   white-space: normal;
@@ -243,6 +243,18 @@ h2 {
   background: rgba(0, 0, 0, .8);
   box-shadow: 0 4px 10px rgba(0, 0, 0, .3);
 }
+
+.photo-slider__arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.photo-slider__arrow:disabled:hover {
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: none;
+}
+
 
 .bx {
   font-size: var(--font-size-9);
@@ -485,27 +497,78 @@ h2 {
 
 .tag-buttons {
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  gap: 12px;
+  /* flex-wrap: wrap; */
+  justify-content: flast-start;
+  align-items: center;
   margin: 24px 0;
+  overflow-x: auto;
+  padding: 8px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tag-buttons::-webkit-scrollbar {
+  display: none;
 }
 
 .tag-button {
-  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px 8px 8px;
   font-size: var(--font-size-6);
   font-weight: 600;
+  font-family: 'Hapiness-Bold', sans-serif;
   border: 1px solid var(--color-grey-5);
-  border-radius: 8px;
+  border-radius: 50px;
   background-color: var(--white);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: all .2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.tag-button:hover,
+.tag-button__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--color-grey-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.tag-button__text {
+  color: var(--black);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.tag-button:hover {
+  background-color: var(--color-grey-1);
+  border-color: var(--color-grey-6);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tag-button:hover .tag-button__icon {
+  background-color: var(--color-grey-3);
+}
+
 .tag-button.active {
   background-color: var(--accent-1);
-  color: var(--white);
   border-color: var(--accent-1);
+}
+
+.tag-button.active .tag-button__text {
+  color: var(--white);
+}
+
+.tag-button.active .tag-button__icon {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ============================================ */
@@ -810,8 +873,14 @@ h2 {
   }
   
   .photo-slider__item {
-    width: 240px;
-    height: 380px;
+    flex: 0 0 auto;
+    width: calc((95vw - 100px) / 4.2);
+    height: 430px;
+    margin-right: 12px;
+    position: relative;
+    overflow: hidden;
+    /* width: 240px;
+    height: 380px; */
   }
   
   .photo-slider__image {

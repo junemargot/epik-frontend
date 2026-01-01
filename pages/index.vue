@@ -26,26 +26,58 @@
           </div>
         </div>
       </div>
-      <button class="photo-slider__arrow photo-slider__arrow--left" @click="moveSlider(-1)">
+      <button 
+        class="photo-slider__arrow photo-slider__arrow--left" 
+        @click="moveSlider(-1)"
+        :disabled="isPrevDisabled"
+      >
         <i class='bx bx-chevron-left'></i>
       </button>
-      <button class="photo-slider__arrow photo-slider__arrow--right" @click="moveSlider(1)">
+      <button 
+        class="photo-slider__arrow photo-slider__arrow--right" 
+        @click="moveSlider(1)"
+        :disabled="isNextDisabled"
+      >
         <i class='bx bx-chevron-right'></i>
       </button>
-      <div class="photo-slider__scrollbar" @mousedown="onScrollbarClick">
+      <!-- <div class="photo-slider__scrollbar" @mousedown="onScrollbarClick">
         <div class="photo-slider__scrollbar-thumb" ref="scrollbarThumbRef" :style="scrollbarThumbStyle"></div>
-      </div>
+      </div> -->
     </div>
 
     <div class="tag-buttons">
-      <button class="tag-button">🎫 티켓 오픈 임박</button>
-      <button class="tag-button">🔥 인기급상승 콘서트</button>
-      <button class="tag-button">🎻 핫이슈 클래식 & 무용</button>
-      <button class="tag-button">🖼️ 봄날에 가기 좋은 전시</button>
-      <button class="tag-button">🛩️ 해외 내한 공연</button>
-      <button class="tag-button">🍭 애니메이션 팝업</button>
-      <button class="tag-button">🌈 체험형 인터랙티브</button>
-      <button class="tag-button">🖋️ 기록덕후 추천 팝업</button>
+      <button class="tag-button">
+        <div class="tag-button__icon">🎫</div>
+        <span>티켓 오픈 임박</span>
+      </button>
+      <button class="tag-button">
+        <div class="tag-button__icon">🔥</div>
+        <span>인기급상승 콘서트</span>
+      </button>
+      <button class="tag-button">
+        <div class="tag-button__icon">🎻</div> 
+        <span>클래식 & 무용</span>
+      </button>
+      <button class="tag-button">
+        <div class="tag-button__icon">🖼️</div>
+        <span>연인과 가기 좋은 전시</span>
+      </button>
+      <button class="tag-button">
+        <div class="tag-button__icon">🛩️</div>
+        <span>해외 내한 공연</span>
+      </button>
+      <button class="tag-button">
+        <div class="tag-button__icon">🍭</div>
+        <span>애니메이션 팝업</span>
+      </button>
+      <button class="tag-button">
+        <div class="tag-button__icon">🌈</div>
+        <span>체험형 인터랙티브</span>
+      </button>
+      <button class="tag-button">
+        <div class="tag-button__icon">🖋️</div>
+        <span>기록덕후 추천 팝업</span>
+      </button>
     </div>
 
     <!-- 팝업 -->
@@ -236,6 +268,11 @@ const popupItems = ref([]);
 const concertItems = ref([]);
 const musicalItems = ref([]);
 const exhibitionItems = ref([]);
+
+const currentIndex = ref(0);
+const slidesToShow = 5;
+const isAutoSlideActive = ref(true);
+let autoSlideInterval = null;
 // const videos = ref([]);
 
 // 팝업 슬라이드 데이터 조회 및 정규화 
@@ -433,19 +470,50 @@ const containerWidth = ref(0)
 const sliderWidth = ref(0)
 const maxScroll = ref(0)
 const slideWidth = ref(0)
-const isDragging = ref(false)
-const startX = ref(0)
-const startScrollLeft = ref(0)
 
 const sliderStyle = computed(() => ({
-  transform: `translateX(${-sliderPosition.value}px)`,
+  transform: `translateX(${-currentIndex.value * slideWidth.value}px)`,
+  transition: 'transform 0.3s ease',
   width: `${sliderWidth.value}px`
-}))
+}));
 
-const scrollbarThumbStyle = computed(() => ({
-  width: `${Math.max((containerWidth.value / sliderWidth.value) * 100, 40)}px`,
-  left: `${(sliderPosition.value / maxScroll.value) * 100}%`
-}))
+const isPrevDisabled = computed(() => currentIndex.value === 0);
+const isNextDisabled = computed(() => currentIndex.value >= slides.value.length - slidesToShow);
+
+const scrollbarThumbStyle = computed(() => {
+  if (slides.value.length === 0) {
+    return { width: '100%', left: '0%' };
+  }
+  
+  // 스크롤 가능한 최대 인덱스
+  const maxIndex = Math.max(0, slides.value.length - slidesToShow);
+  
+  // 스크롤바 thumb 너비 = (보이는 슬라이드 개수 / 전체 슬라이드 개수) * 100
+  const thumbWidthPercent = (slidesToShow / slides.value.length) * 100;
+  
+  // 스크롤바 이동 가능 영역 = 100% - thumb 너비
+  const availableSpace = 100 - thumbWidthPercent;
+  
+  // 현재 위치 비율 = currentIndex / maxIndex
+  const positionRatio = maxIndex > 0 ? currentIndex.value / maxIndex : 0;
+  
+  // 최종 left 위치
+  const leftPercent = availableSpace * positionRatio;
+  
+  console.log('스크롤바 계산:', {
+    totalSlides: slides.value.length,
+    slidesToShow,
+    maxIndex,
+    currentIndex: currentIndex.value,
+    thumbWidth: `${thumbWidthPercent.toFixed(1)}%`,
+    left: `${leftPercent.toFixed(1)}%`
+  });
+  
+  return {
+    width: `${Math.max(thumbWidthPercent, 10)}%`, // 최소 10%
+    left: `${leftPercent}%`
+  };
+});
 
 const videoItemWidth = 300
 const videoItemMargin = 16
@@ -457,23 +525,54 @@ const videoSliderStyle = computed(() => ({
 
 const updateDimensions = () => {
   if (!sliderRef.value) return
-  const slides = sliderRef.value.querySelectorAll('.photo-slider__item')
+  const slideElements = sliderRef.value.querySelectorAll('.photo-slider__item')
 
   if(slides.length === 0) return;
 
-  containerWidth.value = sliderRef.value.parentElement.offsetWidth
-  slideWidth.value = slides[0].offsetWidth + parseFloat(getComputedStyle(slides[0]).marginRight)
-  sliderWidth.value = slideWidth.value * slides.length - parseFloat(getComputedStyle(slides[slides.length - 1]).marginRight)
-  maxScroll.value = Math.max(0, sliderWidth.value - containerWidth.value)
-}
+  const slideElement = slideElements[0];
+  const itemWidth = slideElement.offsetWidth;
+  const marginRight = parseFloat(getComputedStyle(slideElement).marginRight) || 0;
+
+  containerWidth.value = sliderRef.value.parentElement.offsetWidth;
+  slideWidth.value = itemWidth + marginRight;
+  sliderWidth.value = slideWidth.value * slideElements.length;
+  maxScroll.value = Math.max(0, sliderWidth.value - containerWidth.value);
+};
 
 const updateSliderPosition = (percentage) => {
   sliderPosition.value = Math.min(maxScroll.value, percentage * maxScroll.value)
-}
+};
+
+const startAutoSlide = () => {
+  if(!isAutoSlideActive.value) treturn;
+
+  stopAutoSlide();
+
+  autoSlideInterval = setInterval(() => {
+    if(!isAutoSlideActive.value) return;
+
+    if(currentIndex.value >= slides.value.length - slidesToShow) {
+      currentIndex.value = 0;
+    } else {
+      currentIndex.value++;
+    }
+  }, 3000);
+};
+
+const stopAutoSlide = () => {
+  if(autoSlideInterval) {
+    clearInterval(autoSlideInterval);
+    autoSlideInterval = null;
+  }
+};
 
 const moveSlider = (direction) => {
-  sliderPosition.value = Math.max(0, Math.min(maxScroll.value, sliderPosition.value + direction * slideWidth.value))
-}
+  isAutoSlideActive.value = false;
+  stopAutoSlide();
+
+  const newIndex = currentIndex.value + direction;
+  currentIndex.value = Math.max(0, Math.min(slides.value.length - slidesToShow, newIndex));
+};
 
 const moveVideoSlider = (direction) => {
   if (direction > 0 && videoCurrentIndex.value < embedYoutubeUrls.length - 3) {
@@ -520,15 +619,23 @@ const onMouseUp = () => {
 }
 
 onMounted(() => {
-  updateDimensions()
-  window.addEventListener('resize', updateDimensions)
-  
-  // 🔍 5초 후 성능 리포트 출력 (모든 이미지 로드 대기)
+  console.log('슬라이더 마운트 - 총 데이터: ', slides.value.length);
+  nextTick(() => {
+    updateDimensions();
+
+    window.addEventListener('resize', updateDimensions);
+
+    setTimeout(() => {
+      startAutoSlide();
+    }, 1000);
+  });
+});
+
+onMounted(() => {
   setTimeout(() => {
     console.log('\n📊 이미지 로딩 성능 측정 결과:');
     const report = printPerformanceReport();
     
-    // 전역 변수로 저장 (콘솔에서 접근 가능)
     window.imagePerformanceReport = report;
     console.log('💡 다운로드: window.downloadImageReport()');
   }, 5000);
@@ -540,8 +647,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateDimensions)
-})
+  window.removeEventListener('resize', updateDimensions);
+  stopAutoSlide();
+});
+
 </script>
 
 <style scoped>
