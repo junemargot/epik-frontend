@@ -154,6 +154,11 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '~/stores/auth.js';
+
+const router = useRouter();
+const authStore = useAuthStore();
 
 // 아이디 유효성 검증
 const usernameModel = ref('');
@@ -419,6 +424,20 @@ const submitForm = async () => {
     alert('모든 항목을 올바르게 입력해주세요');
   }
 };
+
+watch(() => authStore.isLoggedIn, (newValue) => {
+  if(newValue) {
+    router.push('/');
+  }
+});
+
+onMounted(() => {
+  authStore.checkAuth();
+
+  if(authStore.isLoggedIn) {
+    router.push('/');
+  }
+});
 
 onUnmounted(() => {
   if(verificationTimeout.value) {
