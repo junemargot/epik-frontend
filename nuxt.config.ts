@@ -14,10 +14,9 @@ export default defineNuxtConfig({
 		},
 	},
 	modules: ["lenis/nuxt", "@pinia/nuxt", "@nuxt/image"],
-
-	// @ts-expect-error - @nuxt/image module adds this property
 	image: {
 		quality: 80,
+		format: ["webp"],
 		screens: {
 			xs: 320,
 			sm: 640,
