@@ -56,12 +56,15 @@
       <div class="picks__container">
         <div v-for="(item, index) in picksItems" :key="index" class="picks__item">
           <RouterLink :to="`/popup/${item.id}`" class="picks__item-link">
-            <img 
+            <NuxtImg 
               :src="getImageUrl(item, 'popup')"
-              :alt="`Popup ${index + 1}`"
-              @error="handleImageError"
+              :alt="`${item.title} ${index + 1}`"
+              loading="lazy"
+              quality="80"
+              sizes="sm:100vw md:50vw lg:33vw"
               class="picks__image"
-            >
+              @error="handleImageError"
+            />
             <div class="picks__info">
               <span class="picks__item-title">{{ item.title }}</span>
               <span class="picks__item-venue">{{ item.address }}</span>
@@ -78,22 +81,28 @@
     <section class="region">
       <h2 class="region__title">지역별 보기</h2>
       <div class="region__filters">
-        <button v-for="region in regions"
+        <button 
+          v-for="region in regions"
           :key="region.id"
           class="region__filter-btn"
           :class="{ active: selectedRegion === region.label }"
           @click="filterByRegion(region)"
         >
-        {{ region.label }}
+          {{ region.label }}
         </button>
       </div>
       <div class="region__container">
         <div v-for="(item, index) in displayedItems" :key="index" class="region__item">
           <RouterLink :to="`/popup/${item.id}`" class="region__item-link">
-            <img :src="getImageUrl(item, 'popup')"
-              :alt="`Popup ${index + 1}`"
+            <NuxtImg
+              :src="getImageUrl(item, 'popup')"
+              :alt="`${item.title} ${index + 1}`"
+              loading="lazy"
+              quality="80"
+              sizes="sm:100vw md:50vw lg:33vw"
+              class="region__image"
               @error="handleImageError"
-              class="region__image">
+            />
             <div class="region__info">
               <div class="region__info-header">
                 <div class="card__status-tag">
@@ -117,13 +126,14 @@
     <section class="category">
       <h2 class="category__title">카테고리별 보기</h2>
       <div class="category__filters">
-        <button v-for="category in categories"
-          :key="category.id"
+        <button 
+          v-for="category in categories"
           class="category__filter-btn"
+          :key="category.id"
           :class="{ active: selectedCategory === category.label }"
           @click="filterByCategory(category)"
         >
-        {{ category.label }}
+          {{ category.label }}
         </button>
       </div>
       <!-- <RouterLink to="/popup/category" class="more-btn">
@@ -133,11 +143,15 @@
       <div class="category__container">
         <div v-for="(item, index) in categoryItems" :key="index" class="category__item">
           <RouterLink :to="`/popup/${item.id}`" class="category__item-link">
-            <img :src="getImageUrl(item, 'popup')"
-              :alt="`Popup ${index + 1}`"
-              @error="handleImageError"
+            <NuxtImg 
+              :src="getImageUrl(item, 'popup')"
+              :alt="`${item.title} ${index + 1}`"
+              loading="lazy"
+              quality="80"
+              sizes="sm:100vw md:50vw lg:33vw"
               class="category__image"
-            >
+              @error="handleImageError"
+            />
             <div class="category__info">
               <div class="category__info-header">
                 <div class="card__status-tag">
@@ -166,9 +180,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useFetch } from '#app';
-import { normalizeImageField } from '~/utils/normalizeData';
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useFetch } from "#app";
+import { normalizeImageField } from "~/utils/normalizeData";
 
 const slides = ref([]);
 const picksItems = ref([]);
@@ -178,209 +192,195 @@ const categoryItems = ref([]);
 // const displayLimit = ref(9);
 
 // 필터 상태
-const selectedCategory = ref('전체');
-const selectedRegion = ref('전체');
+const selectedCategory = ref("전체");
+const selectedRegion = ref("전체");
 
 // 지역 목록
 const regions = ref([
-  { label: '전체', id: null },
-  { label: '더현대서울', id: 1 },
-  { label: '성수', id: 2 },
-  { label: '마포﹒서대문﹒홍대', id: 3 },
-  { label: '강남﹒송파', id: 4 },
-  { label: '그 외지역', id: 5 }
+	{ label: "전체", id: null },
+	{ label: "더현대서울", id: 1 },
+	{ label: "성수", id: 2 },
+	{ label: "마포﹒서대문﹒홍대", id: 3 },
+	{ label: "강남﹒송파", id: 4 },
+	{ label: "그 외지역", id: 5 },
 ]);
 
 // 카테고리 목록
 const categories = ref([
-  { label: '전체', id: null },
-  { label: '영화﹒애니메이션', id: 1 },
-  { label: '패션', id: 2},
-  { label: '뷰티﹒코스메틱', id: 3},
-  { label: '문구﹒굿즈', id: 4},
-  { label: '푸드', id: 5},
+	{ label: "전체", id: null },
+	{ label: "영화﹒애니메이션", id: 1 },
+	{ label: "패션", id: 2 },
+	{ label: "뷰티﹒코스메틱", id: 3 },
+	{ label: "문구﹒굿즈", id: 4 },
+	{ label: "푸드", id: 5 },
 ]);
 
-// ====== 데이터 조회 ======
 // 슬라이드 데이터 조회
-const { data: slidesData } = await useFetch('/api/v1/popup/random', {
-  baseURL: 'http://localhost:8081',
-  credentials: 'include'
+const { data: slidesData } = await useFetch("/api/v1/popup/random", {
+	baseURL: "http://localhost:8081",
+	credentials: "include",
 });
 
 if (slidesData.value) {
-  const rawData = Array.isArray(slidesData.value) ? slidesData.value : [slidesData.value]
-  slides.value = normalizeImageField(rawData.slice(0, 10), 'popup')
-};
+	const rawData = Array.isArray(slidesData.value) ? slidesData.value : [slidesData.value];
+	slides.value = normalizeImageField(rawData.slice(0, 10), "popup");
+}
 
 // EPIK'S PICK 데이터 조회
-const { data: picksData } = await useFetch('/api/v1/popup/random', {
-  baseURL: 'http://localhost:8081',
-  credentials: 'include'
+const { data: picksData } = await useFetch("/api/v1/popup/random", {
+	baseURL: "http://localhost:8081",
+	credentials: "include",
 });
 
 if (picksData.value) {
-  const rawData = Array.isArray(picksData.value) ? picksData.value : [picksData.value];
-  picksItems.value = normalizeImageField(rawData.slice(0, 6), 'popup');
-};
-
-// 전체 데이터 조회 및 초기화
-// const { data: allData, error: allDataError } = await useFetch('/api/v1/popup/region', {
-//   baseURL: 'http://localhost:8081',
-//   credentials: 'include',
-//   params: { page: 1 }
-// });
-
-// if (allData.value) {
-//   const rawData = Array.isArray(allData.value) ? allData.value : [allData.value];  
-//   allItems.value = normalizeImageField(rawData, 'popup');
-//   regionItems.value = normalizeImageField(rawData.slice(0, 15), 'popup');
-//   categoryItems.value = normalizeImageField(rawData.slice(0, 15), 'popup');
-// };
+	const rawData = Array.isArray(picksData.value) ? picksData.value : [picksData.value];
+	picksItems.value = normalizeImageField(rawData.slice(0, 6), "popup");
+}
 
 // 초기 지역별/카테고리별 데이터 조회
-const { data: initialData, error: initialDataError } = await useFetch('/api/v1/popup/region', {
-  baseURL: 'http://localhost:8081',
-  credentials: 'include',
-  params: { page: 1}
+const { data: initialData, error: initialDataError } = await useFetch("/api/v1/popup/region", {
+	baseURL: "http://localhost:8081",
+	credentials: "include",
+	params: { page: 1 },
 });
 
 console.log("=== 초기 데이터 조회 ===");
 console.log("API 응답: ", initialData.value);
 
-if(initialData.value) {
-  const rawData = Array.isArray(initialData.value) ? initialData.value : [initialData.value];
-  console.log('rawData 길이:', rawData.length);
-  
-  regionItems.value = normalizeImageField(rawData.slice(0, 15), 'popup');
-  categoryItems.value = normalizeImageField(rawData.slice(0, 15), 'popup');
-  console.log('regionItems 길이: ', regionItems.value.length);
-  console.log('categoryItems 길이: ', categoryItems.value.length);
-};
+if (initialData.value) {
+	const rawData = Array.isArray(initialData.value) ? initialData.value : [initialData.value];
+	console.log("rawData 길이:", rawData.length);
+
+	regionItems.value = normalizeImageField(rawData.slice(0, 15), "popup");
+	categoryItems.value = normalizeImageField(rawData.slice(0, 15), "popup");
+	console.log("regionItems 길이: ", regionItems.value.length);
+	console.log("categoryItems 길이: ", categoryItems.value.length);
+}
 
 const displayedItems = computed(() => {
-  return regionItems.value;
-})
+	return regionItems.value;
+});
 
 // 더보기 버튼 표시 여부
 const hasMore = computed(() => {
-  return filteredItems.value.length > displayLimit.value
-})
+	return filteredItems.value.length > displayLimit.value;
+});
 
 // 카테고리 필터 함수
 const filterByCategory = async (category) => {
-  console.log('=== filterByCategory 호출 ===');
-  console.log('선택한 카테고리: ', category);
+	console.log("=== filterByCategory 호출 ===");
+	console.log("선택한 카테고리: ", category);
 
-  selectedCategory.value = category.label;
-  if(category.id === null) {
-    const { data, error } = await useFetch('/api/v1/popup/region', {
-      baseURL: 'http://localhost:8081',
-      credentials: 'include',
-      params: { page: 1 }
-    });
+	selectedCategory.value = category.label;
+	if (category.id === null) {
+		const { data, error } = await useFetch("/api/v1/popup/region", {
+			baseURL: "http://localhost:8081",
+			credentials: "include",
+			params: { page: 1 },
+		});
 
-    if(data.value) {
-      const rawData = Array.isArray(data.value) ? data.value : [data.value];
-      categoryItems.value = normalizeImageField(rawData.slice(0, 6), 'popup');
-      console.log('categoryItems 업데이트: ', categoryItems.value.length);
-    }
-  } else {
-    const { data, error } = await useFetch('/api/v1/popup/category', {
-      baseURL: 'http://localhost:8081',
-      credentials: 'include',
-      params: { categoryId: category.id }
-    });
+		if (data.value) {
+			const rawData = Array.isArray(data.value) ? data.value : [data.value];
+			categoryItems.value = normalizeImageField(rawData.slice(0, 6), "popup");
+			console.log("categoryItems 업데이트: ", categoryItems.value.length);
+		}
+	} else {
+		const { data, error } = await useFetch("/api/v1/popup/category", {
+			baseURL: "http://localhost:8081",
+			credentials: "include",
+			params: { categoryId: category.id },
+		});
 
-    if(data.value) {
-      const rawData = Array.isArray(data.value) ? data.value : [data.value];
-      categoryItems.value = normalizeImageField(rawData.slice(0, 6), 'popup');
-      console.log('categoryItems 업데이트: ', categoryItems.value.length);
-    }
-  }
-}
+		if (data.value) {
+			const rawData = Array.isArray(data.value) ? data.value : [data.value];
+			categoryItems.value = normalizeImageField(rawData.slice(0, 6), "popup");
+			console.log("categoryItems 업데이트: ", categoryItems.value.length);
+		}
+	}
+};
 
 // 지역 필터 함수
 const filterByRegion = async (region) => {
-  console.log('=== filterByRegion 호출 ===');
-  console.log('선택한 지역: ', region);
+	console.log("=== filterByRegion 호출 ===");
+	console.log("선택한 지역: ", region);
 
-  selectedRegion.value = region.label;
+	selectedRegion.value = region.label;
 
-  // 전체가 아니면 regionId로 조회
-  const params = region.id ? { regionId: region.id, page: 1} : { page: 1};
-  console.log('API 파라미터: ', params);
+	// 전체가 아니면 regionId로 조회
+	const params = region.id ? { regionId: region.id, page: 1 } : { page: 1 };
+	console.log("API 파라미터: ", params);
 
-  const { data, error } = await useFetch('/api/v1/popup/region', {
-    baseURL: 'http://localhost:8081',
-    credentials: 'include',
-    params: params
-  });
+	const { data, error } = await useFetch("/api/v1/popup/region", {
+		baseURL: "http://localhost:8081",
+		credentials: "include",
+		params: params,
+	});
 
-  console.log('API 응답: ', data.value);
-  console.log('에러: ', error);
+	console.log("API 응답: ", data.value);
+	console.log("에러: ", error);
 
-  if(data.value) {
-    const rawData = Array.isArray(data.value) ? data.value : [data.value];
-    console.log('필터된 데이터 개수: ', rawData.length);
+	if (data.value) {
+		const rawData = Array.isArray(data.value) ? data.value : [data.value];
+		console.log("필터된 데이터 개수: ", rawData.length);
 
-    regionItems.value = normalizeImageField(rawData, 'popup');
-    console.log('regionItems 업데이트: ', regionItems.value.length);
-  }
+		regionItems.value = normalizeImageField(rawData, "popup");
+		console.log("regionItems 업데이트: ", regionItems.value.length);
+	}
 };
 
 // 더보기 함수
 const loadMore = () => {
-  displayLimit.value += 15
-}
+	displayLimit.value += 15;
+};
 
 // 상태 라벨 가져오기
 const getStatusLabel = (item) => {
-  const now = new Date();
-  const startDate = new Date(item.startDate);
-  const endDate = new Date(item.endDate);
+	const now = new Date();
+	const startDate = new Date(item.startDate);
+	const endDate = new Date(item.endDate);
 
-  if (now < startDate) {
-    return '오픈예정';
-  } else if (now > endDate) {
-    return '종료';
-  } else {
-    return '진행중';
-  }
+	if (now < startDate) {
+		return "오픈예정";
+	} else if (now > endDate) {
+		return "종료";
+	} else {
+		return "진행중";
+	}
 };
 
 // 날짜 포맷팅
 const formatDate = (date) => {
-  if (!date) return '';
-  const options = { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric'
-  };
-  
-  return new Date(date).toLocaleDateString('ko-KR', options);
+	if (!date) return "";
+	const options = {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	};
+
+	return new Date(date).toLocaleDateString("ko-KR", options);
 };
 
 // 이미지 URL 생성
 const getImageUrl = (item, type) => {
-  if (!item) return null;
-  const imageName = item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName;
+	if (!item) return null;
+	const imageName =
+		item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName;
 
-  if (imageName && (imageName.startsWith('PF_') || item.dataSource === 'KOPIS_API')) {
-    return item.kopisPoster || item.imageUrl || item.poster || null
-  };
+	if (imageName && (imageName.startsWith("PF_") || item.dataSource === "KOPIS_API")) {
+		return item.kopisPoster || item.imageUrl || item.poster || null;
+	}
 
-  if (imageName && !imageName.startsWith('http') && !imageName.startsWith('PF_')) {
-    return `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`
-  };
+	if (imageName && !imageName.startsWith("http") && !imageName.startsWith("PF_")) {
+		return `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`;
+	}
 
-  return null;
+	return null;
 };
 
 // 이미지 에러 처리
 const handleImageError = (event) => {
-  console.warn('이미지 로드 실패:', event.target.src);
-  event.target.style.display = 'none';
+	console.warn("이미지 로드 실패:", event.target.src);
+	event.target.style.display = "none";
 };
 
 // 슬라이더 관련 코드
@@ -393,54 +393,56 @@ const maxScroll = ref(0);
 const slideWidth = ref(0);
 
 const sliderStyle = computed(() => ({
-  transform: `translateX(${-sliderPosition.value}px)`,
-  width: `${sliderWidth.value}px`
+	transform: `translateX(${-sliderPosition.value}px)`,
+	width: `${sliderWidth.value}px`,
 }));
 
 const scrollbarThumbStyle = computed(() => ({
-  width: `${Math.max((containerWidth.value / sliderWidth.value) * 100, 40)}px`,
-  left: `${(sliderPosition.value / maxScroll.value) * 100}%`
+	width: `${Math.max((containerWidth.value / sliderWidth.value) * 100, 40)}px`,
+	left: `${(sliderPosition.value / maxScroll.value) * 100}%`,
 }));
 
 const updateDimensions = () => {
-  if (!sliderRef.value) return;
-  const slideElements = sliderRef.value.querySelectorAll('.photo-slider__item');
+	if (!sliderRef.value) return;
+	const slideElements = sliderRef.value.querySelectorAll(".photo-slider__item");
 
-  if (slideElements.length === 0) return;
-  containerWidth.value = sliderRef.value.parentElement.offsetWidth;
-  slideWidth.value = slideElements[0].offsetWidth + parseFloat(getComputedStyle(slideElements[0]).marginRight);
-  sliderWidth.value = slideWidth.value * slideElements.length - parseFloat(getComputedStyle(slideElements[slideElements.length - 1]).marginRight);
-  maxScroll.value = Math.max(0, sliderWidth.value - containerWidth.value);
+	if (slideElements.length === 0) return;
+	containerWidth.value = sliderRef.value.parentElement.offsetWidth;
+	slideWidth.value =
+		slideElements[0].offsetWidth + parseFloat(getComputedStyle(slideElements[0]).marginRight);
+	sliderWidth.value =
+		slideWidth.value * slideElements.length -
+		parseFloat(getComputedStyle(slideElements[slideElements.length - 1]).marginRight);
+	maxScroll.value = Math.max(0, sliderWidth.value - containerWidth.value);
 };
 
 const moveSlider = (direction) => {
-  sliderPosition.value = Math.max(0, Math.min(maxScroll.value, sliderPosition.value + direction * slideWidth.value));
+	sliderPosition.value = Math.max(
+		0,
+		Math.min(maxScroll.value, sliderPosition.value + direction * slideWidth.value),
+	);
 };
 
 const onScrollbarClick = (e) => {
-  const scrollbarRect = e.currentTarget.getBoundingClientRect();
-  const clickX = e.clientX - scrollbarRect.left;
-  const percentage = clickX / scrollbarRect.width;
-  sliderPosition.value = Math.min(maxScroll.value, Math.max(0, percentage * maxScroll.value));
+	const scrollbarRect = e.currentTarget.getBoundingClientRect();
+	const clickX = e.clientX - scrollbarRect.left;
+	const percentage = clickX / scrollbarRect.width;
+	sliderPosition.value = Math.min(maxScroll.value, Math.max(0, percentage * maxScroll.value));
 };
 
 onMounted(() => {
-  updateDimensions();
-  window.addEventListener('resize', updateDimensions);
+	updateDimensions();
+	window.addEventListener("resize", updateDimensions);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateDimensions);
+	window.removeEventListener("resize", updateDimensions);
 });
-
-
-
 </script>
 
 <style scoped>
 @import url('/public/css/popup/index.css');
 
-/* 추가 스타일 */
 .tag-button.active {
   background-color: #333;
   color: white;

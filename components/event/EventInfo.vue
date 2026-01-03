@@ -1,8 +1,10 @@
 <template>
   <div class="event__content">
-    <img 
+    <NuxtImg 
       :src="imageUrl" 
       :alt="imageAlt || '포스터 이미지'" 
+      loading="eager"
+      quality="80"
       @error="handleImageError"
     />
     <div class="event__info">
