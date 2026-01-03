@@ -7,7 +7,14 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"experimentalScannerIgnores": ["node_modules", ".nuxt", ".output", "dist", ".git", "*.min.js"]
+		"ignore": [
+			"node_modules",
+			".nuxt",
+			".output",
+			"dist",
+			".git",
+			"*.min.js"
+		]
 	},
 	"formatter": {
 		"enabled": true,
@@ -19,10 +26,10 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-      "correctness": {
-        "noUnusedImports": "warn",
-        "noUnusedVariables": "off"
-      },
+			"correctness": {
+				"noUnusedImports": "warn",
+				"noUnusedVariables": "warn"
+			},
 			"style": {
 				"noNonNullAssertion": "off",
 				"useConst": "warn",
@@ -61,7 +68,7 @@
 		"enabled": true,
 		"actions": {
 			"source": {
-				"organizeImports": "on"
+				"organizeImports": "off"
 			}
 		}
 	}
