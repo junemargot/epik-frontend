@@ -145,26 +145,7 @@ async function handleBookmark() {
 }
 
 // 이미지 URL 동적 생성 함수
-const getImageUrl = (concert) => {
-	if (!concert) return null;
-
-	const imageName = concert.saveImageName || concert.imageFileName;
-
-	// KOPIS API 데이터인 경우
-	if (concert.dataSource === "KOPIS_API") {
-		if (concert.imageUrl && concert.imageUrl.startsWith("/cache/kopis")) {
-			return `http://localhost:8081/api/v1${concert.imageUrl}`;
-		}
-
-		return concert.imageUrl || concert.kopisPoster || concert.saveImageName;
-	}
-
-	if (imageName && !imageName.startsWith("http")) {
-		return `http://localhost:8081/api/v1/uploads/images/concert/${imageName}`;
-	}
-
-	return null;
-};
+const getImageUrl = useImageUrl();
 
 // 이미지 로드 에러 처리
 const handleImageError = (event) => {

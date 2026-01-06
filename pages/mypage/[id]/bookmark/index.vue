@@ -64,11 +64,15 @@
                 @click="handleItemClick(item, section.key)"
               >
                 <div class="bookmark__image-container">
-                  <img 
+                  <NuxtImg 
                     :src="getImageUrl(item, section.key)" 
                     :alt="item.title"
+                    loading="lazy"
+                    quality="80"
+                    sizes:="sm:100vw md:50vw lg:33vw"
+                    class="bookmark__image"
                     @error="handleImageError"
-                  >
+                  />
                 </div>
                 <div class="bookmark__info">
                   <h3>{{ item.title }}</h3>
@@ -229,34 +233,7 @@ const formatDate = (date) => {
 };
 
 // 이미지 URL
-const getImageUrl = (item, type) => {
-  console.log(`getImageUrl 호출 - type: ${type}`, item);
-
-  if (!item) {
-    console.log('item이 null입니다.');
-    return null;
-  }
-
-  const imageName = item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName;
-  console.log(`imageName: ${imageName}, dataSource: ${item.dataSource}`);
-
-  // KOPIS API 데이터인 경우
-  if (imageName && (imageName.startsWith('PF_') || item.dataSource === 'KOPIS_API')) {
-    const url = item.poster || item.kopisPoster || item.imageUrl || null;
-    console.log('KOPIS 이미지 URL:', url);
-    return url;
-  }
-
-  // 일반 업로드 이미지
-  if (imageName && !imageName.startsWith('http') && !imageName.startsWith('PF_')) {
-    const url = `${apiBase}/uploads/images/${type}/${imageName}`;
-    console.log('업로드 이미지 URL:', url);
-    return url;
-  }
-
-  console.log('이미지 URL을 생성할 수 없습니다');
-  return null;
-};
+const getImageUrl = useImageUrl();
 
 // 이미지 에러 처리
 const handleImageError = (event) => {

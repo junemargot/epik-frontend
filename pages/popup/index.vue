@@ -361,21 +361,7 @@ const formatDate = (date) => {
 };
 
 // 이미지 URL 생성
-const getImageUrl = (item, type) => {
-	if (!item) return null;
-	const imageName =
-		item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName;
-
-	if (imageName && (imageName.startsWith("PF_") || item.dataSource === "KOPIS_API")) {
-		return item.kopisPoster || item.imageUrl || item.poster || null;
-	}
-
-	if (imageName && !imageName.startsWith("http") && !imageName.startsWith("PF_")) {
-		return `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`;
-	}
-
-	return null;
-};
+const getImageUrl = useImageUrl();
 
 // 이미지 에러 처리
 const handleImageError = (event) => {

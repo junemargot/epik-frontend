@@ -28,6 +28,21 @@ export default defineNuxtConfig({
 	},
 	// ssr: true,
 
+	vite: {
+		server: {
+			proxy: {
+				'/uploads': {
+					target: 'http://localhost:8081',
+					changeOrigin: true,
+				},
+				'/cache': {
+					target: 'http://localhost:8081',
+					changeOrigin: true,
+				},
+			}
+		}
+	},
+
 	nitro: {
 		routeRules: {
 			// toast-ui editor가 SSR을 지원하지 않아 reload시 에러가 나는 것을 방지

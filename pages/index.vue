@@ -376,38 +376,7 @@ const formatDate = (date) => {
 };
 
 // 이미지 URL 동적 생성 함수 + 성능 측정
-const getImageUrl = (item, type) => {
-	if (!item) return null;
-
-	const imageName =
-		item.fileSavedName || item.imgSavedName || item.saveImageName || item.imageFileName;
-
-	// KOPIS 데이터
-	if (imageName && (imageName.startsWith("PF_") || item.dataSource === "KOPIS_API")) {
-		// ✨ 절대 URL로 반환 (원래대로)
-		if (item.imageUrl?.startsWith("/cache/kopis/")) {
-			return `http://localhost:8081/api/v1${item.imageUrl}`;
-		}
-
-		// KOPIS 원본 URL
-		let imageUrl = null;
-		if (item.kopisPoster?.startsWith("http")) {
-			imageUrl = item.kopisPoster;
-		} else if (item.imageUrl?.startsWith("http")) {
-			imageUrl = item.imageUrl;
-		} else if (item.poster?.startsWith("http")) {
-			imageUrl = item.poster;
-		}
-		return imageUrl;
-	}
-
-	// 수기 입력 데이터
-	if (imageName && !imageName.startsWith("http") && !imageName.startsWith("PF_")) {
-		return `http://localhost:8081/api/v1/uploads/images/${type}/${imageName}`;
-	}
-
-	return null;
-};
+const getImageUrl = useImageUrl();
 
 // 이미지 로드 에러 처리
 const handleImageError = (event) => {
