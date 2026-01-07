@@ -139,10 +139,7 @@ const profileImageUrl = computed(() => {
   return authStore.profileImageUrl;
 });
 
-const handleImageError = (e) => {
-  e.target.src = `${apiBase}/uploads/images/user/basic.png`;
-  console.error("프로필 이미지 로드 실패, 기본 이미지로 대체");
-}
+const { handleImageError } = useImageUtils();
 
 const userNickname = computed(() => {
   return user.value.nickname || '사용자';
