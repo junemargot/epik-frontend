@@ -292,7 +292,7 @@ const showDeleteConfirmation = () => {
 // 삭제 확인
 const confirmDelete = async () => {
   try {
-    const deletePrimises = [];
+    const deletePromises = [];
 
     Object.entries(bookmarkData.value).forEach(([type, items]) => {
       const selectedItems = items.filter(item => item.selected);

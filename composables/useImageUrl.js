@@ -1,7 +1,7 @@
 export const useImageUrl = () => {
   const config = useRuntimeConfig();
 
-  return (item, type) => {
+  const getImageUrl = (item, type) => {
     if(!item) return null;
 
     // 1. KOPIS API 데이터인 경우
@@ -35,5 +35,9 @@ export const useImageUrl = () => {
     // 3. 기본 fallback
     console.warn("useImageUrl: No valid image found for item", item);
     return null;
-  }
+  };
+
+  return {
+    getImageUrl
+  };
 }

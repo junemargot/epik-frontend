@@ -8,7 +8,7 @@
           <NuxtImg 
 						class="photo-slider__image"
             :src="getImageUrl(slide, 'popup')"
-            :alt="`${slide.title} ${index + 1}`"
+            :alt="`${slide.title} 포스터 이미지`"
 						loading="eager"
 						quality="80"
             @error="handleImageError" 
@@ -44,9 +44,6 @@
       >
         <i class='bx bx-chevron-right'></i>
       </button>
-      <!-- <div class="photo-slider__scrollbar" @mousedown="onScrollbarClick">
-        <div class="photo-slider__scrollbar-thumb" ref="scrollbarThumbRef" :style="scrollbarThumbStyle"></div>
-      </div> -->
     </div>
 
     <div class="tag-buttons">
@@ -97,7 +94,7 @@
           <RouterLink :to="`/popup/${item.id}`" class="card__link" />
           <NuxtImg 
 						:src="getImageUrl(item, 'popup')"
-            :alt="`${item.title} ${index + 1}`"
+            :alt="`${item.title} 포스터 이미지`"
 						loading="lazy"
 						quality="80"
 						sizes="sm:100vw md:50vw lg:33vw"
@@ -137,7 +134,7 @@
           <RouterLink :to="`/concert/${item.id}`" class="card__link" />
           <NuxtImg 
             :src="getImageUrl(item, 'concert')"
-            :alt="`${item.title} ${index + 1}`"
+            :alt="`${item.title} 포스터 이미지`"
 						loading="lazy"
 						quality="80"
 						sizes="sm:100vw md:50vw lg:33vw"
@@ -182,7 +179,7 @@
           <RouterLink :to="`/musical/${item.id}`" class="card__link" />
           <NuxtImg 
             :src="getImageUrl(item, 'musical')"
-            :alt="`${item.title} ${index + 1}`"
+            :alt="`${item.title} 포스터 이미지`"
 						loading="lazy"
 						quality="80"
 						sizes="sm:100vw md:50vw lg:33vw"
@@ -214,24 +211,6 @@
       </div>
     </div>
 
-    <!-- 영상 섹션 -->
-    <!-- <div class="video">
-    <div class="video__container">
-      <button class="video__nav video__nav--left" @click="moveVideoSlider(-1)">&#8249;</button>
-      <div class="video__slider" ref="videoSliderRef" :style="videoSliderStyle">
-        <div v-for="(embedUrl, index) in embedYoutubeUrls" :key="index" class="video__item">
-          <iframe
-            :src="embedUrl"
-            frameborder="0"
-            allowfullscreen
-            title="YouTube video player"
-          ></iframe>
-        </div>
-      </div>
-      <button class="video__nav video__nav--right" @click="moveVideoSlider(1)">&#8250;</button>
-    </div>
-  </div> -->
-
     <!-- 전시회 -->
     <div class="exhibition">
       <div class="section-header">
@@ -245,7 +224,7 @@
           <RouterLink :to="`/exhibition/${item.id}`" class="card__link" />
           <NuxtImg 
 						:src="getImageUrl(item, 'exhibition')"
-            :alt="`${item.title} ${index + 1}`"
+            :alt="`${item.title} 포스터 이미지`"
 						loading="lazy"
 						quality="80"
 						sizes="sm:100vw md:50vw lg:33vw"
@@ -376,7 +355,7 @@ const formatDate = (date) => {
 };
 
 // 이미지 URL 동적 생성 함수 + 성능 측정
-const getImageUrl = useImageUrl();
+const { getImageUrl } = useImageUrl();
 
 // 이미지 로드 에러 처리
 const handleImageError = (event) => {
@@ -412,30 +391,7 @@ const getRegionLabel = (item) => {
 		.trim();
 };
 
-// YouTube URL 관리
-const youtubeUrls = ref([
-	"https://www.youtube.com/watch?v=yWMbEEO7TcU",
-	"https://www.youtube.com/watch?v=zo1cYfqT1oM",
-	"https://www.youtube.com/watch?v=IImyBu6Hh98",
-	"https://www.youtube.com/watch?v=0bx21frXDJE",
-	"https://www.youtube.com/watch?v=HJ9tK01fSuk",
-	"https://www.youtube.com/watch?v=k8F4s2Ie5xU",
-]);
-
-const embedYoutubeUrls = reactive([]);
-
-function convertToEmbedUrl(url) {
-	const videoIdMatch = url.match(/(?:\?v=|\/embed\/|\/v\/|youtu\.be\/)([^&?/\n]+)/);
-	return videoIdMatch ? `https://www.youtube.com/embed/${videoIdMatch[1]}` : null;
-}
-
 onMounted(() => {
-	youtubeUrls.value.forEach((url) => {
-		const embedUrl = convertToEmbedUrl(url);
-		if (embedUrl) {
-			embedYoutubeUrls.push(embedUrl);
-		}
-	});
 	// URL 변환 이후 슬라이더 크기 다시 계산
 	nextTick(() => {
 		updateDimensions();
@@ -443,10 +399,7 @@ onMounted(() => {
 });
 
 const sliderRef = ref(null);
-const scrollbarThumbRef = ref(null);
-const videoSliderRef = ref(null);
 const sliderPosition = ref(0);
-const videoCurrentIndex = ref(0);
 const containerWidth = ref(0);
 const sliderWidth = ref(0);
 const maxScroll = ref(0);
@@ -460,49 +413,6 @@ const sliderStyle = computed(() => ({
 
 const isPrevDisabled = computed(() => currentIndex.value === 0);
 const isNextDisabled = computed(() => currentIndex.value >= slides.value.length - slidesToShow);
-
-const scrollbarThumbStyle = computed(() => {
-	if (slides.value.length === 0) {
-		return { width: "100%", left: "0%" };
-	}
-
-	// 스크롤 가능한 최대 인덱스
-	const maxIndex = Math.max(0, slides.value.length - slidesToShow);
-
-	// 스크롤바 thumb 너비 = (보이는 슬라이드 개수 / 전체 슬라이드 개수) * 100
-	const thumbWidthPercent = (slidesToShow / slides.value.length) * 100;
-
-	// 스크롤바 이동 가능 영역 = 100% - thumb 너비
-	const availableSpace = 100 - thumbWidthPercent;
-
-	// 현재 위치 비율 = currentIndex / maxIndex
-	const positionRatio = maxIndex > 0 ? currentIndex.value / maxIndex : 0;
-
-	// 최종 left 위치
-	const leftPercent = availableSpace * positionRatio;
-
-	console.log("스크롤바 계산:", {
-		totalSlides: slides.value.length,
-		slidesToShow,
-		maxIndex,
-		currentIndex: currentIndex.value,
-		thumbWidth: `${thumbWidthPercent.toFixed(1)}%`,
-		left: `${leftPercent.toFixed(1)}%`,
-	});
-
-	return {
-		width: `${Math.max(thumbWidthPercent, 10)}%`, // 최소 10%
-		left: `${leftPercent}%`,
-	};
-});
-
-const videoItemWidth = 300;
-const videoItemMargin = 16;
-const videoMoveDistance = videoItemWidth + videoItemMargin;
-
-const videoSliderStyle = computed(() => ({
-	transform: `translateX(-${videoCurrentIndex.value * videoMoveDistance}px)`,
-}));
 
 const updateDimensions = () => {
 	if (!sliderRef.value) return;
@@ -520,12 +430,8 @@ const updateDimensions = () => {
 	maxScroll.value = Math.max(0, sliderWidth.value - containerWidth.value);
 };
 
-const updateSliderPosition = (percentage) => {
-	sliderPosition.value = Math.min(maxScroll.value, percentage * maxScroll.value);
-};
-
 const startAutoSlide = () => {
-	if (!isAutoSlideActive.value) treturn;
+	if (!isAutoSlideActive.value) return;
 
 	stopAutoSlide();
 
@@ -553,53 +459,6 @@ const moveSlider = (direction) => {
 
 	const newIndex = currentIndex.value + direction;
 	currentIndex.value = Math.max(0, Math.min(slides.value.length - slidesToShow, newIndex));
-};
-
-const moveVideoSlider = (direction) => {
-	if (direction > 0 && videoCurrentIndex.value < embedYoutubeUrls.length - 3) {
-		videoCurrentIndex.value++;
-	} else if (direction < 0 && videoCurrentIndex.value > 0) {
-		videoCurrentIndex.value--;
-	}
-};
-
-const onScrollbarClick = (e) => {
-	const thumbRect = scrollbarThumbRef.value.getBoundingClientRect();
-	const clickX = e.clientX - scrollbarRect.left;
-	const percentage = clickX / scrollbarRect.width;
-
-	// if (e.clientX < thumbRect.left || e.clientX > thumbRect.right) {
-	//   const percentage = (e.clientX - sliderRef.value.getBoundingClientRect().left) / sliderRef.value.offsetWidth
-	//   updateSliderPosition(percentage)
-	// }
-	sliderPositionPosition.value = Math.min(
-		maxScroll.value,
-		Math.max(0, percentage * maxScroll.value),
-	);
-};
-
-const startDragging = (e) => {
-	isDragging.value = true;
-	startX.value = e.clientX - scrollbarThumbRef.value.offsetLeft;
-	startScrollLeft.value = scrollbarThumbRef.value.offsetLeft;
-	document.addEventListener("mousemove", onMouseMove);
-	document.addEventListener("mouseup", onMouseUp);
-};
-
-const onMouseMove = (e) => {
-	if (!isDragging.value) return;
-	e.preventDefault();
-	const x = e.clientX - sliderRef.value.getBoundingClientRect().left;
-	const scrollWidth = sliderRef.value.offsetWidth - parseFloat(scrollbarThumbRef.value.style.width);
-	const newScrollLeft = Math.max(0, Math.min(scrollWidth, x - startX.value));
-	const percentage = newScrollLeft / scrollWidth;
-	updateSliderPosition(percentage);
-};
-
-const onMouseUp = () => {
-	isDragging.value = false;
-	document.removeEventListener("mousemove", onMouseMove);
-	document.removeEventListener("mouseup", onMouseUp);
 };
 
 onMounted(() => {
