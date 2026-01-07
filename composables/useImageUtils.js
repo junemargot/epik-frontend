@@ -34,10 +34,10 @@ export const useImageUtils = () => {
    * @param {Event} event - 이미지 에러 이벤트
    * @param {String} fallbackUrl - 대체 이미지 URL
    */
-  const handleImageError = (event, fallbackUrl = null) => {
+  const handleImageError = (event, initialFallbackUrl = null) => {
     console.warn('이미지 로드 실패:', event.target.src);
 
-    const defaultFallbackUrl = '/images/default-poster.jpg';
+    const defaultFallbackUrl = '/images/default-poster.png';
     const currentSrc = event.target.src;
 
     if(currentSrc.includes(defaultFallbackUrl)) {

@@ -167,10 +167,7 @@ const getImageUrl = (musical) => {
   return null;
 };
 
-const handleImageError = (event) => {
-  console.warn('이미지 로드 실패:', event.target.src);
-  event.target.style.display = 'none';
-};
+const { handleImageError } = useImageUtils();
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {

@@ -361,13 +361,10 @@ const formatDate = (date) => {
 };
 
 // 이미지 URL 생성
-const getImageUrl = useImageUrl();
+const { getImageUrl } = useImageUrl();
 
 // 이미지 에러 처리
-const handleImageError = (event) => {
-	console.warn("이미지 로드 실패:", event.target.src);
-	event.target.style.display = "none";
-};
+const { handleImageError } = useImageUtils()
 
 // 슬라이더 관련 코드
 const sliderRef = ref(null);

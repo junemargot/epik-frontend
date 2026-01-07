@@ -193,10 +193,7 @@ const submitForm = async () => {
   }
 };
 
-const handleImageError = (e) => {
-  e.target.src = `${apiBase}/uploads/images/user/basic.png`;
-  console.error("프로필 이미지 로드 실패, 기본 이미지로 대체");
-};
+const { handleImageError } = useImageUtils();
 
 const handleFileChange = async(e) => {
   const file = e.target.files[0];

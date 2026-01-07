@@ -409,11 +409,8 @@ const formatDate = (date) => {
 };
 
 // 이미지 URL
-const getImageUrl = useImageUrl();
-
-const handleImageError = (event) => {
-	event.target.style.display = "none";
-};
+const { getImageUrl } = useImageUrl();
+const { handleImageError } = useImageUtils();
 
 // 슬라이더
 const sliderRef = ref(null);
