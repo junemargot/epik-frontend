@@ -69,7 +69,7 @@
                     :alt="item.title"
                     loading="lazy"
                     quality="80"
-                    sizes:="sm:100vw md:50vw lg:33vw"
+                    sizes="sm:100vw md:50vw lg:33vw"
                     class="bookmark__image"
                     @error="handleImageError"
                   />
