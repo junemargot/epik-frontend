@@ -408,12 +408,8 @@ const formatDate = (date) => {
 	});
 };
 
-// 이미지 URL
-const getImageUrl = useImageUrl();
-
-const handleImageError = (event) => {
-	event.target.style.display = "none";
-};
+// 이미지 URL 동적 생성 및 로드 에러 처리
+const { getImageUrl, handleImageError } = useImageUtils();
 
 // 슬라이더
 const sliderRef = ref(null);

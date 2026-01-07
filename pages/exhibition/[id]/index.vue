@@ -84,15 +84,8 @@ function handleBookmark() {
   console.log('북마크 설정');
 }
 
-// 이미지 URL 동적 생성 함수
-const getImageUrl = useImageUrl();
-
-// 이미지 로드 에러 처리
-const handleImageError = (event) => {
-  console.warn('이미지 로드 실패:', event.target.src);
-  // 기본 이미지로 대체하거나 숨김 처리
-  event.target.style.display = 'none';
-};
+// 이미지 URL 동적 생성 및 로드 에러 처리
+const { getImageUrl, handleImageError } = useImageUtils(); 
 
 </script>
 

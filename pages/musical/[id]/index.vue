@@ -127,37 +127,9 @@ async function handleBookmark() {
   }
 }
 
-// 이미지 URL 동적 생성 함수
-const getImageUrl = (musical) => {
-  if (!musical) return null;
+// 이미지 URL 동적 생성 및 로드 에러 처리
+const { getImageUrl, handleImageError } = useImageUtils();
 
-  // KOPIS API 데이터인 경우
-  if (musical.dataSource === 'KOPIS_API') {
-    // imageUrl이 있으면 그것을 사용 (KOPIS API에서 제공하는 포스터 URL)
-    if (musical.imageUrl) {
-      return musical.imageUrl;
-    }
-
-    // imageUrl이 없으면 saveImageName이 HTTP URL인 경우
-    if (musical.saveImageName && musical.saveImageName.startsWith('http')) {
-      return musical.saveImageName;
-    }
-  }
-
-  // 수기 데이터이거나 로컬 이미지인 경우
-  if (musical.saveImageName && !musical.saveImageName.startsWith('http')) {
-    return `http://localhost:8081/api/v1/uploads/images/musical/${musical.saveImageName}`;
-  }
-
-  return null;
-};
-
-// 이미지 로드 에러 처리
-const handleImageError = (event) => {
-  console.warn('이미지 로드 실패:', event.target.src);
-  // 기본 이미지로 대체하거나 숨김 처리
-  event.target.style.display = 'none';
-};
 </script>
 
 <style lang="css" scoped>

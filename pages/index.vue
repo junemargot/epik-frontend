@@ -354,15 +354,8 @@ const formatDate = (date) => {
 	return new Date(date).toLocaleDateString(undefined, options);
 };
 
-// 이미지 URL 동적 생성 함수 + 성능 측정
-const { getImageUrl } = useImageUrl();
-
-// 이미지 로드 에러 처리
-const handleImageError = (event) => {
-	console.warn("이미지 로드 실패:", event.target.src);
-	// 기본 이미지로 대체하거나 숨김 처리
-	event.target.style.display = "none";
-};
+// 이미지 URL 동적 생성 및 로드 에러 처리
+const { getImageUrl, handleImageError } = useImageUtils();
 
 // 상태별 CSS 클래스 반환 함수
 const getStatusClass = (status) => {

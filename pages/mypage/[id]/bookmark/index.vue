@@ -232,14 +232,8 @@ const formatDate = (date) => {
   });
 };
 
-// 이미지 URL
-const getImageUrl = useImageUrl();
-
-// 이미지 에러 처리
-const handleImageError = (event) => {
-  console.log('이미지 로드 실패:', event.target.src);
-  event.target.style.display = 'none';
-};
+// 이미지 URL 동적 생성 및 로드 에러 처리
+const { getImageUrl, handleImageError } = useImageUtils();
 
 const handleItemClick = (item, type) => {
   if (editMode.value) {
