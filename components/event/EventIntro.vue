@@ -2,15 +2,6 @@
   <section class="event__intro">
     <h2 class="intro__title">공연상세 정보</h2>
     <div class="intro__content" v-html="formatContent(content)"></div>
-    <div class="event__video" v-if="youtubeUrl">
-      <iframe 
-        id="youtube-video" 
-        :src="embedYoutubeUrl" 
-        frameborder="0" 
-        allowfullscreen
-        sandbox="allow-forms allow-scripts allow-same-origin allow-presentation"
-      ></iframe>
-    </div>
     <div class="event__schedule" v-if="schedules && schedules.length">
       <p v-for="(schedule, index) in schedules" :key="index">{{ schedule }}</p>
     </div>
@@ -20,7 +11,7 @@
         <NuxtImg 
           v-for="(image, index) in images" 
           :key="index" 
-          :src="image" 
+          :src="normalizeImageUrl(image)" 
           :alt="`${title} 상세${index + 1}`" 
           loading="lazy"
           quality="80"
@@ -32,12 +23,31 @@
 </template>
 
 <script setup>
+const config = useRuntimeConfig();
+
 defineProps({
   title: String,
   content: String,
   youtubeUrl: String,
   images: Array
 });
+
+// 이미지 URL 정규화
+const normalizeImageUrl = (image) => {
+  if (!image) return null;
+  
+  // 이미 절대 URL이면 그대로 반환
+  if (image.startsWith('http')) {
+    return image;
+  }
+  
+  // 상대 경로면 백엔드 URL 붙이기
+  if (image.startsWith('/cache') || image.startsWith('/api')) {
+    return `${config.public.apiBase}${image}`;
+  }
+  
+  return image;
+};
 
 // 엔터 처리 함수 추가
 const formatContent = (content) => {

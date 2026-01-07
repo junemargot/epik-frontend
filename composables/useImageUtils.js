@@ -1,31 +1,45 @@
 export const useImageUtils = () => {
+  const config = useRuntimeConfig();
+
   /**
    * 컨텐츠 타입과 데이터에 따라 동적으로 이미지 URL을 생성
    * @param {Object} item - 콘서트, 뮤지컬, 전시회 등의 데이터
    * @param {String} contentType - 'concert', 'musical', 'exhibition', 'popup'
    * @returns {String | null} - 이미지 URL 또는 null
    */
-  const getImageUrl = (item, contentType) => {
+  const getImageUrl = (item, type) => {
     if(!item) return null;
 
-    // KOPIS API 데이터인 경우
+    // 1. KOPIS API 데이터인 경우
     if(item.dataSource === 'KOPIS_API') {
-      // imageUrl이 있으면 사용 (KOPIS 포스터 URL)
+      // 백엔드에서 캐시된 이미지 경로를 반환하는 경우
       if(item.imageUrl) {
+        // 상대 경로면 백엔드 URL 붙이기
+        if(item.imageUrl.startsWith('/cache') || item.imageUrl.startsWith('/api')) {
+          return `${config.public.apiBase}${item.imageUrl}`;
+        }
         return item.imageUrl;
       }
-      // imageUrl이 없고 saveImageName이 HTTP URL인 경우
-      if(item.saveImageName && item.saveImageName.startsWith('http')) {
+
+      // saveImageName이 HTTP URL인 경우 (KOPIS 원본 URL)
+      if (item.saveImageName && item.saveImageName.startsWith('http')) {
         return item.saveImageName;
       }
     }
 
-    // 수기 입력 데이터이거나 로컬 이미지인 경우
-    if(item.saveImageName && !item.saveImageName.startsWith('http')) {
-      return `http://localhost:8081/api/v1/uploads/images/${contentType}/${item.saveImageName}`;
+    // 2. 수기 입력 데이터 (로컬 업로드 이미지)
+    if (item.saveImageName && !item.saveImageName.startsWith('http')) {
+      return `${config.public.apiBase}/uploads/images/${type}/${item.saveImageName}`;
+      // 결과: http://localhost:8081/api/v1/uploads/images/popup/abc123.png
     }
 
-    // 기본 이미지 또는 null
+    // 3. imageFileName도 확인 (normalizeData에서 생성)
+    if (item.imageFileName && !item.imageFileName.startsWith('http')) {
+      return `${config.public.apiBase}/uploads/images/${type}/${item.imageFileName}`;
+    }
+
+    // 3. 기본 fallback
+    console.warn("useImageUrl: No valid image found for item", item);
     return null;
   };
 
