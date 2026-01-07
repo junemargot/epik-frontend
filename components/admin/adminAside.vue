@@ -34,7 +34,7 @@
           </li>
         </ul>
       </li>
-      <li v-for="(item, index) in feedMenuItems" :key="index">
+      <li v-for="(item, index) in dataSyncMenuItems" :key="index">
         <a href="#" @click.prevent="toggleDropdown(item.name)">
           <i class='bx bx-book-content icon'></i>{{ item.label }}
           <i class='bx bxs-chevron-right icon-right'></i>
@@ -46,7 +46,7 @@
         </ul>
       </li>
       <li class="sidebar__menu-divider">manage</li>
-      <li v-for="(item, index) in dataSyncMenuItems" :key="index">
+      <li v-for="(item, index) in feedMenuItems" :key="index">
         <a href="#" @click.prevent="toggleDropdown(item.name)">
           <i class='bx bx-book-content icon'></i>{{ item.label }}
           <i class='bx bxs-chevron-right icon-right'></i>
@@ -151,29 +151,29 @@ const contentsMenuItems = [
   },
 ];
 
-// const feedMenuItems = [
-//   {
-//     name: 'feed',
-//     label: '피드 관리',
-//     icon: ['fat', 'list-alt'],
-//     subItems: [
-//       { label: '피드 관리', link: '/admin/feed' },
-//       { label: '댓글 관리', link: '/admin/feed/comment' }
-//     ],
-//   },
-// ];
+const feedMenuItems = [
+  {
+    name: 'feed',
+    label: '피드 관리',
+    icon: ['fat', 'list-alt'],
+    subItems: [
+      { label: '피드 관리', link: '/admin/feed' },
+      { label: '댓글 관리', link: '/admin/feed/comment' }
+    ],
+  },
+];
 
-// const reportMenuItems = [
-//   {
-//     name: 'report',
-//     label: '신고 관리',
-//     icon: ['fas', 'exclamation-triangle'],
-//     subItems: [
-//       { label: '피드 신고 내역', link: '/admin/reports/feed' },
-//       { label: '댓글 신고 내역', link: '/admin/reports/comment' }
-//     ],
-//   },
-// ];
+const reportMenuItems = [
+  {
+    name: 'report',
+    label: '신고 관리',
+    icon: ['fas', 'exclamation-triangle'],
+    subItems: [
+      { label: '피드 신고 내역', link: '/admin/reports/feed' },
+      { label: '댓글 신고 내역', link: '/admin/reports/comment' }
+    ],
+  },
+];
 
 const inquiryMenuItems = [
   {

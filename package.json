@@ -14,6 +14,7 @@
     "check": "biome check --write ."
   },
   "dependencies": {
+    "@nuxt/image": "^2.0.0",
     "@pinia/nuxt": "^0.11.3",
     "@toast-ui/editor": "^3.2.2",
     "axios": "^1.8.4",

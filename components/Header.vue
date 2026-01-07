@@ -28,7 +28,6 @@
 
         <div class="dropdown-menu" :class="{ 'move-sidebar': isSidebarOpen }">
           <div class="dropdown-menu__inner">
-
             <div class="dropdown-menu__header">
               <div class="dropdown-menu__title">
                 <h1><RouterLink to="/">EPIK</RouterLink></h1>
@@ -40,15 +39,10 @@
 
             <div class="search-bar">
               <form>
-                <button type="submit" class="search-bar__submintbutton">
+                <input type="text" placeholder="Search" class="search-bar__input">
+                <button type="submit" class="search-bar__submit">
                   <i class='bx bx-search'></i>
                 </button>
-                <div class="search-bar__input-wrap">
-                  <input type="text" placeholder="검색어를 입력해주세요.">
-                  <button type="reset" class="search-bar__clear" @click="clearSearch">
-                    <i class='bx bx-x search-bar-remove-icon'></i>
-                  </button>
-                </div>
               </form>
             </div>
 
@@ -157,16 +151,24 @@ const isSidebarOpen = ref(false);
 // 사이드바 열기/닫기 토글 함수
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
+
+  if(isSidebarOpen.value) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
 };
 
 // 사이드바 닫기 함수
 const closeSidebar = () => {
   isSidebarOpen.value = false;
+  document.body.style.overflow = '';
 };
 
 router.afterEach(() => {
   isSidebarOpen.value = false;
-})
+  document.body.style.overflow = '';
+});
 
 
 // 사이드바 외부 영역 드롭다운 처리

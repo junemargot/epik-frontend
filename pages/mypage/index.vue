@@ -28,9 +28,9 @@
             </div>
           </div>
         </div>
-        <div class="mypage__wrap-fuction">
+        <div class="mypage__wrap-function">
           <nav>
-            <ul class="mypage__fuction-icons">
+            <ul class="mypage__function-icons">
               <li class="bell">
                 <NuxtLink to="/mypage/notification">
                   <i class='mypage__bell-icon bx bx-bell'></i>알림
@@ -236,53 +236,4 @@ onMounted(() => {
 
 <style scoped>
 @import url('/public/css/mypage/mypageMain.css');
-
-.mypage__menulist li a,
-.mypage__fuction-icons li a {
-  font-weight: normal;
-  /* 기본 폰트 두께는 normal */
-  transition: font-weight 0.3s ease, transform 0.3s ease;
-  /* 부드러운 전환 효과 */
-}
-
-/* 호버 시 폰트 두께와 크기 증가 */
-.mypage__menulist li a:hover,
-.mypage__fuction-icons li a:hover {
-  font-weight: bold;
-  /* 호버 시 폰트 두께를 bold로 변경 */
-  transform: scale(1.005);
-  /* 호버 시 아이콘과 텍스트 크기 살짝 증가 */
-  cursor: pointer;
-}
-
-/* 메뉴 내 아이콘 텍스트 */
-.mypage__menulist li a .mypage__icon-wrap,
-.mypage__fuction-icons li a .mypage__icon-wrap {
-  font-weight: normal;
-  /* 기본 두께는 normal */
-  transition: font-weight 0.3s ease;
-}
-
-/* 호버 시 아이콘 텍스트 볼드 처리 */
-.mypage__menulist li a:hover .mypage__icon-wrap,
-.mypage__fuction-icons li a:hover .mypage__icon-wrap {
-  font-weight: bold;
-  /* 호버 시 아이콘 텍스트도 볼드 처리 */
-  cursor: pointer;
-}
-
-/* 메뉴 내 아이콘 크기 조정 */
-.mypage__menulist li a .mypage__angleright-icon,
-.mypage__fuction-icons li a i {
-  transition: transform 0.3s ease;
-  /* 부드러운 전환 효과 */
-}
-
-/* 호버 시 아이콘 크기 확대 */
-.mypage__menulist li a:hover .mypage__angleright-icon,
-.mypage__fuction-icons li a:hover i {
-  transform: scale(1.2);
-  /* 호버 시 아이콘 크기 살짝 커짐 */
-  cursor: pointer;
-}
 </style>

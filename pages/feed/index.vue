@@ -1,8 +1,8 @@
 <template>
   <section class="feed">
-    <RouterLink to="/feed/reg" class="feed__floating-btn">
+    <Button @click="handleCreateFeed" class="feed__floating-btn">
       <i class='bx bx-plus'></i>
-    </RouterLink>
+    </Button>
     <div class="feed__header">
       <h1 class="feed__title">feed</h1>
       <form class="feed__form" @submit.prevent="handleSearch">
@@ -12,12 +12,6 @@
         </label>
         <input type="submit" value="submit" style="display: none;">
       </form>
-      <!-- 피드 등록 -->
-      <!-- <div class="feed__actions">
-        <RouterLink to="/feed/reg" class="feed__create-btn">
-          <i class="bx bx-plus"></i>
-        </RouterLink>
-      </div> -->
     </div>
 
     <!-- 메뉴 -->
@@ -65,6 +59,7 @@
           :feed="feed"
           @delete="handleDeleteFeed"
           @update="handleUpdateFeed"
+          @report="handleReportFeed"
         />
       </div>
     </div>
@@ -92,40 +87,45 @@
         <form class="modal-report__form">
           <div class="modal-report__radio-group">
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason1" name="report-reason">
+              <input type="radio" id="reason1" name="report-reason" value="욕설, 비방, 차별, 혐오" v-model="reportReason">
               <label for="reason1">욕설, 비방, 차별, 혐오</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason2" name="report-reason">
+              <input type="radio" id="reason2" name="report-reason" value="홍보, 영리목적" v-model="reportReason">
               <label for="reason2">홍보, 영리목적</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason3" name="report-reason">
+              <input type="radio" id="reason3" name="report-reason" value="불법 정보" v-model="reportReason">
               <label for="reason3">불법 정보</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason4" name="report-reason">
+              <input type="radio" id="reason4" name="report-reason" value="음란, 청소년 유해" v-model="reportReason">
               <label for="reason4">음란, 청소년 유해</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason5" name="report-reason">
+              <input type="radio" id="reason5" name="report-reason" value="개인 정보 유출, 유포, 거래" v-model="reportReason">
               <label for="reason5">개인 정보 유출, 유포, 거래</label>
             </div>
             <div class="modal-report__radio-item">
-              <input type="radio" id="reason6" name="report-reason">
+              <input type="radio" id="reason6" name="report-reason" value="도배, 스팸" v-model="reportReason">
               <label for="reason6">도배, 스팸</label>
             </div>
             <div class="modal-report__radio-item">
-              <input class="report-reason" type="radio" id="reason7" name="report-reason">
-              <label class="report-reason" for="reason7">기타</label>
-              <div class="modal-report__text-input">
-                <textarea placeholder="신고 사유를 직접 입력해주세요.(최대 500자)"></textarea>
-              </div>
+              <input class="report-reason" type="radio" id="reason7" name="report-reason" value="기타" v-model="reportReason">
+              <label for="reason7">기타</label>
+            </div>
+            <div class="modal-report__text-input" v-if="reportReason === '기타'">
+              <textarea 
+                v-model="reportDetail"
+                placeholder="신고 사유를 직접 입력해주세요.(최대 500자)"
+                maxlength="500"
+              ></textarea>
             </div>
           </div>
           <p class="modal-report__warning">
-            ** 허위 신고일 경우, 신고자의 서비스 활동이 제한될 수 있습니다.<br>
-            이 점 유의하시어 신중하게 신고해주세요.
+            신고가 허위 또는 악의적인 목적으로 판단될 경우,<br />
+            운영 정책에 따라 신고자의 활동이 제한될 수 있습니다.<br />
+            정확한 내용을 바탕으로 신고해 주시기 바랍니다.
           </p>
           <div class="modal-report__buttons">
             <button type="button" class="modal-report__cancel" @click="closeReportModal">취소</button>
@@ -138,11 +138,11 @@
     <!-- 신고 확인 모달 -->
     <div class="modal-check" v-if="isReportCheckModalOpen">
       <div class="modal-check__contents">
-        <h2 class="modal-check__title">신고가 완료되었습니다.</h2>
+        <h2 class="modal-check__title">신고가 접수되었습니다.</h2>
         <p class="modal-check__text">
-          신고해주셔서 감사합니다.<br><br>
-          보내주신 신고는 EPIK에서 빠르게 확인 후<br> 처리하도록 하겠습니다!<br><br>
-          EPIK을 이용해주셔서 감사합니다.
+          신고 내용이 정상적으로 접수되었습니다.<br />
+          보내주신 내용은 운영팀에서 확인 후 규정에 따라 처리될 예정입니다.<br />
+          처리에 다소 시간이 소요될 수 있는 점 양해 부탁드립니다.
         </p>
         <button class="modal-check__close" @click.stop="closeReportCheckModal">확인</button>
       </div>
@@ -152,13 +152,16 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import FeedItem from '~/components/feed/FeedItem.vue';
 import { useFeedStore } from '~/stores/feed';
+import { useAuthStore } from '~/stores/auth';
 
 const route = useRoute();
+const router = useRouter();
 const currentRoute = computed(() => route.path);
 const feedStore = useFeedStore();
+const authStore = useAuthStore();
 
 // computed로 store 상태 참조
 const feeds = computed(() => feedStore.feeds);
@@ -182,7 +185,19 @@ const filterByCategory = (category) => {
   selectedCategory.value = categoryMapping[category];
   feedStore.resetFeeds();
   feedStore.fetchFeeds(selectedCategory.value);
-}
+};
+
+const handleCreateFeed = () => {
+  if(!authStore.isAuthenticated) {
+    const confirmed = confirm("로그인이 필요한 기능입니다. \n로그인 페이지로 이동하시겠습니까?");
+    if(confirmed) {
+      router.push('/login');
+    }
+    return;
+  }
+
+  router.push('/feed/reg');
+};
 
 const handleSearch = () => {
   // TODO: 검색 API 구현 필요
@@ -210,37 +225,68 @@ const handleScroll = () => {
 }
 
 // ===== 신고 모달 =====
-const isReportModalOpen = ref(false)
-const isReportCheckModalOpen = ref(false)
-const reportReason = ref('')
-const reportDetail = ref('')
+const isReportModalOpen = ref(false);
+const isReportCheckModalOpen = ref(false);
+const reportReason = ref('');
+const reportDetail = ref('');
+const reportingFeedId = ref(null);
+
+const handleReportFeed = (feedId) => {
+  reportingFeedId.value = feedId;
+  openReportModal();
+};
 
 const openReportModal = () => {
-  isReportModalOpen.value = true
-}
+  isReportModalOpen.value = true;
+};
 
 const closeReportModal = () => {
-  isReportModalOpen.value = false
-  reportReason.value = ''
-  reportDetail.value = ''
-}
+  isReportModalOpen.value = false;
+  reportReason.value = '';
+  reportDetail.value = '';
+  reportingFeedId.value = null;
+};
 
 const confirmReport = async () => {
   if (!reportReason.value) {
-    alert('신고 사유를 선택해주세요.')
-    return
+    alert("신고 사유를 선택해주세요.");
+    return;
   }
 
-  // TODO: 신고 API 호출
-  console.log('Report:', reportReason.value, reportDetail.value)
-  
-  closeReportModal()
-  isReportCheckModalOpen.value = true
-}
+  if(reportReason.value === '기타' && !reportDetail.value) {
+    alert("신고 사유를 입력해주세요.");
+    return;
+  }
+
+  try {
+    const response = await useAuthFetch(`/feed/${reportingFeedId.value}/report`, {
+      method: 'POST',
+      body: {
+        reason: reportReason.value,
+        detail: reportDetail.value || ''
+      }
+    });
+
+    if(response.error.value) {
+      throw new Error("신고 실패");
+    }
+    
+    console.log("신고 완료, 모달 닫기");
+    closeReportModal();
+
+    console.log("신고 완료 모달 열기");
+    isReportCheckModalOpen.value = true;
+    console.log('isReportCheckModalOpen: ', isReportCheckModalOpen.value);
+
+  } catch (error) {
+    console.error("신고 실패: ", error);
+    alert("신고 처리 중 오류가 발생했습니다.");
+  }
+};
 
 const closeReportCheckModal = () => {
-  isReportCheckModalOpen.value = false
-}
+  isReportCheckModalOpen.value = false;
+};
 
 
 // ######### hook ######### 
@@ -269,7 +315,7 @@ onUnmounted(() => {
 </script>
 <style scoped>
 @import url('public/css/feed/index.css');
-@import url('public/css/feed/check-report-modal.css');
 @import url('public/css/feed/report-modal.css');
+@import url('public/css/feed/check-report-modal.css');
 
 </style>

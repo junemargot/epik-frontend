@@ -37,12 +37,19 @@ export const useImageUtils = () => {
   const handleImageError = (event, fallbackUrl = null) => {
     console.warn('이미지 로드 실패:', event.target.src);
 
-    if(fallbackUrl) {
-      // 대체 이미지가 있는 경우
-      event.target.src = fallbackUrl;
-    } else {
-      // 대체 이미지가 없는 경우 숨김 처리
+    const defaultFallbackUrl = '/images/default-poster.jpg';
+    const currentSrc = event.target.src;
+
+    if(currentSrc.includes(defaultFallbackUrl)) {
+      // 이미 기본 대체 이미지를 로드하려 했으나 실패한 경우, 숨김 처리
       event.target.style.display = 'none';
+      console.error("기본 대체 이미지 로드에 실패했습니다. 이미지를 숨깁니다.");
+    } else if(initialFallbackUrl && currentSrc !== initialFallbackUrl) {
+      // 초기 대체 url이 있고, 아직 로드하지 않은 경우 (초기 대체 이미지 시도)
+      event.target.src = initialFallbackUrl;
+    } else {
+      // 초기 대체 url이 없거나 이미 실패한 경우 (기본 대체 이미지 로드 시도)
+      event.target.src = defaultFallbackUrl;
     }
   };
 

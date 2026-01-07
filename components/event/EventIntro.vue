@@ -17,11 +17,13 @@
     <div class="event__images" v-if="images && images.length">
       <h3 class="images__title">상세 이미지</h3>
       <div class="images__gallery">
-        <img 
+        <NuxtImg 
           v-for="(image, index) in images" 
           :key="index" 
           :src="image" 
           :alt="`${title} 상세${index + 1}`" 
+          loading="lazy"
+          quality="80"
           class="detail__image"
         />
       </div>

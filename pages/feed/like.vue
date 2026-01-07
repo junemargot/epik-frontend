@@ -29,27 +29,27 @@
           @click="filterByCategory(null)" 
           :class="{ 'is-active': selectedCategory === null }"
           style="cursor: pointer"
-        >all</span>
+        >All</span>
         <span 
           @click="filterByCategory('popup')" 
           :class="{ 'is-active': selectedCategory === 1 }"
           style="cursor: pointer"
-        >pop-up</span>
+        >Popup</span>
         <span 
           @click="filterByCategory('concert')" 
           :class="{ 'is-active': selectedCategory === 2 }"
           style="cursor: pointer"
-        >concert</span>
+        >Concert</span>
         <span 
           @click="filterByCategory('musical')" 
           :class="{ 'is-active': selectedCategory === 3 }"
           style="cursor: pointer"
-        >musical</span>
+        >Musical</span>
         <span 
           @click="filterByCategory('exhibition')" 
           :class="{ 'is-active': selectedCategory === 4 }"
           style="cursor: pointer"
-        >exhibition</span>
+        >Exhibition</span>
       </div>
     </div>
 
@@ -111,7 +111,7 @@ const fetchLikedFeeds = async () => {
   loading.value = true;
   try {
     // 카테고리 파라미터
-    let url = `/feed/liked?sort=${sortOrder.value}`;
+    let url = `/member/feed/liked?sort=${sortOrder.value}`;
     if(selectedCategory.value) {
       url += `&categoryId=${selectedCategory.value}`;
     }

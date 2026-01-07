@@ -5,20 +5,27 @@
       <div class="feed__user-profile">
         <img 
           v-if="feed.writerProfileImage" 
-          :src="`${apiBase}${feed.writerProfileImage}`" 
-          alt="profile" 
+          :src="getProfileImageUrlForFeed()" 
+          alt="feed.writer"
+          @error="handleProfileImageError"
         />
         <span>{{ feed.writer }}</span>
       </div>
       
       <!-- 피드별 독립적인 드롭다운 -->
-      <div class="dropdown">
+      <div class="dropdown" v-if="authStore.isAuthenticated">
         <button @click="toggleDropdown">
           <i class='bx bx-dots-horizontal-rounded'></i>
         </button>
-        <ul v-if="isDropdownOpen" class="dropdown-list">
+        <!-- 본인 글: 수정/삭제 -->
+        <ul v-if="isDropdownOpen && isMyFeed" class="dropdown-list">
           <li><button @click="handleEdit">수정</button></li>
           <li><button @click.prevent="feedRemove">삭제</button></li>
+        </ul>
+        <!-- 다른사람 글 or 비로그인: 신고/취소 -->
+        <ul v-if="isDropdownOpen && !isMyFeed" class="dropdown-list">
+          <li><button @click="handleReport">신고</button></li>
+          <li><button @click="toggleDropdown">취소</button></li>
         </ul>
         
         <!-- 삭제 모달 -->
@@ -35,12 +42,40 @@
     </div>
 
     <!-- 이미지 영역 -->
-    <div class="feed__image" v-if="feed.images && feed.images.length > 0">
-      <img 
-      :src="`${apiBase}${feed.images[0].imagePath}`"
-      :alt="feed.content" 
-      @error="handleImageError"
-    />
+    <div class="feed__image-container" v-if="feed.images && feed.images.length > 0">
+      <div class="feed__image-slider">
+        <img 
+          :src="`${apiBase}${feed.images[currentImageIndex].imagePath}`"
+          :alt="feed.content" 
+          @error="handleImageError"
+        />
+      </div>
+      <!-- 이전 버튼 -->
+      <button 
+        v-if="canGoPrev"
+        class="feed__image-nav feed__image-nav--prev"
+        @click="prevImage"
+      >
+        <i class='bx bx-chevron-left'></i>
+      </button>
+
+      <!-- 다음 버튼 -->
+      <button 
+        v-if="canGoNext"
+        class="feed__image-nav feed__image-nav--next"
+        @click="nextImage"
+      >
+        <i class='bx bx-chevron-right'></i>
+      </button>
+
+      <!-- 인디케이터 -->
+      <div class="feed__image-indicators" v-if="hasMultipleImages">
+        <span 
+          v-for="(image, index) in feed.images" 
+          :key="index"
+          :class="['feed__image-indicator', { active: index === currentImageIndex }]"
+        ></span>
+      </div>
     </div>
 
     <!-- 아이콘 영역 -->
@@ -76,7 +111,7 @@
     <!-- 푸터 영역 -->
     <div class="feed__footer">
       <button class="feed__comment-icon" @click.stop="toggleComment">댓글 모두 보기</button>
-      <a><span>{{ formatTimeAgo(feed.createdAt) }}</span></a>
+      <a><span>{{ formatTimeAgo(feed.writeDate) }}</span></a>
     </div>
 
     <!-- 댓글 영역 - API 연동 -->
@@ -98,7 +133,7 @@
             <div class="comment__details">
               <div class="comment__info">
                 <span class="comment__username">{{ comment.memberNickname }}</span>
-                <span class="comment__time">{{ formatTimeAgo(comment.createdAt) }}</span>
+                <span class="comment__time">{{ formatTimeAgo(comment.writeDate) }}</span>
               </div>
               <div class="comment__text">
                 <span>{{ comment.content }}</span>
@@ -143,6 +178,9 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRuntimeConfig } from '#app';
 import { useFeedStore } from '~/stores/feed';
+import { useAuthStore } from '~/stores/auth';
+import { useProfileImage } from '~/composables/useProfileImage';
+import { useDateUtils } from '~/composables/useDateUtils';
 
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
@@ -154,26 +192,43 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['delete', 'update']);
+const emit = defineEmits(['delete', 'update', 'report']);
+const { getProfileImageUrl } = useProfileImage();
+const { formatTimeAgo } = useDateUtils();
 
 // pinia store 사용
 const feedStore = useFeedStore();
+const authStore = useAuthStore();
+
+const isMyFeed = computed(() => {
+  return authStore.user.nickname === props.feed.writer;
+});
+
+const getProfileImageUrlForFeed = () => {
+  if(isMyFeed.value) {
+    return authStore.profileImageUrl;
+  } else {
+    return getProfileImageUrl(props.feed.writerProfileImage);
+  }
+};
 
 // 로컬 피드 상태 (좋아요 수 등 실시간 업데이트용)
 const localFeed = reactive({ 
   ...props.feed,
   likeCount: Math.max(props.feed.likeCount || 0, 0),
-  commentCount: Math.max(props.feed.commentCount || 0, 0)
+  commentCount: Math.max(props.feed.commentCount || 0, 0),
+  isLiked: props.feed.isLiked
 });
 
-// 디버깅: 초기값 확인
-console.log('🔍 FeedItem 초기화:', {
-  feedId: props.feed.feedId,
-  'props.feed.likeCount': props.feed.likeCount,
-  'localFeed.likeCount': localFeed.likeCount,
-  'props.feed.isLiked': props.feed.isLiked,
-  'localFeed.isLiked': localFeed.isLiked
-});
+const handleProfileImageError = (e) => {
+  console.error("프로필 이미지 로드 실패: ", {
+    src: e.target.src,
+    writerProfileImage: props.feed.writerPforileImage,
+    writer: props.feed.writer
+  });
+
+  e.target.src = `${apiBase}/uploads/images/user/basic.png`;
+};
 
 // 각 피드별 독립적인 상태
 const isDropdownOpen = ref(false);
@@ -181,6 +236,13 @@ const isDeleteFeedModalVisible = ref(false);
 const isCommentVisible = ref(false);
 const activeCommentDropdown = ref(null);
 const isReplyFormOpen = ref(false);
+
+// 이미지 슬라이드 상태
+const currentImageIndex = ref(0);
+const imageCount = computed(() => props.feed.images?.length || 0);
+const hasMultipleImages = computed(() => imageCount.value > 1);
+const canGoPrev = computed(() => currentImageIndex.value > 0);
+const canGoNext = computed(() => currentImageIndex.value < imageCount.value - 1);
 
 // 댓글 관련 상태
 const comments = ref([]);
@@ -216,6 +278,12 @@ const handleEdit = () => {
   // TODO: 피드 수정 페이지로 이동
   console.log('Edit feed:', props.feed.feedId);
 };
+
+// 신고
+const handleReport = () => {
+  isDropdownOpen.value = false;
+  emit('report', props.feed.feedId);
+}
 
 // ===== 좋아요 관련 =====
 const handleToggleLike = async () => {
@@ -284,22 +352,23 @@ const openReplyForm = (commentId) => {
   console.log('Reply to comment:', commentId);
 };
 
-const openReportModal = (commentId) => {
-  // TODO: 신고 기능 구현
-  console.log('Report comment:', commentId);
-};
-
-// ===== 유틸리티 =====
-const formatTimeAgo = (dateString) => {
-  // TODO: 시간 포맷팅 로직 구현 필요
-  return '1시간 전';
-};
-
 // ===== 외부 클릭 감지 =====
 const handleOutsideClick = (e) => {
   if (!e.target.closest('.dropdown')) {
     isDropdownOpen.value = false;
     activeCommentDropdown.value = null;
+  }
+};
+
+const prevImage = () => {
+  if (canGoPrev.value) {
+    currentImageIndex.value--;
+  }
+};
+
+const nextImage = () => {
+  if (canGoNext.value) {
+    currentImageIndex.value++;
   }
 };
 
@@ -318,6 +387,5 @@ onUnmounted(() => {
 
 <style scoped>
 @import url('public/css/feed/index.css');
-@import url('public/css/feed/check-report-modal.css');
 @import url('public/css/feed/report-modal.css');
 </style>

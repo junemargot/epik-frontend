@@ -6,7 +6,8 @@ export const useFeedStore = defineStore('feed', {
     loading: false,
     hasMore: true,
     lastId: null,
-    initialized: false // 초기화 여부 플래그
+    initialized: false, // 초기화 여부 플래그
+    version: 2
   }),
 
   actions: {
@@ -17,6 +18,14 @@ export const useFeedStore = defineStore('feed', {
           const saved = localStorage.getItem('feedStore');
           if (saved) {
             const data = JSON.parse(saved);
+
+            // 버전 체크: 버전이 다르면 localStorage 무시
+            if(data.version !== this.version) {
+              console.log("localStorage 버전 불일치. 데이터 초기화");
+              localStorage.removeItem('feedStore');
+              return;
+            }
+
             this.feeds = data.feeds || [];
             this.lastId = data.lastId || null;
             this.hasMore = data.hasMore ?? true;
@@ -37,7 +46,8 @@ export const useFeedStore = defineStore('feed', {
             feeds: this.feeds,
             lastId: this.lastId,
             hasMore: this.hasMore,
-            initialized: this.initialized
+            initialized: this.initialized,
+            version: this.version
           };
           localStorage.setItem('feedStore', JSON.stringify(data));
         } catch (error) {
@@ -46,7 +56,7 @@ export const useFeedStore = defineStore('feed', {
       }
     },
 
-    // 피드 목록 조회
+    // 피드 목록 조회 (비회원도 조회 가능 - anonymous 경로 사용)
     async fetchFeeds(categoryId = null) {
       if(this.loading) return;
 
@@ -96,10 +106,10 @@ export const useFeedStore = defineStore('feed', {
       this.saveToStorage();
     },
 
-    // 피드 작성
+    // 피드 작성 (이미 /member/feed로 되어 있음 - 수정 불필요)
     async createFeed(formData) {
       try {
-        const { data } = await useAuthFetch('/feed', {
+        const { data } = await useAuthFetch('/member/feed', {
           method: 'POST',
           body: formData
         });
@@ -110,10 +120,10 @@ export const useFeedStore = defineStore('feed', {
       }
     },
 
-    // 좋아요 토글
+    // 좋아요 토글 (회원 전용 - /member/feed 경로)
     async toggleLike(feedId, isLiked) {
       try {
-        const response = await useAuthFetch(`/feed/${feedId}/like`, { 
+        const response = await useAuthFetch(`/member/feed/${feedId}/like`, { 
           method: 'POST',
         });
 
@@ -137,7 +147,7 @@ export const useFeedStore = defineStore('feed', {
       }
     },
 
-    // 댓글 목록 조회
+    // 댓글 목록 조회 (비회원도 조회 가능 - anonymous 경로)
     async fetchComments(feedId) {
       try {
         const { data } = await useAuthFetch(`/feed/${feedId}/comment`);
@@ -148,10 +158,10 @@ export const useFeedStore = defineStore('feed', {
       }
     },
 
-    // 댓글 작성
+    // 댓글 작성 (회원 전용 - /member/feed 경로)
     async createComment(feedId, content) {
       try {
-        const { data } = await useAuthFetch(`/feed/${feedId}/comment`, {
+        const { data } = await useAuthFetch(`/member/feed/${feedId}/comment`, {
           method: 'POST',
           body: { content }
         });
@@ -170,10 +180,10 @@ export const useFeedStore = defineStore('feed', {
       }
     },
 
-    // 댓글 수정
-    async updateComment(feedId, commentId, contnet) {
+    // 댓글 수정 (회원 전용 - /member/feed 경로)
+    async updateComment(feedId, commentId, content) {
       try {
-        await useAuthFetch(`/feed/${feedId}/comment/${commentId}`, {
+        await useAuthFetch(`/member/feed/${feedId}/comment/${commentId}`, {
           method: 'POST',
           body: { content }
         });
@@ -185,10 +195,10 @@ export const useFeedStore = defineStore('feed', {
       }
     },
 
-    // 댓글 삭제
+    // 댓글 삭제 (회원 전용 - /member/feed 경로)
     async deleteComment(feedId, commentId) {
       try {
-        await useAuthFetch(`/feed/${feedId}/comment/${commentId}`, {
+        await useAuthFetch(`/member/feed/${feedId}/comment/${commentId}`, {
           method: 'DELETE'
         });
 
