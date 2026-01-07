@@ -81,6 +81,22 @@ watchEffect(async () => {
 
 	if (data.value) {
 		concert.value = data.value;
+
+		if (concert.value.concertImages && Array.isArray(concert.value.concertImages)) {
+			concert.value.concertImages = concert.value.concertImages.map(img => {
+				// 이미 절대 URL이면 그대로
+				if (img.startsWith('http')) return img;
+				
+				// 캐시 경로면 절대 URL로 변환
+				if (img.startsWith('/cache/kopis/')) {
+					return `http://localhost:8081/api/v1${img}`;
+				}
+				
+				// 상대 경로면 절대 URL로 변환
+				return `http://localhost:8081/api/v1${img}`;
+			});
+		}
+		
 		console.log("콘서트 데이터 로드됨:", concert.value);
 	}
 });
@@ -129,29 +145,7 @@ async function handleBookmark() {
 }
 
 // 이미지 URL 동적 생성 함수
-const getImageUrl = (concert) => {
-	if (!concert) return null;
-
-	// KOPIS API 데이터인 경우
-	if (concert.dataSource === "KOPIS_API") {
-		// imageUrl이 있으면 그것을 사용 (KOPIS API에서 제공하는 포스터 URL)
-		if (concert.imageUrl) {
-			return concert.imageUrl;
-		}
-
-		// imageUrl이 없으면 saveImageName이 HTTP URL인 경우
-		if (concert.saveImageName && concert.saveImageName.startsWith("http")) {
-			return concert.saveImageName;
-		}
-	}
-
-	// 수기 데이터이거나 로컬 이미지인 경우
-	if (concert.saveImageName && !concert.saveImageName.startsWith("http")) {
-		return `http://localhost:8081/api/v1/uploads/images/concert/${concert.saveImageName}`;
-	}
-
-	return null;
-};
+const getImageUrl = useImageUrl();
 
 // 이미지 로드 에러 처리
 const handleImageError = (event) => {

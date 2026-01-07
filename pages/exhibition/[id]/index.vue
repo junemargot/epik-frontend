@@ -16,7 +16,7 @@
       <!-- section 2 -->
       <main>
         <EventInfo 
-          :image-url="getImageUrl(exhibition)"
+          :image-url="getImageUrl(exhibition, 'exhibition')"
           :image-alt="`${exhibition.title} 포스터`"
           :venue="exhibition.venue"
           :running-time="exhibition.runningTime"
@@ -85,29 +85,7 @@ function handleBookmark() {
 }
 
 // 이미지 URL 동적 생성 함수
-const getImageUrl = (exhibition) => {
-  if(!exhibition) return null;
-
-  // KOPIS API 데이터인 경우
-  if(exhibition.dataSource === 'KOPIS_API') {
-    // imageUrl이 있으면 그것을 사용 (KOPIS API에서 제공하는 포스터 URL)
-    if(exhibition.imageUrl) {
-      return exhibition.imageUrl;
-    }
-
-    // imageUrl이 없으면 saveImageName이 HTTP URL인 경우
-    if(exhibition.saveImageName && exhibition.saveImageName.startsWith('http')) {
-      return exhibition.saveImageName;
-    }
-  }
-
-  // 수기 데이터이거나 로컬 이미지인 경우
-  if(exhibition.saveImageName && !exhibition.saveImageName.startsWith('http')) {
-    return `http://localhost:8081/api/v1/uploads/images/exhibition/${exhibition.saveImageName}`;
-  }
-
-  return null;
-};
+const getImageUrl = useImageUrl();
 
 // 이미지 로드 에러 처리
 const handleImageError = (event) => {
