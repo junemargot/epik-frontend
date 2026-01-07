@@ -360,11 +360,8 @@ const formatDate = (date) => {
 	return new Date(date).toLocaleDateString("ko-KR", options);
 };
 
-// 이미지 URL 생성
-const { getImageUrl } = useImageUrl();
-
-// 이미지 에러 처리
-const { handleImageError } = useImageUtils()
+// 이미지 URL 동적 생성 및 로드 에러 처리
+const { getImageUrl, handleImageError } = useImageUtils();
 
 // 슬라이더 관련 코드
 const sliderRef = ref(null);

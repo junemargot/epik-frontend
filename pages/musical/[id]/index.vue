@@ -127,11 +127,8 @@ async function handleBookmark() {
   }
 }
 
-// 이미지 URL 동적 생성 함수
-const { getImageUrl } = useImageUrl();
-
-// 이미지 로드 에러 처리
-const { handleImageError } = useImageUtils();
+// 이미지 URL 동적 생성 및 로드 에러 처리
+const { getImageUrl, handleImageError } = useImageUtils();
 
 </script>
 
