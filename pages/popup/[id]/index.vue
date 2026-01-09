@@ -132,9 +132,8 @@ const totalImages = ref(0);
 const loadedImages = ref(0);
 
 // 한 화면에 보여질 슬라이드 개수
-// const slidesPerView = 2;
 const slidesPerView = computed(() => {
-  if(process.client) {
+  if(process.client && typeof window !== 'undefined') {
     if(window.innerWidth <= 768) return 1;
     return 2;
   }
