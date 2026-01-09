@@ -132,7 +132,13 @@ const totalImages = ref(0);
 const loadedImages = ref(0);
 
 // 한 화면에 보여질 슬라이드 개수
-const slidesPerView = 2;
+const slidesPerView = computed(() => {
+  if(process.client && typeof window !== 'undefined') {
+    if(window.innerWidth <= 768) return 1;
+    return 2;
+  }
+  return 2;
+});
 
 function onImageLoad(index) {
   loadedImages.value++;
@@ -148,13 +154,14 @@ function updateSlideControls() {
   if(!slides.value.length) return;
 
   const total = slides.value.length;
-  const maxSlideIdx = Math.max(0, total - slidesPerView);
+  // const maxSlideIdx = Math.max(0, total - slidesPerView);
+  const maxSlideIdx = Math.max(0, total - slidesPerView.value);
 
   canGoPrev.value = currentIdx.value > 0;
   canGoNext.value = currentIdx.value < maxSlideIdx;
 
-  console.log(`슬라이드 상태 업데이트: 현재=${currentIdx.value}, 전체=${total}, 이전=${canGoPrev.value}, 다음=${canGoNext.value}`);
-}
+  console.log(`슬라이드 상태 업데이트: 현재=${currentIdx.value}, 전체=${total}, slidesPerView=${slidesPerView.value}, maxIdx=${maxSlideIdx}, 이전=${canGoPrev.value}, 다음=${canGoNext.value}`);
+};
 
 // 이미지 로드 확인
 function checkImagesLoaded() {
@@ -211,30 +218,40 @@ function initializeSlider() {
       console.log('슬라이드가 없습니다.');
       return;
     }
-    
-    // 단일 슬라이드의 너비
-    slideWidth.value = 450;
 
-    // 슬라이드 컨테이너 너비 설정 (슬라이드 개수 * 슬라이드 너비)
-    const totalWidth = slideWidth.value * slides.value.length;
-    if(slideContainer.value) {
-      slideContainer.value.style.width = `${totalWidth}px`;
+    const firstSlide = slides.value[0];
+    const img = firstSlide.querySelector('img') || firstSlide;
+
+    if(img.complete || firstSlide.offsetWidth > 0) {
+      slideWidth.value = firstSlide.offsetWidth;
+      console.log('실제 슬라이드 너비: ', slideWidth.value);
+      setupSlider();
+    } else {
+      // 이미지 로드 대기
+      img.onload = () => {
+        slideWidth.value = firstSlide.offsetWidth;
+        console.log("이미지 로드 후 슬라이드 너비: ", slideWidth.value);
+        setupSlider();
+      };
+      return; // 이미지 로드 대기
     }
-
-    // 초기 위치 설정
-    currentIdx.value = 0;
-    if(slideContainer.value) {
-      slideContainer.value.style.transform = `translateX(0px)`;
-    }
-
-    // 상태 업데이트
-    updateSlideControls();
-    // updateWidth();
-    // setInitialPos();
-    // updateSlideControls();
-
-    console.log(`슬라이더 초기화 완료: ${slides.value.length}개 슬라이드, 총 너비: ${totalWidth}px`);  
   });
+}
+
+ // 슬라이더 설정을 별도 함수로 분리
+function setupSlider() {
+  if (!slideContainer.value || !slides.value.length) return;
+  
+  const totalWidth = slideWidth.value * slides.value.length;
+  slideContainer.value.style.width = `${totalWidth}px`;
+
+  // 초기 위치 설정
+  currentIdx.value = 0;
+  slideContainer.value.style.transform = `translateX(0px)`;
+
+  updateSlideControls();
+
+  console.log(`슬라이더 초기화 완료: ${slides.value.length}개, 슬라이드 너비: ${slideWidth.value}px, 총 너비: ${totalWidth}px`);
 }
 
 // 슬라이드 이동 함수
@@ -242,11 +259,11 @@ function moveSlide(num) {
   if (!slideContainer.value || !slides.value.length) return;
   
   // 인덱스 범위 제한
-  const maxIndex = Math.max(0, slides.value.length - slidesPerView);
+  const maxIndex = Math.max(0, slides.value.length - slidesPerView.value);
   currentIdx.value = Math.max(0, Math.min(num, maxIndex));
   
-  // 실제 이동
-  const translateX = currentIdx.value * slideWidth.value;
+  // 실제 이
+  const translateX = currentIdx.value * slideWidth.value
   slideContainer.value.style.transform = `translateX(-${translateX}px)`;
   
   console.log(`슬라이드 이동: ${currentIdx.value}/${maxIndex}, 변환: -${translateX}px`);
@@ -430,8 +447,24 @@ function loadKakaoMapScript() {
   };
 
   document.head.appendChild(script);
-}
+};
 
+const handleResize = () => {
+  if(slides.value.length > 0) {
+    slideWidth.value = slides.value[0].offsetWidth;
+    const totalWidth = slideWidth.value * slides.value.length;
+    if(slideContainer.value) {
+      slideContainer.value.style.width = `${totalWidth}px`;
+    }
+
+    const translateX = currentIdx.value * slideWidth.value;
+    if(slideContainer.value) {
+      slideContainer.value.style.transform = `translateX(-${translateX}px)`;
+    }
+
+    updateSlideControls();
+  }
+};
 
 onMounted(async () => {
   console.log('컴포넌트 마운트 완료');
@@ -454,8 +487,14 @@ onMounted(async () => {
     }
   });
 
+  window.addEventListener('resize', handleResize);
+
   // 카카오맵 스크립트 로드
   loadKakaoMapScript();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
 });
 
 </script>

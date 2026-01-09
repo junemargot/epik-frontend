@@ -572,93 +572,6 @@ h2 {
 }
 
 /* ============================================ */
-/* EPIK'S PICK 섹션 */
-/* ============================================ */
-.picks {
-  width: 100%;
-  max-width: 100%;
-  margin: 40px auto 0;
-  padding: 0 20px;
-}
-
-.picks__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.picks__title {
-  font-family: 'Pretendard-Bold', sans-serif;
-  font-size: var(--font-size-13);
-  margin: 0;
-  padding: 0 !important;
-}
-
-.picks__container {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
-  width: 100%;
-}
-
-.picks__item {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.picks__item-link {
-  text-decoration: none;
-  color: inherit;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.picks__image {
-  width: 100%;
-  aspect-ratio: 3/4;
-  object-fit: cover;
-  border-radius: var(--radius-3);
-  margin-bottom: 8px;
-  transition: transform 0.3s ease;
-}
-
-.picks__item-link:hover .picks__image {
-  transform: scale(1.03);
-}
-
-.picks__info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.picks__item-title {
-  font-size: var(--font-size-6);
-  font-family: 'Pretendard-Bold', sans-serif;
-  font-weight: bold;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-
-.picks__item-venue,
-.picks__item-date {
-  font-size: 13px;
-  color: var(--color-grey-9);
-  font-family: 'Pretendard-Medium', sans-serif;
-}
-
-.picks__item-date {
-  font-size: 12px;
-}
-
-/* ============================================ */
 /* 지역별 보기 섹션 */
 /* ============================================ */
 .region, .category {
@@ -842,32 +755,17 @@ h2 {
 /* ============================================ */
 /* 반응형 */
 /* ============================================ */
-@media (max-width: 1200px) {
-  .picks__container {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
 @media (max-width: 768px) {
-  .picks__container {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  
   .region__container {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .picks__title,
   .region__title {
     font-size: 24px;
   }
 }
 
-@media (max-width: 480px) {
-  .picks__container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
+@media (max-width: 480px) {  
   .region__container {
     grid-template-columns: 1fr;
   }
@@ -885,5 +783,254 @@ h2 {
   
   .photo-slider__image {
     height: 280px;
+  }
+}
+
+/* 반응형 - 슬라이더 */
+@media(max-width: 768px) {
+  .main-container {
+    width: 100%;
+    padding: 20px 16px 40px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-container {
+    padding: 20px 18px 32px 18px;
+  }
+
+  .photo-slider {
+    margin-bottom: 0;
+  }
+
+  
+
+}
+
+@media (max-width: 480px) {
+  .photo-slider__item {
+    width: calc(100vw - 80px);  /* 한 번에 1개 슬라이드만 보이도록 */
+    height: 480px;
+    margin-right: 16px;
+  }
+  
+  .photo-slider__image {
+    height: 420px;
+    object-fit: fill;
+  }
+  
+  .photo-slider__overlay {
+    height: 120px;
+  }
+  
+  .photo-slider__title {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  
+  .overlay-footer > p {
+    font-size: 15px;
+    color: #222;
+  }
+}
+
+/* 반응형 - 슬라이더 화살표 */
+@media (max-width: 768px) {
+  .photo-slider__arrow {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+  }
+  .photo-slider__arrow {
+    display: none;
+  }
+  
+  .photo-slider__arrow--left {
+    left: 8px;
+  }
+  
+  .photo-slider__arrow--right {
+    right: 8px;
+  }
+  
+  .photo-slider__arrow .bx {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .photo-slider__arrow {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+  }
+  
+  .photo-slider__arrow--left {
+    left: 4px;
+  }
+  
+  .photo-slider__arrow--right {
+    right: 4px;
+  }
+}
+
+/* 반응형 - 태그 버튼 섹션 */
+@media (max-width: 768px) {
+  .tag-button {
+    padding: 6px 16px 6px 6px;
+    font-size: 14px;
+  }
+  
+  .tag-button__icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tag-button {
+    padding: 5px 14px 5px 5px;
+    font-size: 13px;
+  }
+  
+  .tag-button__icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+}
+
+/* 태블릿 */
+@media (max-width: 1024px) {
+  .card__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+/* 모바일 */
+@media (max-width: 768px) {
+  .card__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .card__item {
+    height: 160px;
+  }
+  
+  .card__item img {
+    width: 90px;
+    height: 120px;
+    margin: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card__grid {
+    grid-template-columns: 1fr;  /* 1열로 변경 */
+    gap: 12px;
+  }
+  
+  .card__item {
+    height: 140px;
+  }
+  
+  .card__item img {
+    width: 85px;
+    height: 115px;
+  }
+  
+  .card__info {
+    padding: 10px 8px;
+  }
+  
+  .card__info-header h3 {
+    font-size: 16px;
+    -webkit-line-clamp: 2;
+  }
+  
+  .card__location,
+  .card__date-main {
+    font-size: 12px;
+  }
+}
+
+/* 반응형 - 섹션 헤더 & 더보기 버튼 */
+@media (max-width: 768px) {
+  .section-header {
+    margin-bottom: 12px;
+  }
+  
+  .card__title {
+    font-size: 24px;
+    margin: 0 0 10px 6px;
+  }
+  
+  .more-btn {
+    font-size: 13px;
+  }
+  
+  .more-btn i {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-header {
+    margin-top: 26px;
+    margin-bottom: 8px;
+  }
+
+  .card__title {
+    font-size: 22px;
+    margin: 0 0 6px 6px;
+  }
+  
+  .more-btn {
+    font-size: 14px;
+  }
+}
+
+/* 반응형 - 상태 태그 */
+@media (max-width: 768px) {
+  .card__status {
+    font-size: 14px;
+    padding: 3px 8px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card__status {
+    font-size: 12px;
+    padding: 10px 8px;
+    height: 20px;
+  }
+  
+  .card__status-tag {
+    margin-bottom: 6px;
+  }
+
+  .card__info-footer {
+    margin-bottom: 8px;
+  }
+
+  .card__location,
+  .card__date-main {
+    font-size: 14px;
+  }
+}
+
+/* 반응형 - 터치 영역 확대 */
+@media (max-width: 768px) {
+  .card__link {
+    /* 터치 영역이 충분히 큰지 확인 (최소 44x44px 권장) */
+    /* min-height: 44px; */
+  }
+  
+  .tag-button {
+    min-height: 44px;
   }
 }
