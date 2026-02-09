@@ -2,7 +2,7 @@
 <template>
   <div class="main-container">
     <!-- 상단 슬라이더 -->
-    <!-- <div class="photo-slider">
+    <div class="photo-slider">
       <div class="photo-slider__container" ref="sliderRef" :style="sliderStyle">
         <div v-for="(slide, index) in slides" :key="index" class="photo-slider__item">
           <RouterLink :to="`/popup/${slide.id}`" class="card__link" />
@@ -34,7 +34,7 @@
       <div class="photo-slider__scrollbar" @mousedown="onScrollbarClick">
         <div class="photo-slider__scrollbar-thumb" ref="scrollbarThumbRef" :style="scrollbarThumbStyle"></div>
       </div>
-    </div> -->
+    </div>
 
     <!-- 카테고리 버튼 -->
     <!-- <div class="tag-buttons">
@@ -49,7 +49,7 @@
     </div> -->
 
     <!-- EPIK'S PICK -->
-    <section class="picks">
+    <!-- <section class="picks">
       <div class="picks__header">
         <h2 class="picks__title">EPIK'S PICK</h2>
       </div>
@@ -76,6 +76,7 @@
         </div>
       </div>
     </section>
+    -->
 
     <!-- 지역별 보기 -->
     <section class="region">
