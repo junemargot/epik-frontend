@@ -7,28 +7,29 @@
 
 .inquiry-wrap {
   width: 700px;
-  margin: 96px auto 110px;
+  margin: 80px auto 160px;
 }
 
 .inquiry__title {
   font-size: 24px;
   font-weight: bold;
-  margin: 0 0 20px 0;
+  margin: 0;
 }
 
 .inquiry__header {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 10px 20px 10px;
 }
 
 .inquiry__write-btn {
-  padding: 10px 24px;
+  padding: 8px 18px;
   background-color: var(--accent-1);
   border: none;
   border-radius: 8px;
   color: var(--white);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;

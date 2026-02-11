@@ -1,10 +1,9 @@
 <template>
   <main class="mypage-wrap">
     <section class="inquiry-wrap">
-      <h1 class="inquiry__title">1:1 문의</h1>
-      
       <div class="inquiry__header">
-        <NuxtLink to="/mypage/inquiry/write" class="inquiry__write-btn">
+        <h1 class="inquiry__title">1:1 문의</h1>
+        <NuxtLink to="/mypage/inquiry/form" class="inquiry__write-btn">
           문의하기
         </NuxtLink>
       </div>
