@@ -68,41 +68,33 @@ const apiBase = config.public.apiBase;
 const { getBookmarkStatus, toggleBookmark } = useBookmark('concert');
 
 // 상태 관리 위한 ref 선언
-const concert = ref(null);
 const isBookmarked = ref(false);
 const isAuthenticated = ref(false);
 
-// 데이터 가져오기
-watchEffect(async () => {
-	const { data } = await useFetch(`/admin/concert/${concertId}`, {
-		baseURL: apiBase,
-		key: `concert-${concertId}`,
-	});
+const { data: concert, error } = await useFetch(`/admin/concert/${concertId}`, {
+  baseURL: apiBase,
+  key: `concert-${concertId}`,
 
-	if (data.value) {
-		concert.value = data.value;
-
-		if (concert.value.concertImages && Array.isArray(concert.value.concertImages)) {
-			concert.value.concertImages = concert.value.concertImages.map(img => {
-				// 이미 절대 URL이면 그대로
-				if (img.startsWith('http')) return img;
-				
-				// 캐시 경로면 절대 URL로 변환
-				if (img.startsWith('/cache/kopis/')) {
-					return `http://localhost:8081/api/v1${img}`;
-				}
-				
-				// 상대 경로면 절대 URL로 변환
-				return `http://localhost:8081/api/v1${img}`;
-			});
-		}
-		
-		console.log("콘서트 데이터 로드됨:", concert.value);
-	}
+  transform: (fetchedData) => {
+    if(fetchedData && Array.isArray(fetchedData.concertImages)) {
+      fetchedData.concertImages = fetchedData.concertImages.map(img => {
+        if(img.startsWith('http')) return img;
+        return `http://localhost:8081/api/v1${img}`;
+      });
+    }
+    return fetchedData;
+  }
 });
+
+if(error.value) {
+  console.error("[SSR] 데이터 페칭 에러: ", error.value);
+} else if(concert.value) {
+  console.log("[SSR] 콘서트 데이터 서버에서 로드 완료: ", concert.value.title);
+}
 
 // 북마크 상태 초기화
 onMounted(async() => {
+  console.log("[CSR] onMounted 훅 실행 - 브라우저에서만 보임")
   try {
     const status = await getBookmarkStatus(concertId);
     console.log("북마크 상태 응답: ", status);
