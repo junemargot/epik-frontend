@@ -125,6 +125,10 @@ const toggleInquiry = async (id) => {
   detailLoading.value = false;
 };
 
+const handleEdit = (id) => {
+  navigateTo(`/mypage/inquiry/${id}/edit`);
+};
+
 const handleDelete = async (id) => {
   if(!confirm("문의를 삭제하시겠습니까?")) return;
 
