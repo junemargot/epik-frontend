@@ -20,23 +20,26 @@
 
 .mypage__wrap-profile {
   width: 340px;
-  border-radius: 10px 10px 0 0;
+  border-radius: var(--radius-4);
   border: solid 1px var(--color-grey-4);
   background-color: var(--white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
 }
 
 .mypage__profile {
   width: 100%;
-  height: 100px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   padding-left: 26px;
   border-bottom: 1px solid var(--color-grey-4);
-  gap: 8px;
+  gap: 12px;
 }
 
 .mypage__title {
+  font-size: 24px;
   font-weight: bold;
   font-family: 'Pretendard-Bold', sans-serif;
   margin: 0 0 16px 8px;
@@ -48,17 +51,17 @@
 
 .mypage__edit {
   position: absolute;
-  right: 10px;
-  bottom: 4px;
+  right: 0;
+  bottom: 3px;
   z-index: 1;
 }
 
 .mypage__img-my {
-  width: 54px;
-  height: 54px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
   border-radius: 50%;
-  margin-right: 15px;
+  margin-right: 0;
 }
 
 .mypage__edit-icon-box i {
@@ -72,18 +75,21 @@
 }
 
 .mypage__nickname {
-  margin-bottom: 3px;
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 4px;
 }
 
 .mypage__username {
   font-size: 14px;
+  color: var(--color-grey-8);
 }
 
 .mypage__function-icons {
   display: flex;
   justify-content: space-between;
   text-align: center;
-  padding: 12px 20px;
+  padding: 18px 20px;
   margin-top: 0;
 }
 
@@ -92,32 +98,53 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  border-radius: var(--radius-2);
+  padding: 8px 4px;
+  transition: background-color 0.2s ease;
+}
+
+.mypage__function-icons li:hover {
+  background-color: var(--color-grey-1);
 }
 
 .mypage__function-icons li a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--black);
-  gap: 4px;
+  gap: 8px;
+  width: 100%;
 }
 
 .mypage__function-icons li i {
-  font-size: 18px;
-  margin-bottom: 4px;
+  font-size: 20px;
+  margin-bottom: 0%;
+}
+
+.mypage__menulist li {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+  border-radius: var(--radius-2);
+  margin: 4px 0;
+}
+
+.mypage__menulist li:hover {
+  background-color: var(--color-grey-1);
 }
 
 .mypage__menulist li a,
 .mypage__function-icons li a {
   font-weight: normal;
-  transition: font-weight 0.3s ease, transform 0.3s ease;
+  transition: none;
 }
 
 .mypage__menulist li a:hover,
 .mypage__function-icons li a:hover {
-  font-weight: bold;
-  transform: scale(1.005);
+  font-weight: 600;
+  transform: none;
   cursor: pointer;
 }
 
@@ -140,34 +167,37 @@
 
 .mypage__menulist li a:hover .mypage__angleright-icon,
 .mypage__function-icons li a:hover i {
-  transform: scale(1.2);
-  cursor: pointer;
+  transform: none;
+  color: var(--black);
 }
 
 .mypage__wrap-menulist {
   width: 340px;
-  height: 261x;
-  margin-top: 8px;
-  display: flex;
+  height: auto;
+  /* display: flex; */
   justify-content: center;
-  border-radius: 0 0 10px 10px;
+  border-radius: var(--radius-4);
   border: solid 1px var(--color-grey-4);
   background-color: var(--white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .mypage__menulist {
   width: 290px;
-  height: 261px;
+  height: auto;
   margin-left: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   font-size: var(--font-size-7);
+  padding: 16px 0;
 }
 
 .mypage__user-icon,
 .mypage__lock-icon,
-.mypage__headset-icon {
+.mypage__headset-icon,
+.mypage__userlock-icon {
+  font-size: 20px;
   margin-right: 12px;
 }
 
@@ -181,14 +211,162 @@
 .mypage__blockMember {
   display: flex;
   flex-direction: row;
+  padding: 16px 12px;
+  width: 100%;
+  align-items: center;
 }
 
 .mypage__icon-wrap {
   width: 250px;
+  display: flex;
+  align-items: center;
 }
   
 .small-wrap {
   width: 353px;
   height: auto;
-  margin: 96px auto 110px auto;
+  margin: 70px auto 110px auto;
+}
+
+/* 태블릿 (768px 이하) */
+@media (max-width: 768px) {
+  .mypage-wrap {
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .small-wrap {
+    width: 100%;
+    max-width: 480px;
+    margin: 60px auto 80px auto;
+  }
+
+  .mypage__wrap-profile,
+  .mypage__wrap-menulist {
+    width: 100%;
+  }
+
+  .mypage__title {
+    font-size: 22px;
+    margin: 0 0 12px 0;
+  }
+}
+
+/* 모바일 (480px 이하) */
+@media (max-width: 480px) {
+  .mypage-wrap {
+    padding: 0 16px;
+  }
+
+  .small-wrap {
+    margin: 40px auto 100px auto;
+  }
+
+  .mypage__title {
+    font-size: 20px;
+    margin: 0 0 16px 0;
+  }
+
+  .mypage__profile {
+    height: 90px;
+    padding-left: 32px;
+    gap: 14px;
+  }
+
+  .mypage__img-my {
+    width: 56px;
+    height: 56px;
+  }
+
+  .mypage__nickname {
+    font-size: 16px;
+    margin-bottom: 3px;
+  }
+
+  .mypage__username {
+    font-size: 13px;
+  }
+
+  .mypage__function-icons {
+    padding: 12px 12px;
+  }
+
+  .mypage__function-icons li a {
+    font-size: 14px;
+    gap: 6px;
+  }
+
+  .mypage__function-icons li i {
+    font-size: 26px;
+  }
+
+  .mypage__menulist {
+    width: 100%;
+    margin-left: 0;
+    padding: 12px 16px;
+  }
+
+  .mypage__memberInfoUpdate,
+  .mypage__passwordChange,
+  .mypage__inquiry,
+  .mypage__blockMember {
+    padding: 14px 8px;
+  }
+
+  .mypage__icon-wrap {
+    width: auto;
+    flex: 1;
+  }
+
+  .mypage__user-icon,
+  .mypage__lock-icon,
+  .mypage__headset-icon,
+  .mypage__userlock-icon {
+    font-size: 20px;
+    margin-right: 10px;
+  }
+
+  .mypage__angleright-icon {
+    font-size: 22px;
+  }
+}
+
+/* 작은 모바일 (360px 이하) */
+@media (max-width: 360px) {
+  .mypage-wrap {
+    padding: 0 12px;
+  }
+
+  .mypage__title {
+    font-size: 18px;
+  }
+
+  .mypage__profile {
+    padding-left: 16px;
+  }
+
+  .mypage__img-my {
+    width: 54px;
+    height: 54px;
+  }
+
+  .mypage__nickname {
+    font-size: 15px;
+  }
+
+  .mypage__username {
+    font-size: 12px;
+  }
+
+  .mypage__function-icons li i {
+    font-size: 28px;
+  }
+
+  .mypage__function-icons li a {
+    font-size: 13px;
+  }
+
+  .mypage__menulist {
+    font-size: 14px;
+  }
 }

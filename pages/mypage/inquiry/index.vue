@@ -1,141 +1,185 @@
 <template>
   <main class="mypage-wrap">
-    <section class="inquryList__wrap small-wrap">
-      <div class="inquryList__intro">
-        <h1 class="inquryList__title intro-title">
-          문의 내역
-        </h1>
+    <section class="inquiry-wrap">
+      <div class="inquiry__header">
+        <h1 class="inquiry__title">1:1 문의</h1>
+        <NuxtLink to="/mypage/inquiry/form" class="inquiry__write-btn">
+          문의하기
+        </NuxtLink>
       </div>
 
-      <div>
-        <div class="inquryList__personal">
-          <a href="http://localhost:3001/mypage/inquiry/write"> <button class="personal-inqury-btn">1:1 문의 접수</button></a>
+      <div class="inquiry__tabs">
+        <span class="inquiry__tab">제목</span>
+        <span class="inquiry__tab">작성일</span>
+        <span class="inquiry__tab">답변상태</span>
+      </div>
+
+      <div class="inquiry__list-wrap">
+        <div class="inquiry__empty" v-if="inquiries.length === 0">
+          문의글이 없습니다.
         </div>
 
-        <div>
-          <form>
-            <fieldset class="gap-mt_2">
-              <label>
-                <select class="form select_form1">
-                  <option>1개월</option>
-                  <option>3개월</option>
-                  <option>6개월</option>
-                  <option>9개월</option>
-                  <option>12개월</option>
-                </select>
-              </label>
-            </fieldset>
-
-            <fieldset class="inquryList__date gap-mt_2">
-              <label>
-                <input class="select_short" type="date" max="2024-12-25" min="2024-09-18">
-              </label>
-
-              <span> ~ </span>
-
-              <label>
-                <input class="select_short" type="date" max="2024-12-25" min="2024-09-18">
-              </label>
-            </fieldset>
-          </form>
-
-          <div class="gap-bt_1 gap-mt_2">
-            <button class="long_btn red_btn">
-              조회
+        <ul class="inquiry__list" v-else>
+          <li v-for="inquiry in inquiries" :key="inquiry.id" class="inquiry__item">
+            <!-- 아코디언 -->
+            <button class="inquiry__item-link" @click="toggleInquiry(inquiry.id)">
+              <span class="inquiry__item-title">{{ inquiry.title }}</span>
+              <span class="inquiry__item-date">{{ inquiry.createdAt }}</span>
+              <span
+                class="inquiry__item-status"
+                :class="inquiry.status === 'PENDING' ? 'pending' : 'completed'"
+              >
+                {{ inquiry.statusDescription }}
+              </span>
             </button>
-          </div>
+            <div class="inquiry__detail" v-if="openId === inquiry.id">
+              <div class="inquiry__detail-loading" v-if="detailLoading">
+                불러오는 중...
+              </div>
+              <div v-else-if="detail">
+                <div class="inquiry__detail-meta">
+                  {{ detail.parentCategory }} &gt; {{ detail.categoryDescription }}
+                </div>
 
-          <form class="gap-mt_2 ">
-            <select class="grey-long_btn select_form2">
-              <option>전체</option>
-              <option>준비 중 </option>
-              <option>처리 중</option>
-              <option>처리 완료</option>
-            </select>
-          </form>
+                <div class="inquiry__detail-content">
+                  <span class="inquiry__detail-q">Q</span>
+                  <p>{{ detail.content }}</p>  
+                </div>
 
-        </div>
-      </div>
+                <!-- 첨부 이미지 -->
+                <div class="inquiry__detail-images" v-if="detail.images && detail.images.length > 0">
+                  <img
+                    v-for="img in detail.images" :key="img.id"
+                    :src="`${apiBase}${img.imagePath}`"
+                    :alt="img.originalFilename"
+                    class="inquiry__detail-image"
+                  />
+                </div>
 
+                <!-- 답변 -->
+                <div class="inquiry__detail-answer" v-if="detail.answer">
+                  <span class="inquiry__detail-a">A</span>
+                  <div class="inquiry__detail-answer-content">{{ detail.answer }}</div>
+                </div>
 
-      <hr class="hr_2">
-
-      <div>
-        <ul class="">
-          <a href="http://localhost:3001/mypage/inquiry/%7Bid%7D/answer">
-          <li class="inquryList__list">
-            <img class="inquryList__icon" src="/public/images/mypage/q.png">
-            <span class="inquryList__list-arrange ">
-              <span class="agree_text_bold">닉네임 관련 문의 있습니다</span>
-              <span class="small_text">2024.10.03</span>
-            </span>
+                <!-- 수정/삭제 -->
+                <div class="inquiry__detail-actions" v-if="inquiry.status === 'PENDING'">
+                  <button class="inquiry__detail-action-btn" @click.stop="handleEdit(inquiry.id)">수정</button>
+                  <span class="inquiry__detail-action-divider">|</span>
+                  <button class="inquiry__detail-action-btn" @click.stop="handleDelete(inquiry.id)">삭제</button>
+                </div>
+              </div>
+            </div>
           </li>
-        </a>
-
         </ul>
       </div>
-
+      <div class="inquiry__footer">
+        <div class="inquiry__pagination" v-if="totalPages > 1">
+          <button class="pagination__btn" :disabled="currentPage === 0" @click="goToPage(currentPage - 1)">&lt;</button>
+          <button
+            v-for="page in totalPages" :key="page"
+            class="pagination__btn"
+            :class="{ active: currentPage === page - 1 }"
+            @click="goToPage(page - 1)"
+          >
+            {{ page }}
+          </button>
+          <button class="pagination__btn" :disabled="currentPage === totalPages - 1" @click="goToPage(currentPage + 1)">&gt;</button>
+        </div>
+      </div>
     </section>
   </main>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue';
+
+const openId = ref(null);
+const detail = ref(null);
+const detailLoading = ref(false);
+
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBase;
+const authStore = useAuthStore();
+
+const toggleInquiry = async (id) => {
+  if(openId.value === id) {
+    openId.value = null;
+    detail.value = null;
+    return;
+  }
+
+  openId.value = id;
+  detail.value = null;
+  detailLoading.value = true;
+
+  const { data, error } = await useAuthFetch(`/member/inquiry/${id}`);
+  if(data.value) {
+    detail.value = data.value;
+  }
+
+  if(error.value) {
+    console.error("상세 조회 실패: ", error.value);
+  }
+
+  detailLoading.value = false;
+};
+
+const handleEdit = (id) => {
+  navigateTo(`/mypage/inquiry/${id}/edit`);
+};
+
+const handleDelete = async (id) => {
+  if(!confirm("문의를 삭제하시겠습니까?")) return;
+
+  try {
+    await $fetch(`${apiBase}/member/inquiry/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        ...(authStore.token && { Authorization: `Bearer ${authStore.token}` })
+      }
+    });
+    alert("문의가 삭제되었습니다.");
+    openId.value = null;
+    detail.value = null;
+    refresh();
+  } catch(error) {
+    console.error("삭제 실패: ", error);
+  }
+}
+
+const currentPage = ref(0);
+const pageSize = 10;
+
+const { data: pageData, error, refresh } = await useAuthFetch(
+  `/member/inquiry?page=${currentPage.value}&size=${pageSize}`
+);
+
+if (error.value) {
+  console.error('문의 목록 조회 실패:', error.value);
+}
+
+const inquiries = computed(() => {
+  return pageData.value?.content || [];
+});
+
+const totalPages = computed(() => {
+  return pageData.value?.totalPages || 0;
+});
+
+const goToPage = async (page) => {
+  currentPage.value = page;
+  const { data } = await useAuthFetch(
+    `/member/inquiry?page=${page}&size=${pageSize}`
+  );
+
+  if(data.value) {
+    pageData.value = data.value;
+  }
+};
 </script>
 
-<style>
-@import url('/public/css/mypage/inqury.css');
-
-.personal-inqury-btn:hover
-{
-  background-color: var(--accent-1) ;
-  color: white;
-}
-
-.long_btn:hover
-{
-  background-color: var(--white) ;
-  color: var(--accent-1);
-  font-weight: bold;
-}
-
-
-.select_form1 {
-  padding-top: 4px; /* 글자가 폼 안에서 위로 올라가도록 padding-top을 조정 */
-  line-height: 1.4;  /* line-height로 텍스트 간격도 조정 가능 */
-  padding-left: 5px;
-
-  padding-right: 10px; /* 화살표가 너무 오른쪽에 위치하지 않도록 조정 */
-  appearance: none; /* 기본 화살표 제거 */
-  -webkit-appearance: none; /* Safari에서 기본 화살표 제거 */
-  -moz-appearance: none; /* Firefox에서 기본 화살표 제거 */
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="0,0 100,0 50,50" fill="gray"/></svg>') no-repeat scroll right 10px center; /* 커스텀 화살표 */
-  background-size: 10px; /* 화살표 크기 */
-  background-position-x: 95%;; /* 화살표 위치를 오른쪽에서 10px로 조정 */
-
-  color: black; /* 텍스트 색상 변경 */
-}
-
-
-.select_form2 {
-  padding: 10px; /* padding 추가하여 버튼 크기 조정 */
-  padding-left: 10px;
- 
-  background-color: #f7f7f7; /* 배경색 */
-  color: black; /* 텍스트 색상 검정색 */
-  font-size: 12px;
-  font-weight: lighter;
-
-  appearance: none; /* 기본 화살표 제거 */
-  -webkit-appearance: none; /* Safari에서 기본 화살표 제거 */
-  -moz-appearance: none; /* Firefox에서 기본 화살표 제거 */
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="0,0 100,0 50,50" fill="gray"/></svg>') no-repeat scroll right 10px center; /* 커스텀 화살표 */
-  background-size: 10px; /* 화살표 크기 */
-  background-position-x: 95%; /* 화살표 위치를 오른쪽에서 10px로 조정 */
-
-}
-
-
-
-
-
+<style scoped>
+@import url('/public/css/mypage/inquiry.css');
 </style>
