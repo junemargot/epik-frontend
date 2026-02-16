@@ -55,5 +55,5 @@ console.log(contentLength);
 </script>
 
 <style>
-@import url('/public/css/mypage/inqury.css');
+@import url('/public/css/mypage/inquiry.css');
 </style>

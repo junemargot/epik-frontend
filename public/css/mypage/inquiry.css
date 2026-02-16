@@ -1,0 +1,336 @@
+.mypage-wrap {
+  margin: auto;
+  width: 960px;
+  min-height: 100%;
+  background-color: var(--background-1);
+}
+
+.inquiry-wrap {
+  width: 700px;
+  margin: 80px auto 160px;
+}
+
+.inquiry__title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.inquiry__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 10px 20px 10px;
+}
+
+.inquiry__write-btn {
+  padding: 10px 20px;
+  background-color: var(--accent-1);
+  border: none;
+  border-radius: 3px;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.inquiry__write-btn:hover {
+  background-color: var(--accent-2);
+}
+
+/* 테이블 헤더 */
+.inquiry__tabs {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  border-top: 2px solid var(--black);
+  border-bottom: 1px solid var(--color-grey-4);
+  padding: 16px 20px;
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
+}
+
+/* 리스트 영역 */
+.inquiry__list-wrap {
+  border-bottom: 1px solid var(--color-grey-4);
+  min-height: 400px;
+}
+
+.inquiry__empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: var(--color-grey-7);
+  font-size: 15px;
+}
+
+.inquiry__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.inquiry__item {
+  border-bottom: 1px solid var(--color-grey-4);
+}
+
+.inquiry__item:last-child {
+  border-bottom: none;
+}
+
+.inquiry__item-link {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  padding: 18px 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.2s;
+  text-align: center;
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.inquiry__detail {
+  padding: 20px;
+  background-color: var(--color-grey-1);
+  border-top: 1px solid var(--color-grey-4);
+}
+
+.inquiry__detail-loading {
+  text-align: center;
+  color: var(--color-grey-7);
+  font-size: 14px;
+  padding: 20px 0;
+}
+
+.inquiry__detail-meta {
+  font-size: 13px;
+  color: var(--color-grey-7);
+  margin-bottom: 12px;
+}
+
+.inquiry__detail-content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding-top: 10px;
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  margin-bottom: 90px;
+}
+
+.inquiry__detail-content p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.inquiry__detail-q,
+.inquiry__detail-a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.inquiry__detail-q {
+  background-color: var(--accent-1);
+  color: var(--white);
+}
+
+.inquiry__detail-a {
+  background-color: var(--color-grey-4);
+  color: var(--white);
+}
+
+.inquiry__detail-images {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.inquiry__detail-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--color-grey-4);
+}
+
+.inquiry__detail-answer {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 20px;
+  background-color: var(--white);
+  border-top: 1px solid var(--color-grey-4);
+}
+
+.inquiry__detail-answer-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.inquiry__detail-answer-content {
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.inquiry__detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+}
+
+.inquiry__detail-action-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--color-grey-7);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.inquiry__detail-action-btn:hover {
+  color: var(--black);
+}
+
+.inquiry__detail-action-divider {
+  color: var(--color-grey-4);
+  font-size: 12px;
+}
+
+.inquiry__item-link:hover {
+  background-color: var(--color-grey-1);
+}
+
+.inquiry__item-title {
+  font-size: 15px;
+  color: var(--black);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.inquiry__item-date {
+  font-size: 14px;
+  color: var(--color-grey-7);
+}
+
+.inquiry__item-status {
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  color: var(--color-grey-7);
+}
+
+
+/* 태블릿 */
+@media (max-width: 768px) {
+  .mypage-wrap {
+    width: 100%;
+    padding: 0 20px;
+  }
+  
+  .inquiry-wrap {
+    width: 100%;
+    max-width: 600px;
+    margin: 60px auto 80px;
+  }
+}
+
+/* 모바일 */
+@media (max-width: 480px) {
+  .mypage-wrap {
+    padding: 0 16px;
+  }
+  
+  .inquiry-wrap {
+    width: 100%;
+    margin: 40px auto 60px;
+  }
+  
+  .inquiry__title {
+    font-size: 20px;
+  }
+  
+  .inquiry__write-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .inquiry__tabs,
+  .inquiry__item-link {
+    grid-template-columns: 2fr 1fr 1fr;
+    padding: 14px 12px;
+    font-size: 13px;
+  }
+  
+  .inquiry__item-title {
+    font-size: 14px;
+  }
+  
+  .inquiry__item-date {
+    font-size: 12px;
+  }
+  
+  .inquiry__item-status {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+}
+
+/* 페이지네이션 */
+.inquiry__pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 24px 0;
+}
+
+.pagination__btn {
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-grey-4);
+  background-color: var(--white);
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--color-grey-7);
+}
+
+.pagination__btn:hover:not(:disabled) {
+  background-color: var(--color-grey-1);
+}
+
+.pagination__btn.active {
+  background-color: var(--accent-1);
+  color: var(--white);
+  border-color: var(--accent-1);
+}
+
+.pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

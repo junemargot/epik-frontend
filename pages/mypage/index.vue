@@ -76,7 +76,7 @@
             <li>
               <NuxtLink to="/mypage/inquiry" class="mypage__inquiry">
                 <div class="mypage__icon-wrap">
-                  <i class='mypage__headset-icon bx bx-support'></i>문의내역
+                  <i class='mypage__headset-icon bx bx-support'></i>1:1 문의
                 </div>
                 <div>
                   <i class='mypage__angleright-icon bx bx-chevron-right'></i>
