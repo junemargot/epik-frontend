@@ -9,7 +9,7 @@
           <label class="form-label">유형<span class="required">*</span></label>
           <div class="form-controls category-selects">
             <div class="custom-select-wrapper">
-              <select v-model="selectedParentCategory" class="form-select">
+              <select v-model="inquiryFormState.selectedParentCategory" class="form-select">
                 <option disabled value="">문의유형을 선택해주세요</option>
                 <option v-for="parent in parentCategories" :key="parent" :value="parent">
                   {{ parent }}
@@ -17,7 +17,7 @@
               </select>
             </div>
             <div class="custom-select-wrapper">
-              <select v-model="selectedChildCategory" :disabled="!selectedParentCategory" class="form-select">
+              <select v-model="inquiryFormState.selectedChildCategory" :disabled="!inquiryFormState.selectedParentCategory" class="form-select">
                 <option disabled value="">상세유형을 선택해주세요</option>
                 <option v-for="child in childCategories" :key="child.enumName" :value="child.enumName">
                   {{ child.description }}
@@ -31,7 +31,7 @@
         <div class="form-row">
           <label class="form-label" for="inquiry-title">제목<span class="required">*</span></label>
           <div class="form-controls">
-            <input type="text" id="inquiry-title" v-model="title" class="form-input" placeholder="제목을 입력해주세요." />
+            <input type="text" id="inquiry-title" v-model="inquiryFormState.title" class="form-input" placeholder="제목을 입력해주세요." />
           </div>
         </div>
 
@@ -39,7 +39,7 @@
         <div class="form-row">
           <label class="form-label" for="inquiry-content">내용<span class="required">*</span></label>
           <div class="form-controls">
-            <textarea id="inquiry-content" v-model="content" class="form-textarea" placeholder="문의내용을 입력해주세요."></textarea>
+            <textarea id="inquiry-content" v-model="inquiryFormState.content" class="form-textarea" placeholder="문의내용을 입력해주세요."></textarea>
           </div>
         </div>
 
@@ -49,17 +49,17 @@
           <div class="form-controls">
             <div class="image-preview-list">
               <!-- 기존 이미지 -->
-              <div v-for="(img, index) in existingImages" :key="'existing-' + img.id" class="image-preview-item">
+              <div v-for="(img, index) in inquiryFormState.existingImages" :key="'existing-' + img.id" class="image-preview-item">
                 <img :src="`${apiBase}${img.imagePath}`" class="image-preview-img" />
                 <button type="button" class="image-preview-remove" @click="removeExistingImage(index)">&times;</button>
               </div>
               <!-- 새 이미지 미리보기 -->
-              <div v-for="(preview, index) in newImagePreviews" :key="'new-' + index" class="image-preview-item">
+              <div v-for="(preview, index) in inquiryFormState.newImagePreviews" :key="'new-' + index" class="image-preview-item">
                 <img :src="preview" class="image-preview-img" />
                 <button type="button" class="image-preview-remove" @click="removeNewImage(index)">&times;</button>
               </div>
               <!-- 업로드 버튼 -->
-              <label v-if="existingImages.length + newImages.length < 6" for="image-upload" class="image-uploader">
+              <label v-if="inquiryFormState.existingImages.length + inquiryFormState.newImages.length < 6" for="image-upload" class="image-uploader">
                 <span class="camera-icon">
                   <i class='bx bx-camera'></i>
                 </span>
@@ -83,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
@@ -107,14 +107,16 @@ if (error.value) {
 
 const loaded = computed(() => !!detail.value);
 
-// 폼 상태 초기화
-const title = ref(detail.value?.title || '');
-const content = ref(detail.value?.content || '');
-const selectedParentCategory = ref(detail.value?.parentCategory || '');
-const selectedChildCategory = ref(detail.value?.category || '');
-const existingImages = ref(detail.value?.images ? [...detail.value.images] : []);
-const newImages = ref([]);
-const newImagePreviews = ref([]);
+// 폼 상태를 reactive 객체로 통합
+const inquiryFormState = reactive({
+  title: detail.value?.title || '',
+  content: detail.value?.content || '',
+  selectedParentCategory: detail.value?.parentCategory || '',
+  selectedChildCategory: detail.value?.category || '',
+  existingImages: detail.value?.images ? [...detail.value.images] : [],
+  newImages: [],
+  newImagePreviews: []
+});
 
 // 카테고리 computed
 const parentCategories = computed(() => {
@@ -123,29 +125,28 @@ const parentCategories = computed(() => {
 });
 
 const childCategories = computed(() => {
-  if (!selectedParentCategory.value || !categories.value) return [];
-  return categories.value[selectedParentCategory.value] || [];
+  if (!inquiryFormState.selectedParentCategory || !categories.value) return [];
+  return categories.value[inquiryFormState.selectedParentCategory] || [];
 });
 
 // 대분류 변경 시 소분류 초기화 (단, 최초 로드 시에는 유지)
-// let isInitialLoad = true;
 const initialParent = detail.value?.parentCategory || '';
-watch(selectedParentCategory, (newVal, oldVal) => {
+watch(() => inquiryFormState.selectedParentCategory, (newVal, oldVal) => {
   if(oldVal === '' && newVal === initialParent) return;
-  selectedChildCategory.value = '';
+  inquiryFormState.selectedChildCategory = '';
 });
 
 // 기존 이미지 삭제
 const removeExistingImage = (index) => {
-  console.log('삭제 전:', existingImages.value.length);
-  existingImages.value.splice(index, 1);
-  console.log('삭제 후:', existingImages.value.length);
+  console.log('삭제 전:', inquiryFormState.existingImages.length);
+  inquiryFormState.existingImages.splice(index, 1);
+  console.log('삭제 후:', inquiryFormState.existingImages.length);
 };
 
 // 새 이미지 업로드
 const handleImageUpload = (e) => {
   const files = Array.from(e.target.files);
-  const totalCount = existingImages.value.length + newImages.value.length + files.length;
+  const totalCount = inquiryFormState.existingImages.length + inquiryFormState.newImages.length + files.length;
 
   if (totalCount > 6) {
     alert('이미지는 최대 6장까지 업로드 가능합니다.');
@@ -161,10 +162,10 @@ const handleImageUpload = (e) => {
   });
 
   validFiles.forEach(file => {
-    newImages.value.push(file);
+    inquiryFormState.newImages.push(file);
     const reader = new FileReader();
     reader.onload = (event) => {
-      newImagePreviews.value.push(event.target.result);
+      inquiryFormState.newImagePreviews.push(event.target.result);
     };
     reader.readAsDataURL(file);
   });
@@ -174,13 +175,13 @@ const handleImageUpload = (e) => {
 
 // 새 이미지 삭제
 const removeNewImage = (index) => {
-  newImages.value.splice(index, 1);
-  newImagePreviews.value.splice(index, 1);
+  inquiryFormState.newImages.splice(index, 1);
+  inquiryFormState.newImagePreviews.splice(index, 1);
 };
 
 // 수정 제출
 const submitUpdate = async () => {
-  if (!selectedChildCategory.value || !title.value || !content.value) {
+  if (!inquiryFormState.selectedChildCategory || !inquiryFormState.title || !inquiryFormState.content) {
     alert('필수 항목을 모두 입력해주세요.');
     return;
   }
@@ -189,17 +190,17 @@ const submitUpdate = async () => {
     const formData = new FormData();
 
     const requestDto = {
-      title: title.value,
-      content: content.value,
-      category: selectedChildCategory.value,
-      keepImageIds: existingImages.value.map(img => img.id)
+      title: inquiryFormState.title,
+      content: inquiryFormState.content,
+      category: inquiryFormState.selectedChildCategory,
+      keepImageIds: inquiryFormState.existingImages.map(img => img.id)
     };
     
     formData.append('request', new Blob([JSON.stringify(requestDto)], {
       type: 'application/json'
     }));
 
-    newImages.value.forEach(file => {
+    inquiryFormState.newImages.forEach(file => {
       formData.append('images', file);
     });
 
