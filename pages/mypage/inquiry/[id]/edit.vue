@@ -94,16 +94,10 @@ const authStore = useAuthStore();
 const inquiryId = route.params.id;
 
 // 카테고리 조회
-const { data: categories, error: categoryError } = await useAuthFetch('/member/inquiry/categories');
-if (categoryError.value) {
-  console.error('카테고리 조회 실패:', categoryError.value);
-}
+const { data: categories } = await useAuthFetch('/member/inquiry/categories');
 
 // 기존 데이터 불러오기
-const { data: detail, error } = await useAuthFetch(`/member/inquiry/${inquiryId}`);
-if (error.value) {
-  console.error('문의 조회 실패:', error.value);
-}
+const { data: detail } = await useAuthFetch(`/member/inquiry/${inquiryId}`);
 
 const loaded = computed(() => !!detail.value);
 
@@ -186,39 +180,34 @@ const submitUpdate = async () => {
     return;
   }
 
-  try {
-    const formData = new FormData();
+  const formData = new FormData();
 
-    const requestDto = {
-      title: inquiryFormState.title,
-      content: inquiryFormState.content,
-      category: inquiryFormState.selectedChildCategory,
-      keepImageIds: inquiryFormState.existingImages.map(img => img.id)
-    };
-    
-    formData.append('request', new Blob([JSON.stringify(requestDto)], {
-      type: 'application/json'
-    }));
+  const requestDto = {
+    title: inquiryFormState.title,
+    content: inquiryFormState.content,
+    category: inquiryFormState.selectedChildCategory,
+    keepImageIds: inquiryFormState.existingImages.map(img => img.id)
+  };
+  
+  formData.append('request', new Blob([JSON.stringify(requestDto)], {
+    type: 'application/json'
+  }));
 
-    inquiryFormState.newImages.forEach(file => {
-      formData.append('images', file);
-    });
+  inquiryFormState.newImages.forEach(file => {
+    formData.append('images', file);
+  });
 
-    await $fetch(`${apiBase}/member/inquiry/${inquiryId}`, {
-      method: 'PUT',
-      credentials: 'include',
-      headers: {
-        ...(authStore.token && { Authorization: `Bearer ${authStore.token}` })
-      },
-      body: formData
-    });
+  await $fetch(`${apiBase}/member/inquiry/${inquiryId}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      ...(authStore.token && { Authorization: `Bearer ${authStore.token}` })
+    },
+    body: formData
+  });
 
-    alert('문의가 수정되었습니다.');
-    router.push('/mypage/inquiry');
-  } catch (e) {
-    console.error('수정 실패:', e);
-    alert('수정에 실패했습니다.');
-  }
+  alert('문의가 수정되었습니다.');
+  router.push('/mypage/inquiry');
 };
 
 const goBack = () => {

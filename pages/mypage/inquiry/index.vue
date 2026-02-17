@@ -112,24 +112,14 @@ const toggleInquiry = async (id) => {
   if(!inquiryDetails.value.has(id)) {
     detailLoading.value = true;
     try {
-      const { data, error } = await useAuthFetch(`/member/inquiry/${id}`);
+      const { data } = await useAuthFetch(`/member/inquiry/${id}`);
       if(data.value) {
         inquiryDetails.value.set(id, data.value);
       }
-
-      if(error.value) {
-        console.error("상세 조회 실패: ", error.value);
-        alert("문의 상세 정보를 불러올 수 없습니다.");
-      }
-    } catch(e) {
-      console.error("문의 상세 조회 중 예외 발생: ", e);
-      alert("오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       detailLoading.value = false;
     }
   }
-
-  detailLoading.value = false;
 };
 
 const handleEdit = (id) => {
@@ -139,33 +129,25 @@ const handleEdit = (id) => {
 const handleDelete = async (id) => {
   if(!confirm("문의를 삭제하시겠습니까?")) return;
 
-  try {
-    await $fetch(`${apiBase}/member/inquiry/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: {
-        ...(authStore.token && { Authorization: `Bearer ${authStore.token}` })
-      }
-    });
-    alert("문의가 삭제되었습니다.");
-    openId.value = null;
-    inquiryDetails.value.delete(id);
-    refresh();
-  } catch(error) {
-    console.error("삭제 실패: ", error);
-  }
+  await $fetch(`${apiBase}/member/inquiry/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      ...(authStore.token && { Authorization: `Bearer ${authStore.token}` })
+    }
+  });
+  alert("문의가 삭제되었습니다.");
+  openId.value = null;
+  inquiryDetails.value.delete(id);
+  refresh();
 }
 
 const currentPage = ref(0);
 const pageSize = 10;
 
-const { data: pageData, error, refresh } = await useAuthFetch(
+const { data: pageData, refresh } = await useAuthFetch(
   `/member/inquiry?page=${currentPage.value}&size=${pageSize}`
 );
-
-if (error.value) {
-  console.error('문의 목록 조회 실패:', error.value);
-}
 
 const inquiries = computed(() => {
   return pageData.value?.content || [];
