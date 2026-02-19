@@ -1,0 +1,260 @@
+.main-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  margin: 0;
+  padding: 40px 0 40px 260px;
+  box-sizing: border-box;
+  background-color: #f5f5f5;
+}
+
+.board__container {
+  width: 850px;
+  padding: 40px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+  margin-bottom: 40px;
+  border: 1px solid var(--black);
+  background-color: var(--white);
+}
+
+/* 헤더 */
+.board__header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--black);
+}
+
+.board__header .board__category a {
+  display: flex;
+  align-items: center;
+}
+
+.board__header .board__category strong {
+  padding: 2px 0;
+  cursor: pointer;
+}
+
+.board__header .board__category i {
+  font-size: 20px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.board__title .board__title-detail {
+  margin-top: 8px;
+  font-weight: 600;
+  font-size: 24px;
+  word-break: break-all;
+}
+
+.board__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.board__meta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.board__meta-writer {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.board__meta-email {
+  font-size: 12px;
+  color: #888;
+}
+
+.board__meta-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.board__meta-date {
+  font-size: 13px;
+  color: #666;
+}
+
+.board__meta-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+/* 카테고리 태그 */
+.category-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.category-tag--member { background-color: #e8f4fd; color: #1a73e8; }
+.category-tag--service { background-color: #fef3e2; color: #e67e22; }
+.category-tag--business { background-color: #f3e8fd; color: #8e44ad; }
+.category-tag--default { background-color: #f0f0f0; color: #555; }
+
+/* 처리상태 */
+.status--pending {
+  background-color: #fdeaea;
+  color: #e74c3c;
+}
+
+.status--answered {
+  background-color: #e8f8e8;
+  color: #27ae60;
+}
+
+/* 문의 내용 */
+.inquiry__content {
+  padding: 24px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.inquiry__content-label,
+.inquiry__answer-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.inquiry__content-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #444;
+  white-space: pre-wrap;
+  padding: 16px;
+  background-color: #fafafa;
+  border-radius: 6px;
+}
+
+/* 첨부 이미지 */
+.inquiry__content-images {
+  margin-top: 20px;
+}
+
+.inquiry__content-images-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.inquiry__content-images-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.inquiry__content-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.inquiry__content-image:hover {
+  transform: scale(1.05);
+}
+
+/* 답변 영역 */
+.inquiry__answer {
+  padding: 24px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.inquiry__answer-completed {
+  padding: 16px;
+  background-color: #f8fdf8;
+  border-radius: 6px;
+  border-left: 3px solid #27ae60;
+}
+
+.inquiry__answer-text {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #444;
+  white-space: pre-wrap;
+}
+
+.inquiry__answer-date {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #888;
+  text-align: right;
+}
+
+.inquiry__answer-textarea {
+  width: 100%;
+  padding: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.inquiry__answer-textarea:focus {
+  outline: none;
+  border-color: #1a73e8;
+}
+
+.inquiry__answer-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* 버튼 */
+.btn {
+  padding: 10px 24px;
+  border-radius: 4px;
+  border: 1px solid var(--black);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.btn--submit {
+  background-color: var(--color-point-4, #333);
+  color: var(--white);
+  border: none;
+}
+
+.btn--submit:hover {
+  opacity: 0.85;
+}
+
+.btn--list {
+  background-color: var(--white);
+  color: var(--black);
+}
+
+.btn--list:hover {
+  background-color: var(--color-grey-8);
+  color: var(--white);
+}
+
+/* 하단 버튼 */
+.inquiry__footer-buttons {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 20px;
+}

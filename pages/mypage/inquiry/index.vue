@@ -33,23 +33,23 @@
               </span>
             </button>
             <div class="inquiry__detail" v-if="openId === inquiry.id">
-              <div class="inquiry__detail-loading" v-if="detailLoading">
+              <div class="inquiry__detail-loading" v-if="detailLoading && !inquiryDetails.has(inquiry.id)">
                 불러오는 중...
               </div>
-              <div v-else-if="detail">
+              <div v-else-if="inquiryDetails.has(inquiry.id)">
                 <div class="inquiry__detail-meta">
-                  {{ detail.parentCategory }} &gt; {{ detail.categoryDescription }}
+                  {{ inquiryDetails.get(inquiry.id).parentCategory }} &gt; {{ inquiryDetails.get(inquiry.id).categoryDescription }}
                 </div>
 
                 <div class="inquiry__detail-content">
                   <span class="inquiry__detail-q">Q</span>
-                  <p>{{ detail.content }}</p>  
+                  <p>{{ inquiryDetails.get(inquiry.id).content }}</p>  
                 </div>
 
                 <!-- 첨부 이미지 -->
-                <div class="inquiry__detail-images" v-if="detail.images && detail.images.length > 0">
+                <div class="inquiry__detail-images" v-if="inquiryDetails.get(inquiry.id).images && inquiryDetails.get(inquiry.id).images.length > 0">
                   <img
-                    v-for="img in detail.images" :key="img.id"
+                    v-for="img in inquiryDetails.get(inquiry.id).images" :key="img.id"
                     :src="`${apiBase}${img.imagePath}`"
                     :alt="img.originalFilename"
                     class="inquiry__detail-image"
@@ -57,9 +57,9 @@
                 </div>
 
                 <!-- 답변 -->
-                <div class="inquiry__detail-answer" v-if="detail.answer">
+                <div class="inquiry__detail-answer" v-if="inquiryDetails.get(inquiry.id).answer">
                   <span class="inquiry__detail-a">A</span>
-                  <div class="inquiry__detail-answer-content">{{ detail.answer }}</div>
+                  <div class="inquiry__detail-answer-content">{{ inquiryDetails.get(inquiry.id).answer }}</div>
                 </div>
 
                 <!-- 수정/삭제 -->
@@ -95,7 +95,7 @@
 import { ref, computed, watch } from 'vue';
 
 const openId = ref(null);
-const detail = ref(null);
+const inquiryDetails = ref(new Map());
 const detailLoading = ref(false);
 
 const config = useRuntimeConfig();
@@ -105,24 +105,21 @@ const authStore = useAuthStore();
 const toggleInquiry = async (id) => {
   if(openId.value === id) {
     openId.value = null;
-    detail.value = null;
     return;
   }
 
   openId.value = id;
-  detail.value = null;
-  detailLoading.value = true;
-
-  const { data, error } = await useAuthFetch(`/member/inquiry/${id}`);
-  if(data.value) {
-    detail.value = data.value;
+  if(!inquiryDetails.value.has(id)) {
+    detailLoading.value = true;
+    try {
+      const { data } = await useAuthFetch(`/member/inquiry/${id}`);
+      if(data.value) {
+        inquiryDetails.value.set(id, data.value);
+      }
+    } finally {
+      detailLoading.value = false;
+    }
   }
-
-  if(error.value) {
-    console.error("상세 조회 실패: ", error.value);
-  }
-
-  detailLoading.value = false;
 };
 
 const handleEdit = (id) => {
@@ -132,33 +129,25 @@ const handleEdit = (id) => {
 const handleDelete = async (id) => {
   if(!confirm("문의를 삭제하시겠습니까?")) return;
 
-  try {
-    await $fetch(`${apiBase}/member/inquiry/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: {
-        ...(authStore.token && { Authorization: `Bearer ${authStore.token}` })
-      }
-    });
-    alert("문의가 삭제되었습니다.");
-    openId.value = null;
-    detail.value = null;
-    refresh();
-  } catch(error) {
-    console.error("삭제 실패: ", error);
-  }
+  await $fetch(`${apiBase}/member/inquiry/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      ...(authStore.token && { Authorization: `Bearer ${authStore.token}` })
+    }
+  });
+  alert("문의가 삭제되었습니다.");
+  openId.value = null;
+  inquiryDetails.value.delete(id);
+  refresh();
 }
 
 const currentPage = ref(0);
 const pageSize = 10;
 
-const { data: pageData, error, refresh } = await useAuthFetch(
+const { data: pageData, refresh } = await useAuthFetch(
   `/member/inquiry?page=${currentPage.value}&size=${pageSize}`
 );
-
-if (error.value) {
-  console.error('문의 목록 조회 실패:', error.value);
-}
 
 const inquiries = computed(() => {
   return pageData.value?.content || [];
