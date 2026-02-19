@@ -181,8 +181,7 @@ const inquiryMenuItems = [
     label: '문의 관리',
     icon: ['far', 'edit'],
     subItems: [
-      { label: '1:1 문의 내역', link: '/admin/inquiries/personal' },
-      { label: '비즈니스 문의 내역', link: '/admin/inquiries/business' }
+      { label: '1:1 문의 내역', link: '/admin/inquiry' },
     ],
   },
 ];

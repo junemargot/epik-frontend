@@ -25,5 +25,5 @@ export function useAuthFetch(url, options = {}) {
     }
   };
 
-  return useFetch(`${config.public.apiBase}${url}`, fetchOptions);
+  return useApiFetch(`${config.public.apiBase}${url}`, fetchOptions);
 }

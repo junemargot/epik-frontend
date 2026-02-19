@@ -83,7 +83,7 @@
         
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" @click="goBack">취소</button>
-          <button type="submit" class="btn btn-primary">등록</button>
+          <button type="submit" class="btn btn-primary" @click="handleSubmit">등록</button>
         </div>
       </form>
     </section>
@@ -173,13 +173,15 @@ const removeImage = (index) => {
 
 // 폼 제출
 const authStore = useAuthStore();
+const loading = ref(false);
 
-const submitInquiry = async () => {
+const handleSubmit = async () => {
   if(!selectedChildCategory.value || !title.value || !content.value) {
     alert("필수 항목을 모두 입력해주세요.");
     return;
   }
 
+  loading.value = true;
   try {
     const formData = new FormData();
 
@@ -198,20 +200,15 @@ const submitInquiry = async () => {
       formData.append('images', file);
     });
 
-    const data = await $fetch(`${apiBase}/member/inquiry`, {
+    await useAuthFetch(`/member/inquiry`, {
       method: 'POST',
-      credentials: 'include',
-      headers: {
-        ...(authStore.token && { 'Authorization': `Bearer ${authStore.token}` })
-      },
       body: formData,
     });
 
     alert("문의가 등록되었습니다.");
     router.push('/mypage/inquiry');
-  } catch(error) {
-    console.error("문의 등록 실패: ", error);
-    alert("문의 등록에 실패했습니다.");
+  } finally {
+    loading.value = false;
   }
 };
 
