@@ -93,10 +93,12 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '~/stores/auth';
 
 const router = useRouter();
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
+const authStore = useAuthStore();
 
 // 카테고리 조회
 const { data: categories, error: categoryError } = await useAuthFetch('/member/inquiry/categories');
@@ -111,7 +113,7 @@ const title = ref('');
 const content = ref('');
 const images = ref([]);
 const receiveEmail = ref(false);
-const userEmail = ref('user@example.com'); // 사용자 이메일 (실제로는 로그인 상태에서 가져와야 함)
+const userEmail = computed(() => authStore.user.email || '');
 
 const parentCategories = computed(() => {
   if(!categories.value) return [];
@@ -172,7 +174,6 @@ const removeImage = (index) => {
 }
 
 // 폼 제출
-const authStore = useAuthStore();
 const loading = ref(false);
 
 const handleSubmit = async () => {
