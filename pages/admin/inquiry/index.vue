@@ -71,6 +71,7 @@ import { usePaginationStore } from '~/stores/pagination';
 import Pagination from '~/components/admin/Pagination.vue';
 import SearchBar from '~/components/admin/SearchBar.vue';
 import { categoryMapping } from '~/utils/categoryMapping';
+import { useAuthStore } from '~/stores/auth';
 
 const paginationStore = usePaginationStore();
 const totalPages = computed(() => paginationStore.totalPages);
