@@ -326,6 +326,12 @@ const { data: noticeData, error: noticeError } = await useAuthFetch('/admin/noti
     sort: 'writeData,desc'
   }
 });
+const { data: inquiryData, error: inquiryError } = await useAuthFetch('/admin/inquiry', {
+  params: {
+    page: 0,
+    size: 5
+  }
+});
 
 const dashboardStats = computed(() => {
   const data = dashboardData.value || {};
@@ -373,35 +379,12 @@ const contentSections = computed(() => [
   {
     title: '1:1 문의내역',
     link: '/admin/inquiries/personal',
-    items: [
-      { id: 5, title: '회원가입 문의', writer: 'apple1234', writeDate: '2024-11-23' },
-      { id: 4, title: '비밀번호 변경 방법', writer: '이영희', writeDate: '2024-11-23' },
-      { id: 3, title: '탈퇴 신청 문의', writer: '김철수', writeDate: '2024-11-20' },
-      { id: 2, title: '이메일 인증 실패', writer: '박민수', writeDate: '2024-11-20' },
-      { id: 1, title: '포인트 적립 관련 문의', writer: '최유리', writeDate: '2024-11-19' },
-    ]
-  },
-  {
-    title: '비즈니스 문의내역',
-    link: '/admin/inquiries/business',
-    items: [
-      { id: 5, title: '협찬 제안 문의', writer: '김경민', writeDate: '2024-11-25' },
-      { id: 4, title: '공동 이벤트 제안', writer: '담당자', writeDate: '2024-11-23' },
-      { id: 3, title: '탈퇴 신청 문의', writer: '김철재', writeDate: '2024-11-20' },
-      { id: 2, title: '이메일 인증 실패', writer: '박민수', writeDate: '2024-11-20' },
-      { id: 1, title: '포인트 적립 관련 문의', writer: '최유리', writeDate: '2024-11-19' },
-    ]
-  },
-  {
-    title: '피드 신고내역',
-    link: '/admin/reports/feed',
-    items: [
-      { id: 5, title: '게시물 수정 요청드립니다.', writer: '바니', writeDate: '2024-11-25' },
-      { id: 4, title: '공동 이벤트 제안', writer: '래빗', writeDate: '2024-11-23' },
-      { id: 3, title: '탈퇴 신청 문의', writer: '애플', writeDate: '2024-11-20' },
-      { id: 2, title: '이메일 인증 실패', writer: '박민수', writeDate: '2024-11-20' },
-      { id: 1, title: '포인트 적립 관련 문의', writer: '최유리', writeDate: '2024-11-19' },
-    ]
+    items: (inquiryData.value?.content || []).map(inquiry => ({
+      id: inquiry.id,
+      title: inquiry.title,
+      writer: inquiry.writer,
+      writeDate: inquiry.createdAt
+    }))
   },
 ]);
 
