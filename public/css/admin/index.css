@@ -442,3 +442,11 @@ main .content-data .notice table > tbody > tr > td {
   font-weight: 500;
   font-size: 0.85rem;
 }
+
+.chart-container {
+  display: flex;
+  align-items: center !important;
+  justify-content: space-between;
+  gap: 22px;
+  margin-top: 16px;
+}
